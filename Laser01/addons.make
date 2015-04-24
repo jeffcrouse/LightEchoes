@@ -1,0 +1,4 @@
+ofxEtherdream
+ofxIlda
+ofxUI
+ofxXmlSettings
