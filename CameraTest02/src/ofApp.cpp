@@ -4,16 +4,21 @@
 void ofApp::setup(){
     ofSetFrameRate(60);
     ofSetVerticalSync(true);
-    
+    ofSetLogLevel(OF_LOG_VERBOSE);
+    ofSetLogLevel("ofThread", OF_LOG_ERROR);
     camera.setup();
+    camera.lockUI();
 }
 
 //--------------------------------------------------------------
 void ofApp::exit() {
+    camera.unlockUI();
     camera.close();
 }
 //--------------------------------------------------------------
 void ofApp::update(){
+    camera.update();
+    
     if(camera.isPhotoNew()) {
         // process the photo with camera.getPhotoPixels()
         // or just save the photo to disk (jpg only):
@@ -26,7 +31,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     camera.draw(0, 0);
-    // camera.drawPhoto(0, 0, 432, 288);
+    camera.drawPhoto(0, 0, 432, 288);
     
     if(camera.isLiveDataReady()) {
         stringstream status;
@@ -45,6 +50,15 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
+    if(key == ' ') {
+        camera.takePhoto();
+    }
+    if(key=='p') {
+        camera.pressShutterButton();
+    }
+    if(key=='r') {
+        camera.releaseShutterButton();
+    }
 
 }
 

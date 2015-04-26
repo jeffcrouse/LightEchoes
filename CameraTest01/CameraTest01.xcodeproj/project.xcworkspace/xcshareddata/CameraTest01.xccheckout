@@ -20,7 +20,7 @@
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>36985836DF35EF8F5D7D4E20C1E7B9D301114BDF</key>
-		<string>../../../../../addons/ofxEdsdk</string>
+		<string>../../../../addons/ofxEdsdk</string>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>../../..</string>
 	</dict>

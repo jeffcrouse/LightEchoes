@@ -1,3 +1,4 @@
-git clone https://github.com/kylemcdonald/ofxEdsdk.git ../../ofxEdsdk
-git clone https://github.com/memo/ofxEtherdream.git ../../ofxEtherdream
-git clone https://github.com/memo/ofxIlda.git ../../ofxIlda
+git clone https://github.com/jefftimesten/ofxEdsdk.git ../../addons/ofxEdsdk
+git clone https://github.com/memo/ofxEtherdream.git ../../addons/ofxEtherdream
+git clone https://github.com/memo/ofxIlda.git ../../addons/ofxIlda
+git clone https://github.com/jefftimesten/ofxCanon.git ../../addons/ofxCanon
