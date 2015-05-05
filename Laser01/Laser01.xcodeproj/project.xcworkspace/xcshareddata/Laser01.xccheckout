@@ -5,13 +5,17 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>84A0EAB4-ED6A-4475-8C0C-04C362B6F2B2</string>
+	<string>51A63E59-2C10-4098-B5E0-BE10B52721DD</string>
 	<key>IDESourceControlProjectName</key>
 	<string>Laser01</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
+		<key>36985836DF35EF8F5D7D4E20C1E7B9D301114BDF</key>
+		<string>https://github.com/jefftimesten/ofxEdsdk.git</string>
 		<key>7E804D925461714118DB355C65BC964B41D94376</key>
 		<string>https://github.com/rezaali/ofxUI.git</string>
+		<key>822CBBF35EE99AD08308D0A6CCA015A457F9E7CD</key>
+		<string>https://github.com/satoruhiga/ofxModifierKeys.git</string>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>https://github.com/seethroughlab/LightEchoes.git</string>
 		<key>C1E8919E75191C5A81309888FBBC5793267330D8</key>
@@ -23,8 +27,12 @@
 	<string>Laser01/Laser01.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
+		<key>36985836DF35EF8F5D7D4E20C1E7B9D301114BDF</key>
+		<string>../../../../addons/ofxEdsdk</string>
 		<key>7E804D925461714118DB355C65BC964B41D94376</key>
 		<string>../../../../addons/ofxUI</string>
+		<key>822CBBF35EE99AD08308D0A6CCA015A457F9E7CD</key>
+		<string>../../../../addons/ofxModifierKeys</string>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>../../..</string>
 		<key>C1E8919E75191C5A81309888FBBC5793267330D8</key>
@@ -52,6 +60,14 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>36985836DF35EF8F5D7D4E20C1E7B9D301114BDF</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxEdsdk</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
 			<string>C1E8919E75191C5A81309888FBBC5793267330D8</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxEtherdream</string>
@@ -63,6 +79,14 @@
 			<string>F71958031D205D2C5B7FC71EE73A2878789BBF46</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxIlda</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>822CBBF35EE99AD08308D0A6CCA015A457F9E7CD</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxModifierKeys</string>
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>

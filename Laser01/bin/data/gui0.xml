@@ -16,12 +16,60 @@
     <Value>0</Value>
 </Widget>
 <Widget>
-    <Kind>5</Kind>
-    <Name>DRAWPOS</Name>
-    <Value>0.524999976</Value>
+    <Kind>2</Kind>
+    <Name>FORWARD</Name>
+    <Value>1</Value>
 </Widget>
 <Widget>
-    <Kind>5</Kind>
-    <Name>SAMPLEPOS</Name>
-    <Value>0.462499976</Value>
+    <Kind>4</Kind>
+    <Name>SCAN SPEED</Name>
+    <Value>100.285713196</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>OVERSCAN SPEED</Name>
+    <Value>0.000197044</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>BRIGHTNESS</Name>
+    <Value>1.000000000</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>SATURATION</Name>
+    <Value>1.000000000</Value>
+</Widget>
+<Widget>
+    <Kind>6</Kind>
+    <Name>RED</Name>
+    <HighValue>1.000000000</HighValue>
+    <LowValue>0.000000000</LowValue>
+</Widget>
+<Widget>
+    <Kind>6</Kind>
+    <Name>GREEN</Name>
+    <HighValue>1.000000000</HighValue>
+    <LowValue>0.000000000</LowValue>
+</Widget>
+<Widget>
+    <Kind>6</Kind>
+    <Name>BLUE</Name>
+    <HighValue>1.000000000</HighValue>
+    <LowValue>0.000000000</LowValue>
+</Widget>
+<Widget>
+    <Kind>12</Kind>
+    <Name>SAVE LOCATION</Name>
+    <Value>/Users/jeff/Desktop/Day02Test01</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>PREVIEW SPEED</Name>
+    <Value>8.935960770</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>DRAWPOS</Name>
+    <Value>0.543749988</Value>
 </Widget>

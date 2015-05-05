@@ -2,3 +2,4 @@ ofxEtherdream
 ofxIlda
 ofxUI
 ofxXmlSettings
+ofxEdsdk
