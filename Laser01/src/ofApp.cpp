@@ -1,12 +1,14 @@
 #include "ofApp.h"
 #include "ofxModifierKeys.h"
 
+// 48.0/576
+#define DRAW_HEIGHT_RATIO (107.25/636.0)
 
-#define DRAW_HEIGHT_RATIO (48.0/576.0)
 
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle("LightEchoes");
+    ofSetFrameRate(30);
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofBackground(100);
     ofSetEscapeQuitsApp(false);
@@ -24,17 +26,14 @@ void ofApp::setup(){
     
     //camera.lockUI();
     
-    sourceImageDir.listDir("images/EM_comp2");
-    currentImage = 0;
-    sourceImageName = sourceImageDir.getName(currentImage);
-    sourceImage.loadImage(sourceImageDir.getPath(currentImage));
-    sourceImagePreview.allocate(sourceImage.getWidth(), sourceImage.getHeight());
-    
+    sourceImageDir.listDir("images/Text_02");
+    sourceImageIndex = -1;
+    incrementSourceImage();
     
     adjust.load("shaders/adjust");
     
     etherdream.setup();
-    //etherdream.setWaitBeforeSend(false);
+    etherdream.setWaitBeforeSend(false);
     
     calibration.drawCalibration();
     
@@ -47,8 +46,8 @@ void ofApp::setup(){
     gui0->addIntSlider("PPS", 10000, 60000, 30000);
     gui0->addToggle("CALIBRATION", &bDrawCalibration);
     forwardToggle = gui0->addToggle("FORWARD", &bForward);
-    scanSpeedSlider = gui0->addSlider("SCAN SPEED", 1, 140, 58.25);
-    gui0->addSlider("OVERSCAN SPEED", 0, 0.01, 0.005);
+    scanSpeedSlider = gui0->addSlider("SCAN SPEED", 40, 150, 114.30);
+    gui0->addSlider("OVERSCAN SPEED", 0, 5, 2);
     gui0->addSlider("BRIGHTNESS", 0.0, 1.0, 0.5);
     gui0->addSlider("SATURATION", 0.0, 1.0, 0.5);
     gui0->addRangeSlider("RED", 0.0, 1.0, &redMin, &redMax);
@@ -64,15 +63,19 @@ void ofApp::setup(){
     //samplePosSlider = gui0->addSlider("SAMPLEPOS", 1.0, 0.0, 0.5, 17, 160);
     //gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
+    gui0->addSlider("REVERSE OFFSET", -2000.0, 2000.0, 0.0);
+    
     gui0->autoSizeToFitWidgets();
     
     ofAddListener(gui0->newGUIEvent, this, &ofApp::guiEvent);
     gui0->loadSettings("gui0.xml");
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
+    camera.releaseShutterButton();
     camera.close();
     gui0->saveSettings("gui0.xml");
     delete gui0;
@@ -98,54 +101,69 @@ ofFloatColor ofApp::map(ofFloatColor inColor) {
     return outColor;
 }
 
+
+
 //--------------------------------------------------------------
 void ofApp::update(){
     float now = ofGetElapsedTimef();
     float endTime = startTime + scanSpeedSlider->getValue();
     
     camera.update();
+
     
     if(bIsRunning) {
         if(now > endTime) {
             endCapture();
         } else {
-            samplePos = bForward
-                ? ofMap(now, startTime, endTime, 0, 1, true)
-                : ofMap(now, startTime, endTime, 1, 0, true);
+            etherdream.clear();
             
+            // Calculate the y coordinate to sample from, and to draw at
             
+            // stationary line
+            drawY[0] = 0;
+            sampleY[0] = bForward
+                ? ofMap(now, startTime, endTime, 0, 1)
+                : ofMap(now, startTime, endTime, 1, 0);
             
-            drawY = ofNoise(noise.x, noise.y);
-            noise.x += ofGetElapsedTimef() * overscanSpeed;
+            // swinging line
+            drawY[1] = 0.5 * sin(ofGetElapsedTimef()*overscanSpeed) + 0.5;
+            sampleY[1] = sampleY[0] + (drawY[1] * DRAW_HEIGHT_RATIO);
+            sampleY[1] = 1-sampleY[1];
             
-            samplePos = ofClamp(samplePos, 0, 1);
-            samplePos += drawY * DRAW_HEIGHT_RATIO;
+            for(int n=0; n<1; n++) {
+                 if(!ofInRange(sampleY[n], 0, 1)) continue;
+                
+                vector<ofxIlda::Point> points;
+     
+                // x and y are the position to sample from in the image
+                float y = sampleY[n] * sourceImage.getHeight();
+                
+                for (int i=0; i<1000; i++) {
+                    int x = ofMap(i, 0, 1000, 0, sourceImage.getWidth());
+                    
+                    color = map( sourceImage.getColor(x, y) );
+
+                    float drawX = x / (float)sourceImage.getWidth();
+                    
+                    pos.set(ofClamp(drawX, 0, 1), drawY[n]);
+                    
+                    ofxIlda::Point p;
+                    p.set(pos, color);
+                    points.push_back(p);
+                }
+                
+                 //For each subsequent frame,
+//                if(ofGetFrameNum() % 2) {
+//                    reverse(points.begin(), points.end());
+//                    for(int i=0; i<points.size(); i++) {
+//                        points[i].x += reverseOffset;
+//                    }
+//                }
+                
+                etherdream.addPoints(points);
+            }
         }
     }
-    
-    
-    points.clear();
-    
-    
-    ofPoint pos;
-    ofFloatColor color;
-    float drawX;
-    float sampleY = samplePos * sourceImage.getHeight();
-    
-    for (int x=0; x<sourceImage.getWidth(); x++) {
-        
-        color = map( sourceImage.getColor(x, sampleY) );
-
-        float drawX = x / (float)sourceImage.getWidth();
-        pos.set(ofClamp(drawX, 0, 1), drawY);
-        
-        ofxIlda::Point p;
-        p.set(pos, color);
-        points.push_back(p);
-    }
-
-    if(bIsRunning)
-        etherdream.setPoints(points);
     
     if(bDrawCalibration) {
         calibration.update();
@@ -166,7 +184,7 @@ void ofApp::update(){
     if(camera.isPhotoNew()) {
         ofDirectory::createDirectory(outputDir, false, true);
         stringstream path;
-        path << outputDir << "/" << sourceImageName;
+        path << outputDir << "/" << ofGetTimestampString("%m-%d-%H-%M-%S-%i") << ".jpg";
         ofLogNotice() << path.str();
         camera.savePhoto(path.str());
         
@@ -185,19 +203,26 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofSetColor(255);
+    
 
-
+    if(etherdream.checkConnection()) {
+        ofSetColor(ofColor::green);
+    } else {
+        ofSetColor(ofColor::red);
+    }
+    font.drawString("EtherDream", ofGetWidth()-200, 30);
+    
+    
     
     // UPPER RIGHT
+    ofSetColor(ofColor::white);
     sourceImagePreview.draw(225, 10, 640, 480);
     ofSetColor(ofColor::purple);
     ofDrawBitmapStringHighlight(sourceImageName, 225, 20);
     //font.drawString(sourceImageName, 225, 40);
-    
-    ofSetColor(255);
-    
+
     // LOWER RIGHT
+    ofSetColor(ofColor::white);
     adjust.begin();
     adjust.setUniform1f("brightness", brightness);
     adjust.setUniform1f("redMin", redMin);
@@ -257,6 +282,11 @@ void ofApp::keyReleased(int key){
             ofLogNotice() << "Stopping...";
         }
     }
+    if(key=='e') {
+        etherdream.setup();
+        
+    }
+    
     if(key=='s' && ofGetModifierPressed(OF_KEY_SPECIAL)) {
         ofFileDialogResult res = ofSystemLoadDialog("Choose a save directory", true, outputDir);
   
@@ -287,7 +317,8 @@ void ofApp::keyReleased(int key){
         }
     }
     if(key==OF_KEY_ESC) {
-        samplePos=0;
+        sampleY[0]=0;
+        sampleY[1]=0;
         endCapture();
         startTime = ofGetElapsedTimef()-1;
     }
@@ -336,6 +367,57 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
+//--------------------------------------------------------------
+void ofApp::incrementSourceImage() {
+    sourceImageIndex++;
+    if(sourceImageIndex>sourceImageDir.size()-1) sourceImageIndex=0;
+    
+    sourceImageName = sourceImageDir.getName(sourceImageIndex);
+    sourceImage.loadImage(sourceImageDir.getPath(sourceImageIndex));
+    
+    sourceImage.mirror(true, true);
+    sourceImagePreview.allocate(sourceImage.getWidth(), sourceImage.getHeight());
+}
+
+//--------------------------------------------------------------
+void ofApp::toggleDirection() {
+    bForward = !bForward;
+    forwardToggle->setValue(bForward);
+}
+
+//--------------------------------------------------------------
+void ofApp::startCapture() {
+    sampleY[0] = 0;
+    sampleY[1] = 0;
+    startTime = ofGetElapsedTimef();
+    camera.pressShutterButton();
+    bIsRunning=true;
+}
+
+//--------------------------------------------------------------
+void ofApp::endCapture() {
+    camera.releaseShutterButton();
+    bIsRunning=false;
+}
+
+
+//--------------------------------------------------------------
+void ofApp::updateSourceImagePreview() {
+    sourceImagePreview.begin();
+    ofClear(0);
+    sourceImage.draw(0, 0);
+    for(int n=0; n<2; n++) {
+        float y = sampleY[n] * sourceImage.getHeight();
+        ofPushStyle();
+        ofNoFill();
+        ofSetLineWidth(3);
+        ofSetColor(255, 0, 0);
+        ofRect(0, y-1, sourceImage.getWidth(), 3);
+    }
+    ofPopStyle();
+    sourceImagePreview.end();
+}
+
 
 //--------------------------------------------------------------
 void ofApp::guiEvent(ofxUIEventArgs &e)
@@ -362,7 +444,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     else if(name=="DRAWY")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        drawY = slider->getValue();
+        //drawY = slider->getValue();
     }
     else if(name=="OVERSCAN SPEED")
     {
@@ -372,7 +454,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     else if(name=="SAMPLEPOS")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        samplePos = slider->getValue();
+        //samplePos = slider->getValue();
     }
     else if(name=="BRIGHTNESS")
     {
@@ -383,6 +465,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         saturation = slider->getValue();
+    }
+    else if(name=="REVERSE OFFSET")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        reverseOffset = slider->getValue();
     }
     else if(name=="SCAN SPEED")
     {

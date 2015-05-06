@@ -81,7 +81,7 @@ void ofApp::draw(){
 void ofApp::refresh(){
     
     ofDirectory dir;
-    dir.allowExt("png");
+    dir.allowExt("jpg");
     dir.listDir(sourceDir);
     if( dir.size() ){
         

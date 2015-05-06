@@ -14,7 +14,7 @@ var maxIntensity = 65535;
 // 	});
 // }
 
-var IP = '169.254.159.138';//'192.168.1.52';
+var IP = '169.254.159.136';//'192.168.1.52';
 var PORT = 7765;
 var CIRCLE_POINTS = 700;
 
@@ -43,7 +43,7 @@ EtherDream.connect(IP, PORT, function(conn) {
 		}
 
 		console.log('send frame, phase='+phase);
-		conn.write(framedata, 60000, function() {
+		conn.write(framedata, 90000, function() {
 			// console.log('frame written.');
 			if(!quitting){
 					 nextframe(phase + 1.0 / 50.0);

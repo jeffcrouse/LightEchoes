@@ -1,5 +1,0 @@
-ofxXmlSettings
-ofxEdsdk
-ofxEtherdream
-ofxIlda
-ofxUI

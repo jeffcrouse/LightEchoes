@@ -26,44 +26,12 @@ class ofApp : public ofBaseApp{
 	
     
         ofTrueTypeFont font;
-    
-        void incrementSourceImage() {
-            currentImage++;
-            if(currentImage>sourceImageDir.size()-1) currentImage=0;
-            
-            sourceImageName = sourceImageDir.getName(currentImage);
-            sourceImage.loadImage(sourceImageDir.getPath(currentImage));
-            sourceImagePreview.allocate(sourceImage.getWidth(), sourceImage.getHeight());
-        }
-        void toggleDirection() {
-            bForward = !bForward;
-            forwardToggle->setValue(bForward);
-        }
-        void startCapture() {
-            samplePos = 0;
-            startTime = ofGetElapsedTimef();
-            camera.pressShutterButton();
-            bIsRunning=true;
-        }
-        void endCapture() {
-            camera.releaseShutterButton();
-            bIsRunning=false;
-        }
-    
-        void updateSourceImagePreview() {
-            sourceImagePreview.begin();
-            ofClear(0);
-            sourceImage.draw(0, 0);
-            float y = samplePos * sourceImage.getHeight();
-            ofPushStyle();
-            ofNoFill();
-            ofSetLineWidth(3);
-            ofSetColor(255, 0, 0);
-            ofRect(0, y-1, sourceImage.getWidth(), 3);
-            
-            ofPopStyle();
-            sourceImagePreview.end();
-        }
+  
+        void incrementSourceImage();
+        void toggleDirection();
+        void startCapture();
+        void endCapture();
+        void updateSourceImagePreview();
     
         ofFloatColor map(ofFloatColor c);
         bool bIsRecordingMovie;
@@ -94,10 +62,12 @@ class ofApp : public ofBaseApp{
     
     
         ofxEtherdream etherdream;
-        int currentImage;
-
+        int sourceImageIndex;
     
-        vector<ofxIlda::Point> points;
+    
+        float reverseOffset;
+    
+        
         ofxIlda::Frame calibration;
         ofxUISuperCanvas *gui0;
         //ofxUISlider *samplePosSlider;
@@ -107,16 +77,22 @@ class ofApp : public ofBaseApp{
     
         bool bDrawCalibration;
         void guiEvent(ofxUIEventArgs &e);
-        float drawY;            // Y Position for the laser to draw at
-        float samplePos;
+        float drawY[2];            // Y Position for the laser to draw at
+        float sampleY[2];         // Y position to sample from
+    
         float saturation;
         float brightness;
-        ofVec2f noise;
-    float overscanSpeed;
+        float overscanSpeed;
     
         float scanSpeed;
         float redMin, redMax;
         float greenMin, greenMax;
         float blueMin, blueMax;
         ofxEdsdk::Camera camera;
+
+
+        ofPoint pos;
+        ofFloatColor color;
 };
+
+

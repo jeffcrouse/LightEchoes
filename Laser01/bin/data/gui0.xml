@@ -18,17 +18,17 @@
 <Widget>
     <Kind>2</Kind>
     <Name>FORWARD</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>SCAN SPEED</Name>
-    <Value>100.285713196</Value>
+    <Value>52.463054657</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>OVERSCAN SPEED</Name>
-    <Value>0.000197044</Value>
+    <Value>0.640394092</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -61,15 +61,20 @@
 <Widget>
     <Kind>12</Kind>
     <Name>SAVE LOCATION</Name>
-    <Value>/Users/jeff/Desktop/Day02Test01</Value>
+    <Value>/Users/jeff/Desktop/Day03</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>PREVIEW SPEED</Name>
-    <Value>8.935960770</Value>
+    <Value>8.536945343</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>DRAWPOS</Name>
     <Value>0.543749988</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>REVERSE OFFSET</Name>
+    <Value>-1310.344848633</Value>
 </Widget>
