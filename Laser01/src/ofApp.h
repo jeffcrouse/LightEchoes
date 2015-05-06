@@ -59,15 +59,14 @@ class ofApp : public ofBaseApp{
         ofFbo sourceImagePreview;
         ofImage sourceImage;
         ofShader adjust;
-    
+        int sampleWidth;
     
         ofxEtherdream etherdream;
         int sourceImageIndex;
-    
-    
-        float reverseOffset;
-    
         
+        int lineEndCount;
+        int lineBlankCount;
+
         ofxIlda::Frame calibration;
         ofxUISuperCanvas *gui0;
         //ofxUISlider *samplePosSlider;
@@ -77,12 +76,15 @@ class ofApp : public ofBaseApp{
     
         bool bDrawCalibration;
         void guiEvent(ofxUIEventArgs &e);
-        float drawY[2];            // Y Position for the laser to draw at
-        float sampleY[2];         // Y position to sample from
+        float drawY;            // Y Position for the laser to draw at
+        float sampleY;         // Y position to sample from
+    
+        float swingY;
+        float swingSpeed;
     
         float saturation;
         float brightness;
-        float overscanSpeed;
+    
     
         float scanSpeed;
         float redMin, redMax;
@@ -90,7 +92,11 @@ class ofApp : public ofBaseApp{
         float blueMin, blueMax;
         ofxEdsdk::Camera camera;
 
-
+        ofFloatColor stripeColor;
+        float stripeWidth;
+        float stripeGap;
+        ofxIlda::Frame stripes;
+    
         ofPoint pos;
         ofFloatColor color;
 };

@@ -18,7 +18,7 @@
 <Widget>
     <Kind>2</Kind>
     <Name>FORWARD</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -26,9 +26,14 @@
     <Value>52.463054657</Value>
 </Widget>
 <Widget>
+    <Kind>42</Kind>
+    <Name>SAMPLE WIDTH</Name>
+    <Value>778</Value>
+</Widget>
+<Widget>
     <Kind>4</Kind>
-    <Name>OVERSCAN SPEED</Name>
-    <Value>0.640394092</Value>
+    <Name>SWING SPEED</Name>
+    <Value>1.280788183</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -71,10 +76,35 @@
 <Widget>
     <Kind>4</Kind>
     <Name>DRAWPOS</Name>
-    <Value>0.543749988</Value>
+    <Value>0.551724136</Value>
+</Widget>
+<Widget>
+    <Kind>42</Kind>
+    <Name>LINE END COUNT</Name>
+    <Value>45</Value>
+</Widget>
+<Widget>
+    <Kind>42</Kind>
+    <Name>LINE BLANK COUNT</Name>
+    <Value>2</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
-    <Name>REVERSE OFFSET</Name>
-    <Value>-1310.344848633</Value>
+    <Name>STRIPE WIDTH</Name>
+    <Value>0.000100000</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>STRIPE GAP</Name>
+    <Value>0.060168475</Value>
+</Widget>
+<Widget>
+    <Kind>42</Kind>
+    <Name>STRIPE END COUNT</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>42</Kind>
+    <Name>STRIPE BLANK COUNT</Name>
+    <Value>20</Value>
 </Widget>
