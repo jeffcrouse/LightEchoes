@@ -71,7 +71,7 @@ class ofApp : public ofBaseApp{
         ofxUISuperCanvas *gui0;
         //ofxUISlider *samplePosSlider;
     
-        ofxUISlider* scanSpeedSlider;
+        ofxUISlider* drawTimeSlider;
         ofxUIToggle* forwardToggle;
     
         bool bDrawCalibration;

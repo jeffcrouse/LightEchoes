@@ -23,7 +23,7 @@ void ofApp::setup(){
     gui0->addSpacer();
     gui0->addLabel("SETTINGS");
 
-    gui0->addSlider("PREVIEW SPEED", 1, 10, 3);
+    gui0->addSlider("PREVIEW SPEED", 1, 24, 3);
     gui0->addSpacer();
     sourceDirInput = gui0->addTextInput("SAVE LOCATION", sourceDir);
     

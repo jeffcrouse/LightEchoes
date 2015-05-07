@@ -27,7 +27,7 @@ void ofApp::setup(){
     
     //camera.lockUI();
     
-    sourceImageDir.listDir("images/Text_03");
+    sourceImageDir.listDir("images/Source");
     sourceImageIndex = -1;
     incrementSourceImage();
     
@@ -47,7 +47,7 @@ void ofApp::setup(){
     gui0->addIntSlider("PPS", 10000, 60000, 30000);
     gui0->addToggle("CALIBRATION", &bDrawCalibration);
     forwardToggle = gui0->addToggle("FORWARD", &bForward);
-    scanSpeedSlider = gui0->addSlider("SCAN SPEED", 40, 150, 114.30);
+    drawTimeSlider = gui0->addSlider("DRAW TIME", 40, 150, 114.30);
     
     gui0->addIntSlider("SAMPLE WIDTH", 400, 2000, 800);
     gui0->addSlider("SWING SPEED", 0, 5, 2);
@@ -117,7 +117,7 @@ ofFloatColor ofApp::map(ofFloatColor inColor) {
 //--------------------------------------------------------------
 void ofApp::update(){
     float now = ofGetElapsedTimef();
-    float endTime = startTime + scanSpeedSlider->getValue();
+    float endTime = startTime + drawTimeSlider->getValue();
     
     camera.update();
     
@@ -196,9 +196,7 @@ void ofApp::update(){
             stripes.update();
             etherdream.addPoints(stripes);
    
-            
-            
-            
+
             //For each subsequent frame,
 //            if(ofGetFrameNum() % 2) {
 //                reverse(points.begin(), points.end());
