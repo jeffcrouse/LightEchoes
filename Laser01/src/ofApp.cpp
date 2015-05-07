@@ -14,7 +14,6 @@ void ofApp::setup(){
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
     bIsRecordingMovie=false;
-    bPreviewMode = false;
     camera.setup();
     
     font.loadFont("fonts/verdana.ttf", 24);
@@ -213,17 +212,6 @@ void ofApp::update(){
         etherdream.addPoints(calibration);
     }
     
-    if(bPreviewMode && now > previewNextFrame) {
-        previewIterator++;
-        if(previewIterator==previewFrames.end()) {
-            previewIterator = previewFrames.begin();
-        }
-        
-        float delay = 1/previewAnimSpeed;
-        previewNextFrame = now + delay;
-    }
-    
-    
     if(camera.isPhotoNew()) {
         ofDirectory::createDirectory(outputDir, false, true);
         stringstream path;
@@ -283,17 +271,6 @@ void ofApp::draw(){
     
     // LOWER LEFT
     camera.drawPhoto(875, 500, 640, 480);
-    
-    
-    
-    if(bPreviewMode) {
-        float scale = ofGetHeight() / previewIterator->getHeight();
-        int y = 0;
-        int h = scale * previewIterator->getHeight();
-        int w = scale * previewIterator->getWidth();
-        int x = (ofGetWidth() / 2.0) - (w/2.0);
-        previewIterator->draw(x, y, w, h);
-    }
 
 }
 
@@ -327,7 +304,6 @@ void ofApp::keyReleased(int key){
     }
     if(key=='e') {
         etherdream.setup();
-        
     }
     
     if(key=='s' && ofGetModifierPressed(OF_KEY_SPECIAL)) {
@@ -336,29 +312,7 @@ void ofApp::keyReleased(int key){
         outputDir = res.getPath();
         outputDirInput->setTextString(outputDir);
     }
-    if(key=='p') {
-        bPreviewMode=!bPreviewMode;
-        if(bPreviewMode) {
-            ofDirectory dir;
-            dir.listDir(outputDir);
-            if( dir.size() ){
-                previewFrames.assign(dir.size(), ofImage());
-                
-                for(int i = 0; i < (int)dir.size(); i++){
-                    previewFrames[i].loadImage(dir.getPath(i));
-                    int w = previewFrames[i].getWidth();
-                    int h = previewFrames[i].getHeight();
-                    previewFrames[i].resize(w/3.0, h/3.0);
-                }
-                previewNextFrame = ofGetElapsedTimef();
-                previewIterator = previewFrames.begin();
-            } else {
-                bPreviewMode = false;
-            }
-        } else {
-            previewFrames.clear();
-        }
-    }
+
     if(key==OF_KEY_ESC) {
         sampleY=0;
         endCapture();
@@ -547,11 +501,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         scanSpeed = slider->getValue();
-    }
-    else if(name=="PREVIEW SPEED")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        previewAnimSpeed = slider->getValue();
     }
     else if(name=="RED")
     {

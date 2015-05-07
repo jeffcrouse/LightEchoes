@@ -37,15 +37,7 @@ class ofApp : public ofBaseApp{
         bool bIsRecordingMovie;
         bool bIsRunning;
         bool bForward;
-    
-        // PREVIEW MODE
-        bool bPreviewMode;
-        float previewAnimSpeed;
-        float previewNextFrame;
-    
-        vector<ofImage> previewFrames;
-        vector<ofImage>::iterator previewIterator;
-    
+
     
         // CAPTURE MODE STUFF
         float startTime;
