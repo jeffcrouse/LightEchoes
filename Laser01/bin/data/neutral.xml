@@ -18,7 +18,7 @@
 <Widget>
     <Kind>2</Kind>
     <Name>FORWARD</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -26,14 +26,14 @@
     <Value>96.354682922</Value>
 </Widget>
 <Widget>
-    <Kind>12</Kind>
-    <Name>SAVE LOCATION</Name>
-    <Value>/Users/jeff/Desktop/Day50T02</Value>
-</Widget>
-<Widget>
     <Kind>42</Kind>
     <Name>SAMPLE WIDTH</Name>
     <Value>770</Value>
+</Widget>
+<Widget>
+    <Kind>12</Kind>
+    <Name>SAVE LOCATION</Name>
+    <Value>/Users/jeff/Desktop/Day05T02</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
@@ -47,7 +47,7 @@
 </Widget>
 <Widget>
     <Kind>2</Kind>
-    <Name>PENDULUM</Name>
+    <Name>SWINGLINE</Name>
     <Value>1</Value>
 </Widget>
 <Widget>
@@ -67,33 +67,33 @@
 </Widget>
 <Widget>
     <Kind>4</Kind>
-    <Name>PENDULUM WIDTH</Name>
-    <Value>2.000000000</Value>
+    <Name>STRIPE WIDTH</Name>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
-    <Name>PENDULUM RED</Name>
-    <Value>0.295566499</Value>
+    <Name>STRIPE RED</Name>
+    <Value>0.221674874</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
-    <Name>PENDULUM GREEN</Name>
-    <Value>0.000000000</Value>
+    <Name>STRIPE GREEN</Name>
+    <Value>0.236453205</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
-    <Name>PENDULUM BLUE</Name>
-    <Value>0.000000000</Value>
+    <Name>STRIPE BLUE</Name>
+    <Value>0.605911314</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
-    <Name>PENDULUM END COUNT</Name>
+    <Name>STRIPE END COUNT</Name>
     <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
-    <Name>PENDULUM BLANK COUNT</Name>
-    <Value>7</Value>
+    <Name>STRIPE BLANK COUNT</Name>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

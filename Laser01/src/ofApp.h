@@ -24,6 +24,10 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 	
+        float now, endTime;
+        
+        void drawPendulum();
+        void drawImage();
     
         ofTrueTypeFont font;
   
@@ -35,9 +39,10 @@ class ofApp : public ofBaseApp{
     
         ofFloatColor map(ofFloatColor c);
         bool bIsRecordingMovie;
-        bool bIsRunning;
+        bool bDrawingInProgress;
         bool bForward;
-
+        bool bDisableLaser;
+        float brightness;
     
         // CAPTURE MODE STUFF
         float startTime;
@@ -66,16 +71,14 @@ class ofApp : public ofBaseApp{
         ofxUISlider* drawTimeSlider;
         ofxUIToggle* forwardToggle;
     
+        bool bDrawPendulum;
         bool bDrawCalibration;
         void guiEvent(ofxUIEventArgs &e);
         float drawY;            // Y Position for the laser to draw at
         float sampleY;         // Y position to sample from
     
-        float swingY;
-        float swingSpeed;
     
-        float saturation;
-        float brightness;
+
     
     
         float scanSpeed;
@@ -84,10 +87,15 @@ class ofApp : public ofBaseApp{
         float blueMin, blueMax;
         ofxEdsdk::Camera camera;
 
-        ofFloatColor stripeColor;
-        float stripeWidth;
-        float stripeGap;
-        ofxIlda::Frame stripes;
+        float pendulumWidth;
+        float pendulumY;
+        vector<ofxUISlider*> stripeX;
+        ofFloatColor pendulumColor;
+        ofxIlda::Frame pendulum;
+        float swingSpeed;
+        float swingSize;
+        float swingOffset;
+
     
         ofPoint pos;
         ofFloatColor color;

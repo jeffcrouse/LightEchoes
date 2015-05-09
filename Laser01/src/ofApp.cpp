@@ -14,6 +14,7 @@ void ofApp::setup(){
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
     bIsRecordingMovie=false;
+    bDisableLaser = false;
     camera.setup();
     
     font.loadFont("fonts/verdana.ttf", 24);
@@ -26,7 +27,7 @@ void ofApp::setup(){
     
     //camera.lockUI();
     
-    sourceImageDir.listDir("images/Source");
+    sourceImageDir.listDir("images/Text_04");
     sourceImageIndex = -1;
     incrementSourceImage();
     
@@ -42,38 +43,51 @@ void ofApp::setup(){
     gui0->addSpacer();
     gui0->addFPSSlider("FPS SLIDER");
     gui0->addSpacer();
-    gui0->addLabel("SETTINGS");
+    gui0->addLabel("LASER");
     gui0->addIntSlider("PPS", 10000, 60000, 30000);
     gui0->addToggle("CALIBRATION", &bDrawCalibration);
     forwardToggle = gui0->addToggle("FORWARD", &bForward);
     drawTimeSlider = gui0->addSlider("DRAW TIME", 40, 150, 114.30);
     
-    gui0->addIntSlider("SAMPLE WIDTH", 400, 2000, 800);
-    gui0->addSlider("SWING SPEED", 0, 5, 2);
-    gui0->addSlider("BRIGHTNESS", 0.0, 1.0, 0.5);
-    gui0->addSlider("SATURATION", 0.0, 1.0, 0.5);
-    gui0->addRangeSlider("RED", 0.0, 1.0, &redMin, &redMax);
-    gui0->addRangeSlider("GREEN", 0.0, 1.0, &greenMin, &greenMax);
-    gui0->addRangeSlider("BLUE", 0.0, 1.0, &blueMin, &blueMax);
+    
+    
+//    gui0->addSpacer();
+//    gui0->addSlider("BRIGHTNESS", 0.0, 1.0, 0.5);
+//    gui0->addSlider("SATURATION", 0.0, 1.0, 0.5);
+//    gui0->addRangeSlider("RED", 0.0, 1.0, &redMin, &redMax);
+//    gui0->addRangeSlider("GREEN", 0.0, 1.0, &greenMin, &greenMax);
+//    gui0->addRangeSlider("BLUE", 0.0, 1.0, &blueMin, &blueMax);
     gui0->addSpacer();
     outputDirInput = gui0->addTextInput("SAVE LOCATION", outputDir);
-    gui0->addSpacer();
-    gui0->addSlider("PREVIEW SPEED", 1, 10, 3);
-    gui0->addSpacer();
-    gui0->addSlider("DRAWPOS", 0.0, 1.0, 0.5);
-    //gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    //samplePosSlider = gui0->addSlider("SAMPLEPOS", 1.0, 0.0, 0.5, 17, 160);
-    //gui0->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     
     gui0->addSpacer();
+    gui0->addLabel("IMAGE LINE");
+    gui0->addIntSlider("SAMPLE WIDTH", 400, 2000, 800);
     gui0->addIntSlider("LINE END COUNT", 0, 50, 10);
     gui0->addIntSlider("LINE BLANK COUNT", 0, 50, 10);
+    gui0->addSpacer();
     
     
-    gui0->addSlider("STRIPE WIDTH", 0.0001, 0.1, 0.001);
-    gui0->addSlider("STRIPE GAP", 0.0001, 0.2, 0.001);
-    gui0->addIntSlider("STRIPE END COUNT", 0, 50, 10);
-    gui0->addIntSlider("STRIPE BLANK COUNT", 0, 50, 10);
+
+    gui0->addToggle("PENDULUM", &bDrawPendulum);
+    gui0->addSlider("SWING SPEED", 0, 5, 2);
+    gui0->addSlider("SWING SIZE", 0, 1, 0.6);
+    gui0->addSlider("SWING OFFSET", -0.4, 0.4, 0.0);
+    gui0->addSlider("PENDULUM WIDTH", 1, 1000, 2);
+    gui0->addSlider("PENDULUM RED", 0, 1, 0.4);
+    gui0->addSlider("PENDULUM GREEN", 0, 1, 0.4);
+    gui0->addSlider("PENDULUM BLUE", 0, 1, 0.4);
+    gui0->addIntSlider("PENDULUM END COUNT", 0, 50, 10);
+    gui0->addIntSlider("PENDULUM BLANK COUNT", 0, 50, 10);
+     gui0->addSpacer();
+    
+    
+    float gap = 1/8.0;
+    float x = 0;
+    for(int i=0; i<9; i++) {
+        stripeX.push_back(gui0->addSlider("STRIPE "+ofToString(i), 0, 1, x));
+        x += gap;
+    }
     
     gui0->autoSizeToFitWidgets();
     
@@ -92,7 +106,8 @@ void ofApp::exit()
 }
 
 //--------------------------------------------------------------
-ofFloatColor ofApp::map(ofFloatColor inColor) {
+
+/*ofFloatColor ofApp::map(ofFloatColor inColor) {
     
     ofFloatColor outColor;
     
@@ -109,101 +124,126 @@ ofFloatColor ofApp::map(ofFloatColor inColor) {
     outColor.setHsb(hue, sat, bri);
 
     return outColor;
+}*/
+
+//--------------------------------------------------------------
+void ofApp::drawPendulum() {
+    pendulum.clear();
+    
+    
+    vector<ofxIlda::Point> points;
+
+    float swingMin = 0.5 - swingSize;
+    float swingMax = 0.5 + swingSize;
+    pendulumY = ofMap(sin(ofGetElapsedTimef()*swingSpeed), -1, 1, swingMin, swingMax);
+    pendulumY += swingOffset;
+    
+    // Add some blank points to the beginning
+    for(int n=0; n<lineBlankCount; n++) {
+        points.push_back( ofxIlda::Point(ofPoint(0, pendulumY), ofFloatColor(0, 0, 0, 0) ));
+    }
+    etherdream.addPoints(points);
+    
+    
+    // Now add the actual pendulum points
+    float w = pendulumWidth/1000.0;
+    for(int i=0; i<stripeX.size(); i++) {
+        float x1 = stripeX[i]->getValue();
+        float x2 = (i==stripeX.size()-1) ? x1-w : x1+w;
+        ofPolyline p;
+        p.addVertex(x1, pendulumY);
+        p.addVertex(x2, pendulumY);
+        pendulum.addPoly(p);
+    }
+    
+    pendulum.params.output.color = pendulumColor;
+    pendulum.update();
+    etherdream.addPoints(pendulum);
 }
 
-
+//--------------------------------------------------------------
+void ofApp::drawImage() {
+    
+    // Calculate the y coordinate to sample from, and to draw at
+    drawY = 0.5;
+    sampleY = bForward
+        ? ofMap(now, startTime, endTime, 0, 1, true)
+        : ofMap(now, startTime, endTime, 1, 0, true);
+    
+    
+    // Generate the first batch of points to draw the line
+    vector<ofxIlda::Point> points;
+    
+    // x and y are the position to sample from in the image
+    float y = sampleY * sourceImage.getHeight();
+    
+    for (int i=0; i<sampleWidth; i++) {
+        
+        int x = ofMap(i, 0, sampleWidth, 0, sourceImage.getWidth(), true);
+        
+        color = (i%10<9)
+            ? (ofFloatColor)sourceImage.getColor(x, y)
+            : ofFloatColor::black;
+        
+        //color =  sourceImage.getColor(x, y);
+        
+        float drawX = x / (float)sourceImage.getWidth();
+        
+        pos.set(ofClamp(drawX, 0, 1), drawY);
+        
+        ofxIlda::Point p;
+        p.set(pos, color);
+        points.push_back(p);
+    }
+    
+    if(bDisableLaser) {
+        for(int i=0; i<points.size(); i++) {
+            points[i].r = 0;
+            points[i].g = 0;
+            points[i].b = 0;
+        }
+    }
+    
+    
+    // Add safety points to the line
+    vector<ofxIlda::Point> finalPoints;
+    ofxIlda::Point startPoint = points[0];
+    ofxIlda::Point endPoint = points[1];
+    
+    // repeat at start
+    for(int n=0; n<lineBlankCount; n++) {
+        finalPoints.push_back( ofxIlda::Point(startPoint.getPosition(), ofFloatColor(0, 0, 0, 0)) );
+    }
+    for(int n=0; n<lineEndCount; n++) {
+        finalPoints.push_back( startPoint );
+    }
+    for(int j=0; j<points.size(); j++) {
+        finalPoints.push_back( points[j] );
+    }
+    for(int n=0; n<lineEndCount; n++) {
+        finalPoints.push_back( endPoint );
+    }
+    for(int n=0; n<lineBlankCount; n++) {
+        finalPoints.push_back( ofxIlda::Point(endPoint.getPosition(), ofFloatColor(0, 0, 0, 0) ));
+    }
+    etherdream.addPoints(finalPoints);
+    
+}
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    float now = ofGetElapsedTimef();
-    float endTime = startTime + drawTimeSlider->getValue();
+    now = ofGetElapsedTimef();
+    endTime = startTime + drawTimeSlider->getValue();
     
     camera.update();
     
-    if(bIsRunning) {
+    if(bDrawingInProgress) {
         if(now > endTime) {
             endCapture();
         } else {
             etherdream.clear();
-            
-            // Calculate the y coordinate to sample from, and to draw at
-            drawY = 0.5;
-            sampleY = bForward
-                ? ofMap(now, startTime, endTime, 0, 1, true)
-                : ofMap(now, startTime, endTime, 1, 0, true);
-
-            vector<ofxIlda::Point> points;
- 
-            // x and y are the position to sample from in the image
-            float y = sampleY * sourceImage.getHeight();
-            
-            for (int i=0; i<sampleWidth; i++) {
-                int x = ofMap(i, 0, sampleWidth, 0, sourceImage.getWidth(), true);
-                
-                color = map( sourceImage.getColor(x, y) );
-
-                float drawX = x / (float)sourceImage.getWidth();
-                
-                pos.set(ofClamp(drawX, 0, 1), drawY);
-                
-                ofxIlda::Point p;
-                p.set(pos, color);
-                points.push_back(p);
-            }
-            
-            
-            vector<ofxIlda::Point> finalPoints;
-            ofxIlda::Point startPoint = points[0];
-            ofxIlda::Point endPoint = points[1];
-            
-            // repeat at start
-            for(int n=0; n<lineEndCount; n++) {
-                finalPoints.push_back( ofxIlda::Point(startPoint.getPosition(), ofFloatColor(0, 0, 0, 0)) );
-            }
-            for(int n=0; n<lineBlankCount; n++) {
-                finalPoints.push_back( startPoint );
-            }
-            for(int j=0; j<points.size(); j++) {
-                finalPoints.push_back( points[j] );
-            }
-            for(int n=0; n<lineBlankCount; n++) {
-                finalPoints.push_back( endPoint );
-            }
-            for(int n=0; n<lineEndCount; n++) {
-                finalPoints.push_back( ofxIlda::Point(endPoint.getPosition(), ofFloatColor(0, 0, 0, 0) ));
-            }
-            etherdream.addPoints(finalPoints);
-            
-
-            
-            
-            
-            // Do Stripes
-            swingY = 0.4 * sin(ofGetElapsedTimef()*swingSpeed) + 0.4;
-
-            stripes.clear();
-            float x = 0;
-            while(x < 1) {
-                ofPolyline p;
-                p.addVertex(x, swingY);
-                p.addVertex(x+stripeWidth, swingY);
-                stripes.addPoly(p);
-                x += stripeGap;
-            }
-            stripes.params.output.color = map(ofFloatColor(0.4));
-
-            stripes.update();
-            etherdream.addPoints(stripes);
-   
-
-            //For each subsequent frame,
-//            if(ofGetFrameNum() % 2) {
-//                reverse(points.begin(), points.end());
-//                for(int i=0; i<points.size(); i++) {
-//                    points[i].x += reverseOffset;
-//                }
-//            }
-        
+            drawImage();
+            if(bDrawPendulum) drawPendulum();
         }
     }
     
@@ -234,16 +274,6 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    
-
-    if(etherdream.checkConnection()) {
-        ofSetColor(ofColor::green);
-    } else {
-        ofSetColor(ofColor::red);
-    }
-    font.drawString("EtherDream", ofGetWidth()-200, 30);
-    
-    
     
     // UPPER RIGHT
     ofSetColor(ofColor::white);
@@ -280,7 +310,6 @@ void ofApp::keyPressed(int key){
     if(key==' ') {
         camera.pressShutterButton();
     }
-
 }
 
 //--------------------------------------------------------------
@@ -288,8 +317,11 @@ void ofApp::keyReleased(int key){
     if(key==' ') {
         camera.releaseShutterButton();
     }
-    if(key==OF_KEY_RETURN && !bIsRunning) {
+    if(key==OF_KEY_RETURN && !bDrawingInProgress) {
         startCapture();
+    }
+    if(key=='l'){
+        bDisableLaser=!bDisableLaser;
     }
     if(key=='v') {
         bIsRecordingMovie=!bIsRecordingMovie;
@@ -387,13 +419,13 @@ void ofApp::startCapture() {
     sampleY = 0;
     startTime = ofGetElapsedTimef();
     camera.pressShutterButton();
-    bIsRunning=true;
+    bDrawingInProgress=true;
 }
 
 //--------------------------------------------------------------
 void ofApp::endCapture() {
     camera.releaseShutterButton();
-    bIsRunning=false;
+    bDrawingInProgress=false;
 }
 
 
@@ -437,15 +469,15 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
         sampleWidth = slider->getValue();
     }
-    else if(name == "STRIPE END COUNT")
+    else if(name == "PENDULUM END COUNT")
     {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
-        stripes.params.output.endCount = slider->getValue();
+        pendulum.params.output.endCount = slider->getValue();
     }
-    else if(name == "STRIPE BLANK COUNT")
+    else if(name == "PENDULUM BLANK COUNT")
     {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
-        stripes.params.output.blankCount = slider->getValue();
+        pendulum.params.output.blankCount = slider->getValue();
     }
     else if(name == "LINE END COUNT")
     {
@@ -462,21 +494,52 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
         bForward = toggle->getValue();
     }
-    else if(name=="DRAWY")
+    else if(name == "PENDULUM")
     {
-        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        //drawY = slider->getValue();
+        ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
+        bDrawPendulum = toggle->getValue();
     }
     else if(name=="SWING SPEED")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         swingSpeed = slider->getValue();
     }
-    else if(name=="SAMPLEPOS")
+    else if(name=="SWING OFFSET")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        //samplePos = slider->getValue();
+        swingOffset = slider->getValue();
     }
+    else if(name=="SWING SIZE")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        swingSize = slider->getValue();
+    }
+    else if(name=="PENDULUM RED")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulumColor.r =  slider->getValue() ;
+    }
+    else if(name=="PENDULUM GREEN")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulumColor.g = slider->getValue();
+    }
+    else if(name=="PENDULUM BLUE")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulumColor.b = slider->getValue();
+    }
+    else if(name=="PENDULUM WIDTH")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulumWidth = slider->getValue();
+    }
+    else if(name=="SCAN SPEED")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        scanSpeed = slider->getValue();
+    }
+    /*
     else if(name=="BRIGHTNESS")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
@@ -486,21 +549,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         saturation = slider->getValue();
-    }
-    else if(name=="STRIPE WIDTH")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        stripeWidth = slider->getValue();
-    }
-    else if(name=="STRIPE GAP")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        stripeGap = slider->getValue();
-    }
-    else if(name=="SCAN SPEED")
-    {
-        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
-        scanSpeed = slider->getValue();
     }
     else if(name=="RED")
     {
@@ -520,9 +568,19 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         blueMin = slider->getValueLow();
         blueMax = slider->getValueHigh();
     }
+     */
     else if(name=="SAVE LOCATION")
     {
         outputDir = outputDirInput->getTextString();
     }
+    
+//    for(int i=0; i<stripeX.size(); i++) {
+//        if(name=="STRIPE "+ofToString(i))  {
+//            ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+//            stripeX[i] = slider->getValue();
+//        }
+//    }
+    
+    
     gui0->saveSettings("gui0.xml");
 }
