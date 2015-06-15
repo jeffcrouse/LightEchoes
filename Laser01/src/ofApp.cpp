@@ -24,14 +24,11 @@ void ofApp::setup(){
     path.pushDirectory(ofGetTimestampString("%m-%d-%H-%M-%S-%i"));
     outputDir = path.toString();
     
-    
     //camera.lockUI();
     
     sourceImageDir.listDir("images/Text_04");
     sourceImageIndex = -1;
     incrementSourceImage();
-    
-    adjust.load("shaders/adjust");
     
     etherdream.setup();
     //etherdream.setWaitBeforeSend(false);
@@ -50,13 +47,6 @@ void ofApp::setup(){
     drawTimeSlider = gui0->addSlider("DRAW TIME", 40, 150, 114.30);
     
     
-    
-//    gui0->addSpacer();
-//    gui0->addSlider("BRIGHTNESS", 0.0, 1.0, 0.5);
-//    gui0->addSlider("SATURATION", 0.0, 1.0, 0.5);
-//    gui0->addRangeSlider("RED", 0.0, 1.0, &redMin, &redMax);
-//    gui0->addRangeSlider("GREEN", 0.0, 1.0, &greenMin, &greenMax);
-//    gui0->addRangeSlider("BLUE", 0.0, 1.0, &blueMin, &blueMax);
     gui0->addSpacer();
     outputDirInput = gui0->addTextInput("SAVE LOCATION", outputDir);
     
@@ -79,7 +69,7 @@ void ofApp::setup(){
     gui0->addSlider("PENDULUM BLUE", 0, 1, 0.4);
     gui0->addIntSlider("PENDULUM END COUNT", 0, 50, 10);
     gui0->addIntSlider("PENDULUM BLANK COUNT", 0, 50, 10);
-     gui0->addSpacer();
+    gui0->addSpacer();
     
     
     float gap = 1/8.0;
@@ -106,7 +96,6 @@ void ofApp::exit()
 }
 
 //--------------------------------------------------------------
-
 /*ofFloatColor ofApp::map(ofFloatColor inColor) {
     
     ofFloatColor outColor;
@@ -282,30 +271,19 @@ void ofApp::draw(){
     ofDrawBitmapStringHighlight(sourceImageName, 225, 20);
     //font.drawString(sourceImageName, 225, 40);
 
-    // LOWER RIGHT
-    ofSetColor(ofColor::white);
-    adjust.begin();
-    adjust.setUniform1f("brightness", brightness);
-    adjust.setUniform1f("redMin", redMin);
-    adjust.setUniform1f("redMax", redMax);
-    adjust.setUniform1f("greenMin", greenMin);
-    adjust.setUniform1f("greenMax", greenMax);
-    adjust.setUniform1f("blueMin", blueMin);
-    adjust.setUniform1f("blueMax", blueMax);
-    sourceImage.draw(225, 500, 640, 480);
-    adjust.end();
+
     
     
-    // UPPER LEFT
+    // UPPER LEFT - live camera image
     camera.draw(875, 10, 640, 480);
     
-    // LOWER LEFT
+    // LOWER LEFT - most recent photo
     camera.drawPhoto(875, 500, 640, 480);
-
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    
     
     if(key==' ') {
         camera.pressShutterButton();
@@ -314,6 +292,8 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
+    
+    // TO DO: Take out unnecessary key commands
     if(key==' ') {
         camera.releaseShutterButton();
     }
@@ -357,7 +337,6 @@ void ofApp::keyReleased(int key){
     if(key=='f') {
         toggleDirection();
     }
-
 }
 
 //--------------------------------------------------------------
@@ -415,7 +394,6 @@ void ofApp::toggleDirection() {
 
 //--------------------------------------------------------------
 void ofApp::startCapture() {
-    sampleY = 0;
     sampleY = 0;
     startTime = ofGetElapsedTimef();
     camera.pressShutterButton();
@@ -534,12 +512,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e)
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         pendulumWidth = slider->getValue();
     }
+        /*
     else if(name=="SCAN SPEED")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         scanSpeed = slider->getValue();
     }
-    /*
+
     else if(name=="BRIGHTNESS")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();

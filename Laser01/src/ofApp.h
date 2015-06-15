@@ -37,7 +37,7 @@ class ofApp : public ofBaseApp{
         void endCapture();
         void updateSourceImagePreview();
     
-        ofFloatColor map(ofFloatColor c);
+        //ofFloatColor map(ofFloatColor c);
         bool bIsRecordingMovie;
         bool bDrawingInProgress;
         bool bForward;
@@ -55,7 +55,6 @@ class ofApp : public ofBaseApp{
         // SOURCE IMAGE STUFF
         ofFbo sourceImagePreview;
         ofImage sourceImage;
-        ofShader adjust;
         int sampleWidth;
     
         ofxEtherdream etherdream;
@@ -81,10 +80,7 @@ class ofApp : public ofBaseApp{
 
     
     
-        float scanSpeed;
-        float redMin, redMax;
-        float greenMin, greenMax;
-        float blueMin, blueMax;
+        //float scanSpeed;
         ofxEdsdk::Camera camera;
 
         float pendulumWidth;
