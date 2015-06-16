@@ -8,77 +8,7 @@
 #include "ofxJSON.h"
 #include "ofxDmx.h"
 
-class SamplerLine: public vector<ofxIlda::Point> {
-public:
-    SamplerLine() : sampleWidth(800) {
-        drawPos.y = 0.5;
-    }
-    void update(float yPos, ofImage& img) {
-        clear();
-        
-        ofColor color;
-        
-        samplePos.y = yPos * img.getHeight();
-        for (int i=0; i<sampleWidth; i++) {
-            samplePos.x = ofMap(i, 0, sampleWidth, 0, img.getWidth(), true);
-            color = (i%10<9)
-                ? (ofFloatColor)img.getColor(samplePos.x, samplePos.y)
-                : ofFloatColor::black;
-            
-            drawPos.x = samplePos.x / (float)img.getWidth();
-            drawPos.x = ofClamp(drawPos.x, 0, 1);
-            
-            push_back(ofxIlda::Point(drawPos, color));
-        }
-    }
-    
-    void addSafetyPoints() {
-        // Add safety points to the line
-        vector<ofxIlda::Point> finalPoints;
-        ofxIlda::Point startPoint = points[0];
-        ofxIlda::Point endPoint = points[1];
-        
-        // repeat at start
-        for(int n=0; n<lineBlankCount; n++) {
-            finalPoints.push_back( ofxIlda::Point(startPoint.getPosition(), ofFloatColor(0, 0, 0, 0)) );
-        }
-        for(int n=0; n<lineEndCount; n++) {
-            finalPoints.push_back( startPoint );
-        }
-        for(int j=0; j<points.size(); j++) {
-            finalPoints.push_back( points[j] );
-        }
-        for(int n=0; n<lineEndCount; n++) {
-            finalPoints.push_back( endPoint );
-        }
-        for(int n=0; n<lineBlankCount; n++) {
-            finalPoints.push_back( ofxIlda::Point(endPoint.getPosition(), ofFloatColor(0, 0, 0, 0) ));
-        }
-        etherdream.addPoints(finalPoints);
-    }
-    
-    ofPoint samplePos;
-    ofPoint drawPos;
-    int sampleWidth;    // How many samples should we take from the image?
-};
 
-class Pendulum : public ofxIlda::Frame {
-public:
-    void update(float yPos) {
-        ofxIlda::Frame::clear();
-
-        vector<ofxIlda::Point> points;
-        
-        
-        ofxIlda::Frame::update();
-    }
-    
-    
-    ofFloatColor color;
-    float height;
-    float speed;
-    float offset;
-};
 
 class ofApp : public ofBaseApp{
 
@@ -105,15 +35,16 @@ class ofApp : public ofBaseApp{
         void startRun();
         void endRun();
         void toggleDirection();
-
-    
+        void drawPendulum();
+        void drawMainLine();
     
         ofxEtherdream etherdream;
         ofxEdsdk::Camera camera;
         ofxUISuperCanvas *gui;
         ofxDmx dmx;
     
-        float yPos;
+    
+        float trackPos;
         float startTime;
         bool bForward;
         bool bRunning;
@@ -123,19 +54,47 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;
     
+        ofSoundPlayer clap;
+        ofSoundPlayer foundation;
+        ofSoundPlayer woosh;
+        ofSoundPlayer buzz;
     
         ofTrueTypeFont font;
         ofxIlda::Frame calibPattern;
-        Pendulum pendulum;
-        SamplerLine drawLine;
         string savePath;
-    
         ofxJSONElement persist;
-    
-        ofDirectory sourceImageDir;
-        string sourceDirPath;
-        int sourceImageIndex;
-        string sourceImageName;
-        ofImage sourceImage;
         ofFbo laserPreview;
+    
+        struct Source {
+            ofDirectory dir;
+            string dirPath;
+            int index;
+            string imageName;
+            ofImage image;
+            
+        } source;
+    
+        struct Pendulum {
+            ofxIlda::Frame frame;
+            float stripeWidth;
+            vector<ofxUISlider*> stripeX;
+            ofFloatColor color;
+            float height;
+            float speed;
+            float offset;
+            int blankCount;
+            float sin;
+            ofxUILabelToggle* draw;
+        } pendulum;
+    
+        struct MainLine {
+            vector<ofxIlda::Point> points;
+            int endCount;
+            int blankCount;
+            ofPoint samplePos;
+            ofPoint drawPos;
+            int sampleWidth;    // How many samples should we take from the image?
+            float brightness;
+        } mainLine;
+    
 };

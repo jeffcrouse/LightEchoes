@@ -19,12 +19,21 @@ void ofApp::setup(){
     dmx.connect("tty.usbserial-EN143965");
     font.loadFont("fonts/verdana.ttf", 24);
     calibPattern.drawCalibration();
-    sourceImageName = "NONE";
+    source.imageName = "NONE";
     startTime = -1;
     bRunning = false;
-    yPos = 0;
-    
-    
+    trackPos = 0;
+    mainLine.sampleWidth = 800;
+    mainLine.drawPos.y = 0.5;
+    clap.loadSound("sounds/clap.wav");
+    foundation.loadSound("sounds/ambience-synth.wav");
+    foundation.setLoop(true);
+    woosh.loadSound("sounds/woosh2.wav");
+    //foundation.play();
+    buzz.loadSound("sounds/buzz.wav");
+    buzz.setLoop(true);
+    buzz.setVolume(0);
+    buzz.play();
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -32,10 +41,10 @@ void ofApp::setup(){
     persist.open("persist.json");
     
     if (!persist.isMember("sourceImageIndex")) persist["sourceImageIndex"] = 0;
-    sourceImageIndex = persist["sourceImageIndex"].asInt();
+    source.index = persist["sourceImageIndex"].asInt();
     
     if (!persist.isMember("sourceDirPath")) persist["sourceDirPath"] = "Source";
-    sourceDirPath = persist["sourceDirPath"].asString();
+    source.dirPath = persist["sourceDirPath"].asString();
     
     
 
@@ -63,13 +72,36 @@ void ofApp::setup(){
     drawCalibPatternToggle = gui->addLabelToggle("CALIBRATION PATTERN", false);
     trackTimeSlider = gui->addSlider("TRACK TIME", 40, 150, 114.30);
     directionToggle = gui->addLabelToggle("FORWARD", &bForward);
-    
-    gui->addSpacer();
-    gui->addLabel("DRAW SETTINGS");
     autoRunToggle = gui->addLabelToggle("AUTO RUN", false);
     autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 1, 10, 10);
 
-
+    gui->addSpacer();
+    gui->addLabel("MAIN LINE");
+    gui->addIntSlider("SAMPLE WIDTH", 400, 2000, 800);
+    gui->addIntSlider("LINE END COUNT", 0, 50, 10);
+    gui->addIntSlider("LINE BLANK COUNT", 0, 50, 10);
+    
+    gui->addSpacer();
+    gui->addLabel("PENDULUM");
+    pendulum.draw = gui->addLabelToggle("DRAW PENDULUM", true);
+    gui->addSlider("SWING SPEED", 0, 5, 2);
+    gui->addSlider("SWING SIZE", 0, 1, 0.6);
+    gui->addSlider("SWING OFFSET", -0.4, 0.4, 0.0);
+    gui->addSlider("PENDULUM WIDTH", 1, 1000, 2);
+    gui->addSlider("PENDULUM RED", 0, 1, 0.4);
+    gui->addSlider("PENDULUM GREEN", 0, 1, 0.4);
+    gui->addSlider("PENDULUM BLUE", 0, 1, 0.4);
+    gui->addIntSlider("PENDULUM BLANK COUNT", 0, 50, 10);
+    float gap = 1/8.0;
+    float x = 0;
+    for(int i=0; i<9; i++) {
+        ofxUISlider* s = gui->addSlider("STRIPE "+ofToString(i), 0, 1, x);
+        pendulum.stripeX.push_back(s);
+        x += gap;
+    }
+    gui->addSpacer();
+    
+    
     
     gui->autoSizeToFitWidgets();
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
@@ -101,16 +133,14 @@ void ofApp::update(){
         if(now > endTime) {
             endRun();
         } else {
-            yPos = bForward
+            trackPos = bForward
                 ? ofMap(now, startTime, endTime, 0, 1, true)
                 : ofMap(now, startTime, endTime, 1, 0, true);
+            
             etherdream.clear();
+            drawMainLine();
+            drawPendulum();
             
-            drawLine.update(yPos, sourceImage);
-            etherdream.addPoints(drawLine);
-            
-            pendulum.update(yPos);
-            etherdream.addPoints(pendulum);
         }
     } else {
         if(startTime!=-1 && now > startTime) {
@@ -120,19 +150,30 @@ void ofApp::update(){
     
     laserPreview.begin();
         ofClear(0);
-        sourceImage.draw(0, 0);
+        ofSetColor(ofColor::white);
+        source.image.draw(0, 0);
     
         ofPushStyle();
         ofNoFill();
         ofSetLineWidth(3);
         ofSetColor(bRunning ? ofColor::green : ofColor::red);
-        float y = yPos * sourceImage.getHeight();
-        ofRect(0, y-4, sourceImage.getWidth(), 8);
+        float y1 = trackPos * source.image.getHeight();
+        ofLine(0, y1, source.image.getWidth(), y1);
+    
+        if(pendulum.draw->getValue()) {
+            ofSetColor(ofColor::red);
+            float min = y1 - 200;
+            float max = y1 + 200;
+            float y2 = ofMap(pendulum.sin, -1, 1, min, max);
+            ofLine(0, y2, source.image.getWidth(), y2);
+        }
         ofPopStyle();
     laserPreview.end();
     
     
-    if(drawCalibPatternToggle->getValue()) {
+    // TO DO: pendulum.draw() and drawLine.draw();
+    
+    if(drawCalibPatternToggle->getValue()==true) {
         calibPattern.update();
         etherdream.addPoints(calibPattern);
     }
@@ -149,20 +190,15 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    stringstream info;
-    info << "sourceImageIndex " << sourceImageIndex << endl;
-    info << "savePath " << savePath << endl;
-    ofDrawBitmapStringHighlight(info.str(), 10, ofGetHeight()-40);
-    
-    
     ofPushMatrix();
     ofTranslate(250, 0);
     
-    if(!sourceImage.isAllocated()) {
+    if(!source.image.isAllocated()) {
         ofSetColor(ofColor::red);
         font.drawString("WARNING: NO SOURCE IMAGE", 0, 40);
     } else {
-        ofDrawBitmapStringHighlight(sourceImageName, 0, 20);
+        ofSetColor(ofColor::white);
+        ofDrawBitmapStringHighlight(source.imageName, 0, 20);
         float width = 450;
         float height = (width/laserPreview.getWidth()) * laserPreview.getHeight();
 
@@ -175,17 +211,128 @@ void ofApp::draw(){
     // LOWER LEFT - most recent photo
     camera.drawPhoto(460, 500, 640, 480);
    
+    stringstream info;
+    info << "sourceImageIndex " << source.index << endl;
+    info << "savePath " << savePath << endl;
+    ofDrawBitmapStringHighlight(info.str(), 0, ofGetHeight()-40);
+    
+    ofSetColor(ofColor::red);
+    ofRect(0, 0, ofMap(mainLine.brightness, 0, 1, 0, ofGetWidth()), 10);
+    
     ofPopMatrix();
 }
 
 
 //--------------------------------------------------------------
+void ofApp::drawPendulum() {
+    pendulum.frame.clear();
+    
+    if(pendulum.draw->getValue())
+    {
+        pendulum.frame.params.output.color = pendulum.color;
+        float oldSin = pendulum.sin;
+        float newSin =sin(ofGetElapsedTimef() * pendulum.speed);
+        
+        
+        if((oldSin > 0 && newSin < 0) || (oldSin < 0 && newSin > 0)) {
+            woosh.play();
+        }
+        
+        pendulum.sin = newSin;
+        float min = 0.5 - pendulum.height;
+        float max = 0.5 + pendulum.height;
+        float y = ofMap(pendulum.sin, -1, 1, min, max) + pendulum.offset;
+    
+        // safety points
+        vector<ofxIlda::Point> points;
+        for(int n=0; n<pendulum.blankCount; n++) {
+            points.push_back( ofxIlda::Point(ofPoint(0, y), ofFloatColor(0, 0, 0, 0) ));
+        }
+        etherdream.addPoints(points);
+        
+        // Now add the actual pendulum points
+        float w = pendulum.stripeWidth/1000.0;
+        for(int i=0; i<pendulum.stripeX.size(); i++) {
+            float x1 = pendulum.stripeX[i]->getValue();
+            float x2 = (i==pendulum.stripeX.size()-1) ? x1-w : x1+w;
+            ofPolyline p;
+            p.addVertex(x1, y);
+            p.addVertex(x2, y);
+            pendulum.frame.addPoly(p);
+        }
+    }
+    pendulum.frame.update();
+    etherdream.addPoints(pendulum.frame);
+}
+
+//--------------------------------------------------------------
+void ofApp::drawMainLine() {
+    mainLine.samplePos.y = trackPos * source.image.getHeight();
+    
+    vector<ofxIlda::Point> pts;
+    ofFloatColor color;
+    
+    float totalBrightness = 0;
+    for (int i=0; i<mainLine.sampleWidth; i++) {
+        mainLine.samplePos.x = ofMap(i, 0, mainLine.sampleWidth, 0, source.image.getWidth(), true);
+        
+        color = (i%10<9)
+            ? (ofFloatColor)source.image.getColor(mainLine.samplePos.x, mainLine.samplePos.y)
+            : ofFloatColor::black;
+        
+        totalBrightness += color.getBrightness() ;
+        
+        mainLine.drawPos.x = mainLine.samplePos.x / (float)source.image.getWidth();
+        mainLine.drawPos.x = ofClamp(mainLine.drawPos.x, 0, 1);
+        
+        pts.push_back(ofxIlda::Point(mainLine.drawPos, color));
+    }
+    
+    // TO DO: calculate mainLine.lightness
+    
+    mainLine.brightness = totalBrightness / (float)mainLine.sampleWidth;
+    buzz.setVolume( mainLine.brightness );
+    
+    mainLine.points.clear();
+    
+    // Add safety points to the line
+    ofxIlda::Point startPoint = pts[0];
+    ofxIlda::Point endPoint = pts[1];
+    
+    // repeat at start
+    for(int n=0; n<mainLine.blankCount; n++) {
+        mainLine.points.push_back( ofxIlda::Point(startPoint.getPosition(), ofFloatColor(0, 0, 0, 0)) );
+    }
+    for(int n=0; n<mainLine.endCount; n++) {
+        mainLine.points.push_back( startPoint );
+    }
+    for(int n=0; n<pts.size(); n++) {
+        mainLine.points.push_back( pts[n] );
+    }
+    for(int n=0; n<mainLine.endCount; n++) {
+        mainLine.points.push_back( endPoint );
+    }
+    for(int n=0; n<mainLine.blankCount; n++) {
+        mainLine.points.push_back( ofxIlda::Point(endPoint.getPosition(), ofFloatColor(0, 0, 0, 0) ));
+    }
+    
+    etherdream.addPoints(mainLine.points);
+}
+
+//--------------------------------------------------------------
 void ofApp::startRun() {
     if(bRunning) return;
     
+    clap.play();
     ofLogNotice() << "startRun";
     startTime = ofGetElapsedTimef();
-    yPos = 0;
+    
+    if(bForward) {
+        //dmx.setLevel(1, 100);
+    } else {
+        //dmx.setLevel(1, 0);
+    }
+    
     //camera.pressShutterButton();
     bRunning=true;
 }
@@ -194,6 +341,7 @@ void ofApp::startRun() {
 void ofApp::endRun() {
     if(!bRunning) return;
     
+    clap.play();
     ofLogNotice() << "endRun";
     //camera.releaseShutterButton();
     bRunning = false;
@@ -213,26 +361,26 @@ void ofApp::toggleDirection() {
 
 //--------------------------------------------------------------
 void ofApp::loadSourceImage(bool increment) {
-    sourceImage.clear();
-    sourceImageDir.listDir(sourceDirPath);
-    if(sourceImageDir.size()==0) return;
+    source.image.clear();
+    source.dir.listDir(source.dirPath);
+    if(source.dir.size()==0) return;
     
     if(increment) {
-        sourceImageIndex++;
+        source.index++;
         
         // Have we reached the end of the frames?
-        if(sourceImageIndex>sourceImageDir.size()-1) {
+        if(source.index > source.dir.size()-1) {
             processFrames();
-            sourceImageIndex=0;
+            source.index=0;
         }
-        persist["sourceImageIndex"] = sourceImageIndex;
+        persist["sourceImageIndex"] = source.index;
         persist.save("persist.json", true);
     }
     
-    sourceImageName = sourceImageDir.getName(sourceImageIndex);
-    sourceImage.loadImage(sourceImageDir.getPath(sourceImageIndex));
-    laserPreview.allocate(sourceImage.getWidth(), sourceImage.getHeight(), GL_RGB);
-    sourceImage.mirror(true, true);
+    source.imageName = source.dir.getName(source.index);
+    source.image.loadImage(source.dir.getPath(source.index));
+    laserPreview.allocate(source.image.getWidth(), source.image.getHeight(), GL_RGB);
+    source.image.mirror(true, true);
 }
 
 //--------------------------------------------------------------
@@ -264,7 +412,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
     int kind = e.getKind();
     cout << "got event from: " << name << endl;
     
-    
+
     if(name == "PPS")
     {
         ofxUIIntSlider *slider = (ofxUIIntSlider *) e.getSlider();
@@ -275,7 +423,41 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
         bForward = toggle->getValue();
     }
-    
+    else if(name=="SWING SPEED")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulum.speed = slider->getValue();
+    }
+    else if(name=="SWING OFFSET")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulum.offset = slider->getValue();
+    }
+    else if(name=="SWING SIZE")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulum.height = slider->getValue();
+    }
+    else if(name=="PENDULUM RED")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulum.color.r =  slider->getValue() ;
+    }
+    else if(name=="PENDULUM GREEN")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulum.color.g = slider->getValue();
+    }
+    else if(name=="PENDULUM BLUE")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulum.color.b = slider->getValue();
+    }
+    else if(name=="PENDULUM WIDTH")
+    {
+        ofxUISlider *slider = (ofxUISlider *) e.getSlider();
+        pendulum.stripeWidth = slider->getValue();
+    }
     gui->saveSettings("settings.xml");
 }
 
