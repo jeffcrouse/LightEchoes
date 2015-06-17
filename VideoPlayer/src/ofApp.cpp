@@ -1,5 +1,9 @@
 #include "ofApp.h"
 
+// TO DO
+// Sort files by date modified timestamp?
+// http://forum.openframeworks.cc/t/timestamp-of-a-file-date-created-or-modified/10748/3
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle("LightEchoes Video Player");
@@ -113,12 +117,13 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-    float ratio =  ofGetHeight() / video.getHeight();
-    bounds.height = video.getHeight() * ratio;
-    bounds.width = video.getWidth() * ratio;
-    bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
-    bounds.y = 0;
-    
+    if(video.isLoaded()) {
+        float ratio =  ofGetHeight() / video.getHeight();
+        bounds.height = video.getHeight() * ratio;
+        bounds.width = video.getWidth() * ratio;
+        bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
+        bounds.y = 0;
+    }
 }
 
 //--------------------------------------------------------------

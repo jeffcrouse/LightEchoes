@@ -23,7 +23,7 @@
 <Widget>
     <Kind>17</Kind>
     <Name>FORWARD</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -34,11 +34,6 @@
     <Kind>4</Kind>
     <Name>POST RUN PAUSE</Name>
     <Value>5.522167206</Value>
-</Widget>
-<Widget>
-    <Kind>42</Kind>
-    <Name>SAMPLE WIDTH</Name>
-    <Value>800</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
@@ -139,4 +134,9 @@
     <Kind>4</Kind>
     <Name>STRIPE 8</Name>
     <Value>1.000000000</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>BING THRESHOLD</Name>
+    <Value>0.094581284</Value>
 </Widget>

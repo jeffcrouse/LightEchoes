@@ -7,8 +7,7 @@
 #include "ofxEdsdk.h"
 #include "ofxJSON.h"
 #include "ofxDmx.h"
-
-
+#include "SourceMaterial.h"
 
 class ofApp : public ofBaseApp{
 
@@ -29,13 +28,14 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		void guiEvent(ofxUIEventArgs &e);
     
-        void loadSourceImage(bool increment=true);
+        void incrementSource();
         void makeNewName();
         string getSavePath();
         void processFrames();
         void startRun();
         void endRun();
         void toggleDirection();
+        void updatePreviewFBO();
         void drawPendulum();
         void drawMainLine();
     
@@ -43,7 +43,9 @@ class ofApp : public ofBaseApp{
         ofxEdsdk::Camera camera;
         ofxUISuperCanvas *gui;
         ofxDmx dmx;
-    
+        ofTrueTypeFont font;
+        ofxIlda::Frame calibPattern;
+        string currentName; // The name of the video we are working on
     
         float trackPos;
         float startTime;
@@ -59,23 +61,12 @@ class ofApp : public ofBaseApp{
         ofSoundPlayer foundation;
         ofSoundPlayer woosh;
         ofSoundPlayer buzz;
+        ofSoundPlayer bing;
     
-        ofTrueTypeFont font;
-        ofxIlda::Frame calibPattern;
-        string currentName; // The name of the video we are working on
-
         ofxJSONElement persist;
-        ofFbo laserPreview;
-    
-        struct Source {
-            ofDirectory dir;
-            string dirPath;
-            int index;
-            string imageName;
-            ofImage image;
-            
-        } source;
-    
+        SourceMaterial source;
+        ofFbo preview;
+
         struct Pendulum {
             ofxIlda::Frame frame;
             float stripeWidth;
@@ -93,11 +84,12 @@ class ofApp : public ofBaseApp{
             vector<ofxIlda::Point> points;
             int endCount;
             int blankCount;
-            ofPoint samplePos;  // Where in the source image should we sample from?
+            int lastSampleY;
+       
             ofPoint drawPos;    // Where in the etherdream frame are we drawing the sampled color?
-            int sampleWidth;    // How many samples should we take from the image?
-            float brightness;
-            float brightnessVelocity;
         } mainLine;
     
+        float brightness;
+        float brightnessVelocity;
+        ofxUISlider* bingThreshold;
 };

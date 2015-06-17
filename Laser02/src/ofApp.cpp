@@ -36,17 +36,18 @@ void ofApp::setup(){
     //
     camera.setup();
     etherdream.setup();
-    dmx.connect("tty.usbserial-EN143965");
+    //dmx.connect("tty.usbserial-EN143965");
     font.loadFont("fonts/verdana.ttf", 24);
     calibPattern.drawCalibration();
-    source.imageName = "NONE";
     startTime = -1;
     bRunning = false;
     trackPos = 0;
-    mainLine.sampleWidth = 800;
+    brightness = 0;
+    brightnessVelocity = 0;
     mainLine.drawPos.y = 0.5;
     // LOAD SOUNDS
     clap.loadSound("sounds/clap.wav");
+    bing.loadSound("sounds/bing.aif");
     woosh.loadSound("sounds/woosh2.wav");
     foundation.loadSound("sounds/ambience-synth.wav");
     foundation.setLoop(true);
@@ -61,25 +62,18 @@ void ofApp::setup(){
     // PERSIST: load some persistent variables (that aren't sliders)
     //
     persist.open(PERSIST_JSON_FILE);
-    
-    if (!persist.isMember("sourceImageIndex")) persist["sourceImageIndex"] = 0;
-    source.index = persist["sourceImageIndex"].asInt();
-    
-    if (!persist.isMember("sourceDirPath")) persist["sourceDirPath"] = "Source";
-    source.dirPath = persist["sourceDirPath"].asString();
-    
-    
-
-    
-    // Prepare source image
-    loadSourceImage(false);
-    if(!persist.isMember("currentName")) {
-        makeNewName();
-    } else {
+    if(persist.isMember("currentName")) {
         currentName = persist["currentName"].asString();
-    }
+        ofSetWindowTitle("LightEchoes - "+currentName);
+    } else makeNewName();
     
     
+    
+    //
+    //  Set up the source material object
+    //
+    source.setup();
+    preview.allocate(source.getWidth(), source.getHeight(), GL_RGB);
     
     
     //
@@ -99,7 +93,6 @@ void ofApp::setup(){
 
     gui->addSpacer();
     gui->addLabel("MAIN LINE");
-    gui->addIntSlider("SAMPLE WIDTH", 400, 2000, 800);
     gui->addIntSlider("LINE END COUNT", 0, 50, 10);
     gui->addIntSlider("LINE BLANK COUNT", 0, 50, 10);
     
@@ -122,8 +115,9 @@ void ofApp::setup(){
         x += gap;
     }
     gui->addSpacer();
+    gui->addLabel("SOUND");
+    bingThreshold = gui->addSlider("BING THRESHOLD", 0, 0.2, 0.05);
     
-
     
     gui->autoSizeToFitWidgets();
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
@@ -159,6 +153,7 @@ void ofApp::update(){
                 ? ofMap(now, startTime, endTime, 0, 1, true)
                 : ofMap(now, startTime, endTime, 1, 0, true);
             
+            
             etherdream.clear();
             drawMainLine();
             drawPendulum();
@@ -169,29 +164,6 @@ void ofApp::update(){
         }
     }
     
-    
-    // Generate source image preview
-    laserPreview.begin();
-        ofClear(0);
-        ofSetColor(ofColor::white);
-        source.image.draw(0, 0);
-    
-        ofPushStyle();
-        ofNoFill();
-        ofSetLineWidth(3);
-        ofSetColor(bRunning ? ofColor::green : ofColor::red);
-        float y1 = trackPos * source.image.getHeight();
-        ofLine(0, y1, source.image.getWidth(), y1);
-    
-        if(pendulum.draw->getValue()) {
-            ofSetColor(ofColor::red);
-            float min = y1 - 200;
-            float max = y1 + 200;
-            float y2 = ofMap(pendulum.sin, -1, 1, min, max);
-            ofLine(0, y2, source.image.getWidth(), y2);
-        }
-        ofPopStyle();
-    laserPreview.end();
     
     
     // Draw calibration pattern if it's on
@@ -212,42 +184,79 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+    
+    updatePreviewFBO();
+    
     ofPushMatrix();
     ofTranslate(250, 0);
     
-        if(!source.image.isAllocated()) {
-            ofSetColor(ofColor::red);
-            font.drawString("WARNING: NO SOURCE IMAGE", 0, 40);
-        } else {
-            ofSetColor(ofColor::white);
-            ofDrawBitmapStringHighlight(source.imageName, 0, 20);
-            float width = 450;
-            float height = (width/laserPreview.getWidth()) * laserPreview.getHeight();
-            laserPreview.draw(0, 30, width, height);
-        }
+        // Brightness bars
+        ofSetColor(ofColor::red);
+        ofRect(0, 0, ofMap(brightness, 0, 1, 0, ofGetWidth()), 10);
+        ofRect(0, 10, ofMap(brightnessVelocity, 0, 1, 0, ofGetWidth()), 10);
         
+        // LEFT SIDE
+        ofSetColor(ofColor::white);
+        preview.draw(0, 30, 500, 1000);
+ 
         // UPPER LEFT - live camera image
         camera.draw(460, 10, 640, 480);
         
         // LOWER LEFT - most recent photo
         camera.drawPhoto(460, 500, 640, 480);
-       
-        stringstream info;
-        info << "sourceImageIndex " << source.index << endl;
-        info << "currentName " << currentName << endl;
-        ofDrawBitmapStringHighlight(info.str(), 0, ofGetHeight()-40);
-        
-        // Brightness bars
-        ofSetColor(ofColor::red);
-        ofRect(0, 0, ofMap(mainLine.brightness, 0, 1, 0, ofGetWidth()), 10);
-        ofRect(0, 10, ofMap(mainLine.brightnessVelocity, 0, 1, 0, ofGetWidth()), 10);
+    
     
     ofPopMatrix();
+    
+    
+    
+    // Draw some circles to show what the laser is projecting
+    for(int i=0; i<mainLine.points.size(); i++) {
+        ofxIlda::Point& pt = mainLine.points[i];
+        if(pt.a>0) {
+            ofSetColor(pt.r, pt.g, pt.b);
+            ofCircle(pt.getPosition().x * ofGetWidth(), ofGetHeight()-5, 2);
+        }
+    }
 }
 
 
 //--------------------------------------------------------------
+// Generate a preview of the source material and some
+// lines that represent the laser
+void ofApp::updatePreviewFBO() {
+    preview.begin();
+        ofClear(0);
+        ofPushStyle();
+    
+        ofSetColor(ofColor::white);
+        source.draw(0, 0);
+        
+    
+        ofNoFill();
+        ofSetLineWidth(3);
+        ofSetColor(bRunning ? ofColor::green : ofColor::red);
+        float y1 = trackPos * source.getHeight();
+        ofLine(0, y1, source.getWidth(), y1);
+        
+        if(pendulum.draw->getValue()) {
+            ofSetColor(ofColor::red);
+            float min = y1 - 100;
+            float max = y1 + 100;
+            float y2 = ofMap(pendulum.sin, -1, 1, min, max);
+            ofLine(0, y2, source.getWidth(), y2);
+        }
+    
+        stringstream info;
+        info << "index = " << source.getIndex() << endl;
+        ofDrawBitmapStringHighlight(info.str(), 20, preview.getHeight()-20);
+        ofPopStyle();
+    preview.end();
+}
+
+
+//--------------------------------------------------------------
+// Add the lines to the etherdream that represent the pendulum.
 void ofApp::drawPendulum() {
     pendulum.frame.clear();
     
@@ -288,36 +297,45 @@ void ofApp::drawPendulum() {
     etherdream.addPoints(pendulum.frame);
 }
 
+
 //--------------------------------------------------------------
 void ofApp::drawMainLine() {
-    mainLine.samplePos.y = trackPos * source.image.getHeight();
+    int sampleY = trackPos * source.getHeight();
+    
+    if(sampleY==mainLine.lastSampleY) return;
+    
     
     vector<ofxIlda::Point> pts;
     ofFloatColor color;
     
     float totalBrightness = 0;
-    for (int i=0; i<mainLine.sampleWidth; i++) {
-        mainLine.samplePos.x = ofMap(i, 0, mainLine.sampleWidth, 0, source.image.getWidth(), true);
-        
-        color = (i%10<9)
-            ? (ofFloatColor)source.image.getColor(mainLine.samplePos.x, mainLine.samplePos.y)
+    int sampleX;
+    for (int sampleX=0; sampleX<source.getWidth(); sampleX++) {
+     
+        color = (sampleX%10<9)
+            ? source.getColor(sampleX, sampleY)
             : ofFloatColor::black;
         
         totalBrightness += color.getBrightness() ;
         
-        mainLine.drawPos.x = mainLine.samplePos.x / (float)source.image.getWidth();
+        mainLine.drawPos.x = sampleX / (float)source.getWidth();
         mainLine.drawPos.x = ofClamp(mainLine.drawPos.x, 0, 1);
         
         pts.push_back(ofxIlda::Point(mainLine.drawPos, color));
     }
     
-    float oldBrightness = mainLine.brightness;
-    float newBrightness = totalBrightness / (float)mainLine.sampleWidth;
-    float diff = oldBrightness-newBrightness;
-    mainLine.brightness = newBrightness;
-    mainLine.brightnessVelocity = diff / ofGetLastFrameTime();
+    float oldBrightness = brightness;
+    float newBrightness = totalBrightness / (float)source.getWidth();
+    float diff = abs(newBrightness - oldBrightness);
     
-    buzz.setVolume( mainLine.brightness );
+    brightness = newBrightness;
+    brightnessVelocity = diff;
+
+    
+    if(brightnessVelocity > bingThreshold->getValue()) {
+        bing.play();
+    }
+    //buzz.setVolume( brightness );
     
     mainLine.points.clear();
     
@@ -343,6 +361,8 @@ void ofApp::drawMainLine() {
     }
     
     etherdream.addPoints(mainLine.points);
+    
+    mainLine.lastSampleY = sampleY;
 }
 
 //--------------------------------------------------------------
@@ -373,7 +393,7 @@ void ofApp::endRun() {
     bRunning = false;
     
     toggleDirection();
-    loadSourceImage(true);
+    incrementSource();
     
     if(autoRunToggle->getValue())
         startTime = ofGetElapsedTimef() + 10;
@@ -386,29 +406,14 @@ void ofApp::toggleDirection() {
 }
 
 //--------------------------------------------------------------
-void ofApp::loadSourceImage(bool increment) {
-    source.image.clear();
-    source.dir.listDir(source.dirPath);
-    if(source.dir.size()==0) return;
-    
-    if(increment) {
-        source.index++;
-        
-        // Have we reached the end of the frames?
-        if(source.index > source.dir.size()-1) {
-            processFrames();
-            makeNewName();
-            source.index=0;
-        }
-        
-        persist["sourceImageIndex"] = source.index;
-        persist.save(PERSIST_JSON_FILE, true);
+void ofApp::incrementSource() {
+    bool incremented = source.increment();
+    if(!incremented) {
+        ofLogNotice("ofApp::incrementSource()") << "Processing frames and resetting source materials";
+        processFrames();
+        makeNewName();
+        source.reset();
     }
-    
-    source.imageName = source.dir.getName(source.index);
-    source.image.loadImage(source.dir.getPath(source.index));
-    laserPreview.allocate(source.image.getWidth(), source.image.getHeight(), GL_RGB);
-    source.image.mirror(true, true);
 }
 
 //--------------------------------------------------------------
@@ -433,6 +438,7 @@ void ofApp::processFrames() {
 //--------------------------------------------------------------
 void ofApp::makeNewName() {
     currentName = ofGetTimestampString("%m-%d-%H-%M-%S-%i");
+    ofSetWindowTitle("LightEchoes - "+currentName);
     persist["currentName"] = currentName;
     persist.save(PERSIST_JSON_FILE, true);
 }
@@ -496,11 +502,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         pendulum.stripeWidth = slider->getValue();
     }
-    else if(name == "SAMPLE WIDTH")
-    {
-        ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
-        mainLine.sampleWidth = slider->getValue();
-    }
     else if(name == "LINE END COUNT")
     {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
@@ -522,7 +523,7 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     if(key==OF_KEY_TAB) {
-        loadSourceImage(true);
+        incrementSource();
     }
     if(key==OF_KEY_RETURN) {
         startRun();

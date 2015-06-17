@@ -15,6 +15,7 @@
 		1F459DB31B2E2A47002302ED /* EDSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F459DAA1B2E2A3D002302ED /* EDSDK.framework */; };
 		1F459DB41B2E2A5A002302ED /* DPP.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1F459DA91B2E2A3D002302ED /* DPP.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1F459DB51B2E2A5A002302ED /* EDSDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1F459DAA1B2E2A3D002302ED /* EDSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1FCEDED81B32308400B57D5F /* SourceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FCEDED61B32308400B57D5F /* SourceMaterial.cpp */; };
 		22030CBDCC25D815E7ED6757 /* ofxUIFPSSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E7E592342D8B7FB73A6F64D /* ofxUIFPSSlider.cpp */; };
 		222C3AB10FA3158602718602 /* ofxUIMultiImageButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 17E06821FB98542FDB806E50 /* ofxUIMultiImageButton.cpp */; };
 		24B475D09D396FD37823F959 /* test.c in Sources */ = {isa = PBXBuildFile; fileRef = 998154314347A01197567C72 /* test.c */; };
@@ -151,6 +152,8 @@
 		1F459DAF1B2E2A3D002302ED /* EDSDKErrors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EDSDKErrors.h; sourceTree = "<group>"; };
 		1F459DB01B2E2A3D002302ED /* EDSDKTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EDSDKTypes.h; sourceTree = "<group>"; };
 		1F459DB11B2E2A3D002302ED /* readme */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme; sourceTree = "<group>"; };
+		1FCEDED61B32308400B57D5F /* SourceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SourceMaterial.cpp; sourceTree = "<group>"; };
+		1FCEDED71B32308400B57D5F /* SourceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SourceMaterial.h; sourceTree = "<group>"; };
 		21BDE665988474F1B1F4D302 /* jsoncpp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = jsoncpp.cpp; path = ../../../addons/ofxJSON/libs/jsoncpp/src/jsoncpp.cpp; sourceTree = SOURCE_ROOT; };
 		23F3707AC2C550C3F34520BC /* etherdream.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = etherdream.h; path = ../../../addons/ofxEtherdream/libs/driver/libetherdream/etherdream.h; sourceTree = SOURCE_ROOT; };
 		23FA31CAEA236B2C1E218497 /* ofxUIWidgets.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxUIWidgets.h; path = ../../../addons/ofxUI/src/ofxUIWidgets.h; sourceTree = SOURCE_ROOT; };
@@ -761,6 +764,8 @@
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
+				1FCEDED61B32308400B57D5F /* SourceMaterial.cpp */,
+				1FCEDED71B32308400B57D5F /* SourceMaterial.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -912,6 +917,7 @@
 				DF0C851B244C4C867CEA8806 /* ofxUICircleSlider.cpp in Sources */,
 				9BE4AE0AA2B8C436BDFE9D4D /* ofxUIDragableLabelButton.cpp in Sources */,
 				F392A99D83698FC099127880 /* ofxUIDropDownList.cpp in Sources */,
+				1FCEDED81B32308400B57D5F /* SourceMaterial.cpp in Sources */,
 				084025DA517D8329301FE1B6 /* ofxUIEventArgs.cpp in Sources */,
 				7252706DA14C1BE63950ADDA /* ofxUIFPS.cpp in Sources */,
 				22030CBDCC25D815E7ED6757 /* ofxUIFPSSlider.cpp in Sources */,
