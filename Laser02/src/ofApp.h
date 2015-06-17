@@ -93,10 +93,11 @@ class ofApp : public ofBaseApp{
             vector<ofxIlda::Point> points;
             int endCount;
             int blankCount;
-            ofPoint samplePos;
-            ofPoint drawPos;
+            ofPoint samplePos;  // Where in the source image should we sample from?
+            ofPoint drawPos;    // Where in the etherdream frame are we drawing the sampled color?
             int sampleWidth;    // How many samples should we take from the image?
             float brightness;
+            float brightnessVelocity;
         } mainLine;
     
 };

@@ -1,6 +1,11 @@
 #include "ofApp.h"
 #include "ofxModifierKeys.h"
 
+#define GUI_SETTINGS_XML "settings.xml"
+#define PERSIST_JSON_FILE "persist.json"
+
+
+//--------------------------------------------------------------
 string ofSystemCall(string command)
 {
     FILE* pipe = popen(command.c_str(), "r");
@@ -40,20 +45,22 @@ void ofApp::setup(){
     trackPos = 0;
     mainLine.sampleWidth = 800;
     mainLine.drawPos.y = 0.5;
+    // LOAD SOUNDS
     clap.loadSound("sounds/clap.wav");
+    woosh.loadSound("sounds/woosh2.wav");
     foundation.loadSound("sounds/ambience-synth.wav");
     foundation.setLoop(true);
-    woosh.loadSound("sounds/woosh2.wav");
-    //foundation.play();
+    foundation.play();
     buzz.loadSound("sounds/buzz.wav");
     buzz.setLoop(true);
     buzz.setVolume(0);
     buzz.play();
     
+    
     //
     // PERSIST: load some persistent variables (that aren't sliders)
     //
-    persist.open("persist.json");
+    persist.open(PERSIST_JSON_FILE);
     
     if (!persist.isMember("sourceImageIndex")) persist["sourceImageIndex"] = 0;
     source.index = persist["sourceImageIndex"].asInt();
@@ -64,7 +71,7 @@ void ofApp::setup(){
     
 
     
-    // Prepare input and output stuff
+    // Prepare source image
     loadSourceImage(false);
     if(!persist.isMember("currentName")) {
         makeNewName();
@@ -120,7 +127,7 @@ void ofApp::setup(){
     
     gui->autoSizeToFitWidgets();
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
-    gui->loadSettings("settings.xml");
+    gui->loadSettings(GUI_SETTINGS_XML);
 }
 
 //--------------------------------------------------------------
@@ -130,8 +137,8 @@ void ofApp::exit() {
     
     camera.releaseShutterButton();
     camera.close();
-    gui->saveSettings("settings.xml");
-    persist.save("persist.json", true);
+    gui->saveSettings(GUI_SETTINGS_XML);
+    persist.save(PERSIST_JSON_FILE, true);
     delete gui;
 }
 
@@ -155,7 +162,6 @@ void ofApp::update(){
             etherdream.clear();
             drawMainLine();
             drawPendulum();
-            
         }
     } else {
         if(startTime!=-1 && now > startTime) {
@@ -163,6 +169,8 @@ void ofApp::update(){
         }
     }
     
+    
+    // Generate source image preview
     laserPreview.begin();
         ofClear(0);
         ofSetColor(ofColor::white);
@@ -186,13 +194,13 @@ void ofApp::update(){
     laserPreview.end();
     
     
-    // TO DO: pendulum.draw() and drawLine.draw();
-    
+    // Draw calibration pattern if it's on
     if(drawCalibPatternToggle->getValue()==true) {
         calibPattern.update();
         etherdream.addPoints(calibPattern);
     }
     
+    // Deal with photos from the camera
     if(camera.isPhotoNew()) {
         ofDirectory::createDirectory(getSavePath(), false, true);
         stringstream path;
@@ -208,31 +216,32 @@ void ofApp::draw(){
     ofPushMatrix();
     ofTranslate(250, 0);
     
-    if(!source.image.isAllocated()) {
+        if(!source.image.isAllocated()) {
+            ofSetColor(ofColor::red);
+            font.drawString("WARNING: NO SOURCE IMAGE", 0, 40);
+        } else {
+            ofSetColor(ofColor::white);
+            ofDrawBitmapStringHighlight(source.imageName, 0, 20);
+            float width = 450;
+            float height = (width/laserPreview.getWidth()) * laserPreview.getHeight();
+            laserPreview.draw(0, 30, width, height);
+        }
+        
+        // UPPER LEFT - live camera image
+        camera.draw(460, 10, 640, 480);
+        
+        // LOWER LEFT - most recent photo
+        camera.drawPhoto(460, 500, 640, 480);
+       
+        stringstream info;
+        info << "sourceImageIndex " << source.index << endl;
+        info << "currentName " << currentName << endl;
+        ofDrawBitmapStringHighlight(info.str(), 0, ofGetHeight()-40);
+        
+        // Brightness bars
         ofSetColor(ofColor::red);
-        font.drawString("WARNING: NO SOURCE IMAGE", 0, 40);
-    } else {
-        ofSetColor(ofColor::white);
-        ofDrawBitmapStringHighlight(source.imageName, 0, 20);
-        float width = 450;
-        float height = (width/laserPreview.getWidth()) * laserPreview.getHeight();
-
-        laserPreview.draw(0, 30, width, height);
-    }
-    
-    // UPPER LEFT - live camera image
-    camera.draw(460, 10, 640, 480);
-    
-    // LOWER LEFT - most recent photo
-    camera.drawPhoto(460, 500, 640, 480);
-   
-    stringstream info;
-    info << "sourceImageIndex " << source.index << endl;
-    info << "currentName " << currentName << endl;
-    ofDrawBitmapStringHighlight(info.str(), 0, ofGetHeight()-40);
-    
-    ofSetColor(ofColor::red);
-    ofRect(0, 0, ofMap(mainLine.brightness, 0, 1, 0, ofGetWidth()), 10);
+        ofRect(0, 0, ofMap(mainLine.brightness, 0, 1, 0, ofGetWidth()), 10);
+        ofRect(0, 10, ofMap(mainLine.brightnessVelocity, 0, 1, 0, ofGetWidth()), 10);
     
     ofPopMatrix();
 }
@@ -247,7 +256,6 @@ void ofApp::drawPendulum() {
         pendulum.frame.params.output.color = pendulum.color;
         float oldSin = pendulum.sin;
         float newSin =sin(ofGetElapsedTimef() * pendulum.speed);
-        
         
         if((oldSin > 0 && newSin < 0) || (oldSin < 0 && newSin > 0)) {
             woosh.play();
@@ -303,9 +311,12 @@ void ofApp::drawMainLine() {
         pts.push_back(ofxIlda::Point(mainLine.drawPos, color));
     }
     
-    // TO DO: calculate mainLine.lightness
+    float oldBrightness = mainLine.brightness;
+    float newBrightness = totalBrightness / (float)mainLine.sampleWidth;
+    float diff = oldBrightness-newBrightness;
+    mainLine.brightness = newBrightness;
+    mainLine.brightnessVelocity = diff / ofGetLastFrameTime();
     
-    mainLine.brightness = totalBrightness / (float)mainLine.sampleWidth;
     buzz.setVolume( mainLine.brightness );
     
     mainLine.points.clear();
@@ -389,8 +400,9 @@ void ofApp::loadSourceImage(bool increment) {
             makeNewName();
             source.index=0;
         }
+        
         persist["sourceImageIndex"] = source.index;
-        persist.save("persist.json", true);
+        persist.save(PERSIST_JSON_FILE, true);
     }
     
     source.imageName = source.dir.getName(source.index);
@@ -422,7 +434,7 @@ void ofApp::processFrames() {
 void ofApp::makeNewName() {
     currentName = ofGetTimestampString("%m-%d-%H-%M-%S-%i");
     persist["currentName"] = currentName;
-    persist.save("persist.json", true);
+    persist.save(PERSIST_JSON_FILE, true);
 }
 
 //--------------------------------------------------------------
@@ -432,7 +444,6 @@ string ofApp::getSavePath() {
     path.pushDirectory(currentName);
     return path.toString();
 }
-
 
 //--------------------------------------------------------------
 void ofApp::guiEvent(ofxUIEventArgs &e) {
@@ -500,7 +511,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
         mainLine.blankCount = slider->getValue();
     }
-    gui->saveSettings("settings.xml");
+    gui->saveSettings(GUI_SETTINGS_XML);
 }
 
 //--------------------------------------------------------------
