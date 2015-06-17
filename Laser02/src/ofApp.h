@@ -30,7 +30,8 @@ class ofApp : public ofBaseApp{
 		void guiEvent(ofxUIEventArgs &e);
     
         void loadSourceImage(bool increment=true);
-        void makeNewSavePath();
+        void makeNewName();
+        string getSavePath();
         void processFrames();
         void startRun();
         void endRun();
@@ -61,7 +62,8 @@ class ofApp : public ofBaseApp{
     
         ofTrueTypeFont font;
         ofxIlda::Frame calibPattern;
-        string savePath;
+        string currentName; // The name of the video we are working on
+
         ofxJSONElement persist;
         ofFbo laserPreview;
     

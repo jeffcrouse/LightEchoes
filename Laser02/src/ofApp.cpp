@@ -1,6 +1,21 @@
 #include "ofApp.h"
 #include "ofxModifierKeys.h"
 
+string ofSystemCall(string command)
+{
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    string result = "";
+    while(!feof(pipe)) {
+        if(fgets(buffer, 128, pipe) != NULL)
+            result += buffer;
+    }
+    pclose(pipe);
+    result.erase(remove(result.begin(), result.end(), '\n'), result.end());
+    return result;
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle("LightEchoes");
@@ -51,10 +66,10 @@ void ofApp::setup(){
     
     // Prepare input and output stuff
     loadSourceImage(false);
-    if(!persist.isMember("savePath")) {
-        makeNewSavePath();
+    if(!persist.isMember("currentName")) {
+        makeNewName();
     } else {
-        savePath = persist["savePath"].asString();
+        currentName = persist["currentName"].asString();
     }
     
     
@@ -101,7 +116,7 @@ void ofApp::setup(){
     }
     gui->addSpacer();
     
-    
+
     
     gui->autoSizeToFitWidgets();
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
@@ -179,9 +194,9 @@ void ofApp::update(){
     }
     
     if(camera.isPhotoNew()) {
-        ofDirectory::createDirectory(savePath, false, true);
+        ofDirectory::createDirectory(getSavePath(), false, true);
         stringstream path;
-        path << savePath << "/" << ofGetTimestampString("%m-%d-%H-%M-%S-%i") << ".jpg";
+        path << getSavePath() << "/" << ofGetTimestampString("%m-%d-%H-%M-%S-%i") << ".jpg";
         ofLogNotice() << path.str();
         camera.savePhoto(path.str());
     }
@@ -213,7 +228,7 @@ void ofApp::draw(){
    
     stringstream info;
     info << "sourceImageIndex " << source.index << endl;
-    info << "savePath " << savePath << endl;
+    info << "currentName " << currentName << endl;
     ofDrawBitmapStringHighlight(info.str(), 0, ofGetHeight()-40);
     
     ofSetColor(ofColor::red);
@@ -371,6 +386,7 @@ void ofApp::loadSourceImage(bool increment) {
         // Have we reached the end of the frames?
         if(source.index > source.dir.size()-1) {
             processFrames();
+            makeNewName();
             source.index=0;
         }
         persist["sourceImageIndex"] = source.index;
@@ -385,24 +401,36 @@ void ofApp::loadSourceImage(bool increment) {
 
 //--------------------------------------------------------------
 void ofApp::processFrames() {
+
+    stringstream cmd;
+    cmd << "cd " << getSavePath() << ";";
+    cmd << "ffmpeg -f image2 -pattern_type glob -i '*.jpg' ";
+    cmd << "-s 1920x1080 ";
+    cmd << "-c:v libx264 ";
+    cmd << "-an ";
+    cmd << "-q:v 2 ";
+    cmd << "-r 24 ";
+    cmd << "-pix_fmt yuv420p ";
+    cmd << currentName << ".mp4; ";
+    cmd << "open " << currentName << ".mp4";
     
-    ofDirectory dir;
-    dir.listDir(savePath);
     
-    
-    // process frames here.
-    makeNewSavePath();
+    ofSystem(cmd.str());
 }
 
 //--------------------------------------------------------------
-void ofApp::makeNewSavePath() {
-    
+void ofApp::makeNewName() {
+    currentName = ofGetTimestampString("%m-%d-%H-%M-%S-%i");
+    persist["currentName"] = currentName;
+    persist.save("persist.json", true);
+}
+
+//--------------------------------------------------------------
+string ofApp::getSavePath() {
     Poco::Path path = Poco::Path::home();
     path.pushDirectory("Desktop");
-    path.pushDirectory(ofGetTimestampString("%m-%d-%H-%M-%S-%i"));
-    savePath =  path.toString();
-    persist["savePath"] = savePath;
-    persist.save("persist.json", true);
+    path.pushDirectory(currentName);
+    return path.toString();
 }
 
 
@@ -412,7 +440,6 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
     int kind = e.getKind();
     cout << "got event from: " << name << endl;
     
-
     if(name == "PPS")
     {
         ofxUIIntSlider *slider = (ofxUIIntSlider *) e.getSlider();
@@ -457,6 +484,21 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         pendulum.stripeWidth = slider->getValue();
+    }
+    else if(name == "SAMPLE WIDTH")
+    {
+        ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
+        mainLine.sampleWidth = slider->getValue();
+    }
+    else if(name == "LINE END COUNT")
+    {
+        ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
+        mainLine.endCount = slider->getValue();
+    }
+    else if(name == "LINE BLANK COUNT")
+    {
+        ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
+        mainLine.blankCount = slider->getValue();
     }
     gui->saveSettings("settings.xml");
 }
