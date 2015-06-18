@@ -225,6 +225,7 @@ void ofApp::update(){
     endTime = startTime + drawTimeSlider->getValue();
     
     camera.update();
+    etherdream.checkConnection(true);
     
     if(bDrawingInProgress) {
         if(now > endTime) {

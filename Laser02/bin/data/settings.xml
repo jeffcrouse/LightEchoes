@@ -8,7 +8,7 @@
 <Widget>
     <Kind>42</Kind>
     <Name>PPS</Name>
-    <Value>30000</Value>
+    <Value>60000</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -18,7 +18,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TRACK TIME</Name>
-    <Value>43.251232147</Value>
+    <Value>83.645317078</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -33,17 +33,17 @@
 <Widget>
     <Kind>4</Kind>
     <Name>POST RUN PAUSE</Name>
-    <Value>5.522167206</Value>
+    <Value>20.541872025</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
     <Name>LINE END COUNT</Name>
-    <Value>10</Value>
+    <Value>5</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
     <Name>LINE BLANK COUNT</Name>
-    <Value>10</Value>
+    <Value>50</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -53,42 +53,42 @@
 <Widget>
     <Kind>4</Kind>
     <Name>SWING SPEED</Name>
-    <Value>1.403940916</Value>
+    <Value>1.724138021</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>SWING SIZE</Name>
-    <Value>0.901477814</Value>
+    <Value>0.261083752</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>SWING OFFSET</Name>
-    <Value>0.000000000</Value>
+    <Value>0.021674871</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
-    <Name>PENDULUM WIDTH</Name>
-    <Value>517.724121094</Value>
+    <Name>PENDULUM STRIPE WIDTH</Name>
+    <Value>20.684728622</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>PENDULUM RED</Name>
-    <Value>0.400000006</Value>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>PENDULUM GREEN</Name>
-    <Value>0.400000006</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>PENDULUM BLUE</Name>
-    <Value>0.400000006</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
     <Name>PENDULUM BLANK COUNT</Name>
-    <Value>10</Value>
+    <Value>7</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -138,5 +138,5 @@
 <Widget>
     <Kind>4</Kind>
     <Name>BING THRESHOLD</Name>
-    <Value>0.094581284</Value>
+    <Value>0.058128078</Value>
 </Widget>

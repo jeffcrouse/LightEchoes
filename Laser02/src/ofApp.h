@@ -57,11 +57,13 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;
     
-        ofSoundPlayer clap;
-        ofSoundPlayer foundation;
-        ofSoundPlayer woosh;
-        ofSoundPlayer buzz;
-        ofSoundPlayer bing;
+        ofSoundPlayer endClap;
+        ofSoundPlayer startClap;
+        ofSoundPlayer arpPad;
+        ofSoundPlayer kick;
+        ofSoundPlayer snare;
+        ofSoundPlayer hihat;
+        ofSoundPlayer bed;
     
         ofxJSONElement persist;
         SourceMaterial source;
@@ -78,6 +80,7 @@ class ofApp : public ofBaseApp{
             int blankCount;
             float sin;
             ofxUILabelToggle* draw;
+            float vel;
         } pendulum;
     
         struct MainLine {
