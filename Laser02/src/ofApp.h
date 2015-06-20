@@ -47,11 +47,14 @@ class ofApp : public ofBaseApp{
         ofxEdsdk::Camera camera;
         ofxUISuperCanvas *gui;
         ofxDmx dmx;
+        int dmxLevels[3];
         ofTrueTypeFont font;
         ofxIlda::Frame calibPattern;
         ofxUISlider* colorAdjust[3];
         //ofxUIRangeSlider* cutout;
         string savePath;
+        bool bPaused;
+
     
         //string currentName; // The name of the video we are working on
         float trackPos;

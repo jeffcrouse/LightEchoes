@@ -2,8 +2,8 @@
     <Kind>40</Kind>
     <Name>OFX_UI_WIDGET_CANVAS</Name>
     <IsMinified>0</IsMinified>
-    <XPosition>0.000000000</XPosition>
-    <YPosition>0.000000000</YPosition>
+    <XPosition>3.000000000</XPosition>
+    <YPosition>15.000000000</YPosition>
 </Canvas>
 <Widget>
     <Kind>42</Kind>
@@ -23,7 +23,7 @@
 <Widget>
     <Kind>17</Kind>
     <Name>FORWARD</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -43,7 +43,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TRACK POSITION</Name>
-    <Value>0.136675298</Value>
+    <Value>0.826400757</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -73,7 +73,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TEMPO</Name>
-    <Value>84.433502197</Value>
+    <Value>96.232513428</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

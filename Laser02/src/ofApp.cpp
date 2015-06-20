@@ -26,7 +26,7 @@ void ofApp::setup(){
     camera.setup();
     //camera.lockUI();
     if(camera.isConnected()) camera.releaseShutterButton();
-    dmx.connect("tty.usbserial-EN169701");
+    dmx.connect(0);
     font.loadFont("fonts/verdana.ttf", 24);
     calibPattern.drawCalibration();
     startTime = -1;
@@ -36,8 +36,12 @@ void ofApp::setup(){
     brightnessVelocity = 0;
     mainLine.drawPos.y = 0.5;
     pendulum.bDraw=false;
-    
+    bPaused = false;
 
+    dmxLevels[0] = 0;
+    dmxLevels[1] = 0;
+    dmxLevels[2] = 0;
+    
     //
     // PERSIST: load some persistent variables (that aren't sliders)
     //
@@ -52,6 +56,7 @@ void ofApp::setup(){
     path.pushDirectory("Desktop");
     path.pushDirectory("LightEchoes");
     savePath = path.toString();
+    
     
     
     //
@@ -194,17 +199,19 @@ void ofApp::update(){
     float now = ofGetElapsedTimef();
     float endTime = startTime + trackTimeSlider->getValue();
     
-    //etherdream.checkConnection(true);
-    
     camera.update();
+    
+    dmx.setLevel(1, dmxLevels[0]);
+    dmx.setLevel(2, dmxLevels[1]);
+    dmx.setLevel(3, dmxLevels[2]);
+    
     dmx.update();
-    etherdream.clear();
     sound.update();
     
     //drawSafetyPattern();
     
     // RUN LOGIC
-    if(bRunning) {
+    if(bRunning && !bPaused) {
         if(now > endTime) {
             endRun();
         } else {
@@ -214,13 +221,6 @@ void ofApp::update(){
             trackPosSlider->setValue(trackPos);
         }
     }
-    
-    if(bRunning || forceOnToggle->getValue()) {
-        drawMainLine();
-        drawPendulum();
-    }
-    
-
     if(!bRunning && startTime != -1 && autoRunToggle->getValue()) {
         float timeToStart = startTime - now;
         
@@ -230,6 +230,14 @@ void ofApp::update(){
         if(timeToStart < 0) startRun();
     }
     
+    
+    etherdream.clear();
+    if(bRunning || forceOnToggle->getValue()) {
+        if(etherdream.checkConnection(true)) {
+            drawMainLine();
+            drawPendulum();
+        }
+    }
     
     
     // Draw calibration pattern if it's on
@@ -674,7 +682,20 @@ void ofApp::keyReleased(int key){
     if(key=='h') {
         sound.randomHarp();
     }
+    if(key=='p') {
+        bPaused=!bPaused;
+    }
 
+    if(key==OF_KEY_UP) {
+        dmxLevels[0] = 255;
+        dmxLevels[2] = 0;
+    }
+    
+    if(key==OF_KEY_DOWN) {
+        dmxLevels[0] = 0;
+        dmxLevels[2] = 255;
+    }
+    
     source.onKeyReleased(key);
 }
 
