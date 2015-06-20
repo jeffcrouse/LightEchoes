@@ -70,15 +70,13 @@ void SourceMaterial::setup() {
         }
     }
     
-    
+    dir.listDir(SOURCE_DIR);
     loadWarp();
     loadImage();
-    
 }
 
 // -------------------------------------------------
 void SourceMaterial::onKeyReleased(int key) {
-    
     
     if(key=='w') {
         bWarpMode = !bWarpMode;
@@ -150,17 +148,10 @@ ofFloatColor SourceMaterial::getColor(int x, int y) {
 // -------------------------------------------------
 bool SourceMaterial::increment() {
     index++;
+    index %= dir.size();
     state["index"] = index;
     state.save(SOURCE_MATERIAL_STATE_JSON, true);
     return loadImage();
-}
-
-// -------------------------------------------------
-void SourceMaterial::reset() {
-    index = 0;
-    state["index"] = 0;
-    state.save(SOURCE_MATERIAL_STATE_JSON, true);
-    loadImage();
 }
 
 // -------------------------------------------------
@@ -175,7 +166,6 @@ void SourceMaterial::updatePixels() {
 
 // -------------------------------------------------
 bool SourceMaterial::loadImage() {
-    dir.listDir(SOURCE_DIR);
     
     if(dir.size()==0 || index > dir.size()-1 || index < 0)
         return false;
@@ -186,7 +176,6 @@ bool SourceMaterial::loadImage() {
     image.loadImage(dir.getPath(index));
     image.mirror(true, true);
     
-
     drawIntoFBO();
     updatePixels();
     

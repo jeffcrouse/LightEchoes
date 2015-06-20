@@ -17,7 +17,6 @@ public:
     void setup();
     ofFloatColor getColor(int x, int y);
     bool increment();
-    void reset();
     int getIndex();
     string getName() {
         return dir.getName(index);

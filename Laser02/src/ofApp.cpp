@@ -5,21 +5,6 @@
 #define PERSIST_JSON_FILE "persist.json"
 
 
-//--------------------------------------------------------------
-string ofSystemCall(string command)
-{
-    FILE* pipe = popen(command.c_str(), "r");
-    if (!pipe) return "ERROR";
-    char buffer[128];
-    string result = "";
-    while(!feof(pipe)) {
-        if(fgets(buffer, 128, pipe) != NULL)
-            result += buffer;
-    }
-    pclose(pipe);
-    result.erase(remove(result.begin(), result.end(), '\n'), result.end());
-    return result;
-}
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -56,14 +41,19 @@ void ofApp::setup(){
     //
     // PERSIST: load some persistent variables (that aren't sliders)
     //
-    persist.open(PERSIST_JSON_FILE);
-    if(persist.isMember("currentName")) {
-        currentName = persist["currentName"].asString();
-        ofSetWindowTitle("LightEchoes - "+currentName);
-    } else makeNewName();
+//    persist.open(PERSIST_JSON_FILE);
+//    if(persist.isMember("currentName")) {
+//        currentName = persist["currentName"].asString();
+//        ofSetWindowTitle("LightEchoes - "+currentName);
+//    } else makeNewName();
     
     
-
+    Poco::Path path = Poco::Path::home();
+    path.pushDirectory("Desktop");
+    path.pushDirectory("LightEchoes");
+    savePath = path.toString();
+    
+    
     //
     //  Set up the source material object
     //
@@ -157,9 +147,6 @@ void ofApp::exit() {
     dmx.clear();
     dmx.update(true); // black on shutdown
     
-//    bed.stop();
-//    arpPad.stop();
-
     camera.releaseShutterButton();
     //camera.unlockUI();
     camera.close();
@@ -253,9 +240,9 @@ void ofApp::update(){
     
     // Deal with photos from the camera
     if(camera.isPhotoNew()) {
-        ofDirectory::createDirectory(getSavePath(), false, true);
+        ofDirectory::createDirectory(savePath, false, true);
         stringstream path;
-        path << getSavePath() << "/" << ofGetTimestampString("%m-%d-%H-%M-%S-%i") << ".jpg";
+        path << savePath << "/" << ofGetTimestampString("%m-%d-%H-%M-%S-%i") << ".jpg";
         ofLogNotice() << "=== SAVING " << path.str();
         camera.savePhoto(path.str());
     }
@@ -266,12 +253,12 @@ void ofApp::draw(){
     
     updatePreviewFBO();
     
-    
     stringstream info1;
-    info1 << "Etherdream = " << etherdream.getState();
-    ofDrawBitmapStringHighlight(info1.str(), 10, ofGetHeight()-40);
-    
-    
+    info1 << "etherdream" << endl;
+    info1 << "state = " << etherdream.getState() << endl;
+    info1 << "mainLine = " << mainLine.points.size() << endl;
+    ofDrawBitmapStringHighlight(info1.str(), 10, ofGetHeight()-60);
+
 
     // Brightness bars
     ofFill();
@@ -286,7 +273,7 @@ void ofApp::draw(){
     stringstream info2;
     info2 << "index = " << source.getIndex() << endl;
     info2 << "name = " << source.getName();
-    ofDrawBitmapStringHighlight(info2.str(), 250, ofGetHeight()-40);
+    ofDrawBitmapStringHighlight(info2.str(), 250, ofGetHeight()-60);
     
     
     if(camera.isConnected()) {
@@ -299,7 +286,7 @@ void ofApp::draw(){
         stringstream info3;
         info3 << "BulbExposureTime: " << camera.bulbExposureTime;
         ofColor textColor = camera.isShutterButtonPressed()? ofColor::green: ofColor::red;
-        ofDrawBitmapStringHighlight(info3.str(), 790, ofGetHeight()-30, ofColor::black, textColor);
+        ofDrawBitmapStringHighlight(info3.str(), 790, ofGetHeight()-60, ofColor::black, textColor);
         
     } else {
         ofDrawBitmapStringHighlight("NO CAMERA", 790, 30, ofColor::red, ofColor::white);
@@ -525,6 +512,7 @@ void ofApp::toggleDirection() {
 
 //--------------------------------------------------------------
 void ofApp::incrementSource() {
+    /*
     bool incremented = source.increment();
     if(!incremented) {
         ofLogNotice("ofApp::incrementSource()") << "Processing frames and resetting source materials";
@@ -532,6 +520,27 @@ void ofApp::incrementSource() {
         makeNewName();
         source.reset();
     }
+     */
+    
+    source.increment();
+}
+
+
+/*
+//--------------------------------------------------------------
+string ofSystemCall(string command)
+{
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    string result = "";
+    while(!feof(pipe)) {
+        if(fgets(buffer, 128, pipe) != NULL)
+            result += buffer;
+    }
+    pclose(pipe);
+    result.erase(remove(result.begin(), result.end(), '\n'), result.end());
+    return result;
 }
 
 //--------------------------------------------------------------
@@ -568,6 +577,9 @@ string ofApp::getSavePath() {
     path.pushDirectory(currentName);
     return path.toString();
 }
+*/
+
+
 
 //--------------------------------------------------------------
 void ofApp::guiEvent(ofxUIEventArgs &e) {

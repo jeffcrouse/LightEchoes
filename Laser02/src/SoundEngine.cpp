@@ -39,7 +39,7 @@ void SoundEngine::setup() {
     fx[5].loadSound("sounds/LE.Elements_0617.pitched_synth.aif");
     fx[6].loadSound("sounds/LE.Elements_0617.warped_synth_downbeat.aif");
     
-    nextFX = ofGetElapsedTimef()+10;
+    nextFX = 8;
     nextBeat = ofGetElapsedTimef()+(60.0/tempo->getValue());
     beat = 0;
     padIndex=0;
@@ -72,7 +72,7 @@ void SoundEngine::onBeat() {
         int n = ofRandom(NUM_FXS);
         fx[n].setVolume( fxVolume->getValue() );
         fx[n].play();
-        nextFX = beat + ofRandom(4, 12)*2;
+        nextFX = beat + ofRandom(4, 12) * 2;
     }
 
     beat++;

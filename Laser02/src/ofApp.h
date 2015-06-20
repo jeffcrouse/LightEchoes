@@ -33,9 +33,9 @@ class ofApp : public ofBaseApp{
         ofFloatColor mapColor(ofFloatColor c);
         void drawSafetyPattern();
         void incrementSource();
-        void makeNewName();
-        string getSavePath();
-        void processFrames();
+        //void makeNewName();
+        //string getSavePath();
+        //void processFrames();
         void startRun();
         void endRun();
         void toggleDirection();
@@ -51,8 +51,9 @@ class ofApp : public ofBaseApp{
         ofxIlda::Frame calibPattern;
         ofxUISlider* colorAdjust[3];
         //ofxUIRangeSlider* cutout;
+        string savePath;
     
-        string currentName; // The name of the video we are working on
+        //string currentName; // The name of the video we are working on
         float trackPos;
         float startTime;
         bool bForward;
@@ -66,7 +67,6 @@ class ofApp : public ofBaseApp{
         ofxUISlider* trackPosSlider;
     
         SoundEngine sound;
-
     
         ofxJSONElement persist;
         SourceMaterial source;
