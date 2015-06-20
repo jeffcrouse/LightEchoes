@@ -38,8 +38,8 @@ void ofApp::setup(){
     // SETUP AND INITIALIZE!!!
     //
     etherdream.setup();
-    //camera.setup();
-    //camera.lockUI();
+    camera.setup();
+    camera.lockUI();
     if(camera.isConnected()) camera.releaseShutterButton();
     dmx.connect("tty.usbserial-EN169701");
     font.loadFont("fonts/verdana.ttf", 24);
@@ -52,32 +52,7 @@ void ofApp::setup(){
     mainLine.drawPos.y = 0.5;
     pendulum.bDraw=false;
     
-    // LOAD SOUNDS
-    startClap.loadSound("sounds/LE.Elements_0617.start_clap.aif");
-    endClap.loadSound("sounds/LE.Elements_0617.end_clap.aif");
-    hihat.loadSound("sounds/LE.Elements_0617.hihat.aif");
-    kick.loadSound("sounds/LE.Elements_0617.kick.aif");
-    snare.loadSound("sounds/LE.Elements_0617.snare.aif");
-    
-    //arpPad.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
-    //arpPad.setLoop(true);
-    //arpPad.play();
 
-    bed.loadSound("sounds/LE.Elements_0617.bed.aif");
-    bed.setLoop(true);
-    bed.play();
-    
-    ofDirectory dir;
-    dir.allowExt("aif");
-    dir.listDir("sounds/harp");
-    //harp.assign(dir.size(), ofSoundPlayer());
-    for(int i=0; i<(int)dir.size(); i++) {
-        ofLogNotice() << "loading " << dir.getPath(i);
-        ofSoundPlayer s;
-        s.loadSound(dir.getPath(i));
-        harp.push_back(s);
-    }
-    
     //
     // PERSIST: load some persistent variables (that aren't sliders)
     //
@@ -89,8 +64,6 @@ void ofApp::setup(){
     
     
 
-
-    
     //
     //  Set up the source material object
     //
@@ -147,13 +120,23 @@ void ofApp::setup(){
     }
      */
     gui->addSpacer();
-    gui->addLabel("SOUND");
-    briChangeThresh = gui->addSlider("PLUCK THRESHOLD", 0, 0.2, 0.05);
     
+    gui->addLabel("SOUND");
+    sound.tempo = gui->addSlider("TEMPO", 60, 220, 90);
+    briChangeThresh = gui->addSlider("PLUCK THRESHOLD", 0, 0.2, 0.05);
+    sound.fxVolume = gui->addSlider("FX VOLUME", 0, 1, 1);
+    sound.padVolume = gui->addSlider("PAD VOLUME", 0, 1, 1);
+    sound.harpVolume = gui->addRangeSlider("HARP VOLUME", 0, 1, 0.25, 0.75);
+    sound.drumVolume = gui->addSlider("DRUM VOLUME", 0, 1, 1);
     
     gui->autoSizeToFitWidgets();
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
     gui->loadSettings(GUI_SETTINGS_XML);
+    
+    
+    
+    sound.setup();
+
 }
 
 //--------------------------------------------------------------
@@ -227,6 +210,7 @@ void ofApp::update(){
     camera.update();
     dmx.update();
     etherdream.clear();
+    sound.update();
     
     //drawSafetyPattern();
     
@@ -247,10 +231,13 @@ void ofApp::update(){
         drawPendulum();
     }
     
-    
+
     if(!bRunning && startTime != -1 && autoRunToggle->getValue()) {
         float timeToStart = startTime - now;
-        if(timeToStart < 2.975 && !startClap.getIsPlaying()) startClap.play();
+        
+        if(timeToStart < 2.975 && !sound.startClap.getIsPlaying())
+            sound.startClap.play();
+        
         if(timeToStart < 0) startRun();
     }
     
@@ -370,6 +357,7 @@ void ofApp::drawPendulum() {
         float newVel = newSin-oldSin;
         pendulum.vel = newVel;
         
+        /*
         if(oldSin > 0 && newSin < 0) {
             hihat.play();
             kick.play();
@@ -384,7 +372,7 @@ void ofApp::drawPendulum() {
         if(newVel > 0 && oldVel < 0) {
             hihat.play();
         }
-        
+        */
         
         pendulum.sin = newSin;
         float min = 0.5 - pendulum.height;
@@ -452,9 +440,7 @@ void ofApp::drawMainLine() {
 
     
     if(brightnessVelocity > briChangeThresh->getValue()) {
-        int n = ofRandom(harp.size());
-        ofLogNotice() << "harp " << n;
-        harp[n].play();
+        sound.randomHarp();
     }
 
     
@@ -490,7 +476,6 @@ void ofApp::drawMainLine() {
 void ofApp::startRun() {
     if(bRunning) return;
     
-    endClap.play();
     ofLogNotice() << "startRun";
     startTime = ofGetElapsedTimef();
     
@@ -512,9 +497,10 @@ void ofApp::endRun() {
     
     ofLogNotice() << "===== Releasing shutter button";
    if(camera.isConnected()) camera.releaseShutterButton();
-    endClap.play();
+    
     bRunning = false;
     
+    sound.endClap.play();
     toggleDirection();
     incrementSource();
     
@@ -654,6 +640,7 @@ void ofApp::keyReleased(int key){
         incrementSource();
     }
     if(key==OF_KEY_RETURN) {
+        sound.endClap.play();
         startRun();
     }
     if(key==OF_KEY_ESC) {
@@ -664,9 +651,7 @@ void ofApp::keyReleased(int key){
         etherdream.setup();
     }
     if(key=='h') {
-        int n = ofRandom(harp.size());
-        ofLogNotice() << "harp " << n;
-        harp[n].play();
+        sound.randomHarp();
     }
 
     source.onKeyReleased(key);

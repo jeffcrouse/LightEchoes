@@ -6,3 +6,5 @@ ofxModifierKeys
 ofxUI
 ofxJSON
 ofxDmx
+ofxMidi
+ofxSoundPlayerMultiOutput

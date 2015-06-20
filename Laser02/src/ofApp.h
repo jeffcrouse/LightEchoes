@@ -8,6 +8,8 @@
 #include "ofxJSON.h"
 #include "ofxDmx.h"
 #include "SourceMaterial.h"
+#include "SoundEngine.h"
+
 
 class ofApp : public ofBaseApp{
 
@@ -63,14 +65,8 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* forceOnToggle;
         ofxUISlider* trackPosSlider;
     
-        ofSoundPlayer endClap;
-        ofSoundPlayer startClap;
-        //ofSoundPlayer arpPad;
-        ofSoundPlayer kick;
-        ofSoundPlayer snare;
-        ofSoundPlayer hihat;
-        ofSoundPlayer bed;
-        vector<ofSoundPlayer> harp;
+        SoundEngine sound;
+
     
         ofxJSONElement persist;
         SourceMaterial source;
