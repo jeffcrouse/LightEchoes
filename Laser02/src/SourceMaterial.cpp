@@ -8,6 +8,10 @@
 
 #include "SourceMaterial.h"
 
+#define SOURCE_MATERIAL_STATE_JSON "source-state.json"
+#define SOURCE_MATERIAL_WARP_JSON "warper.json"
+#define NUM_ROWS 30
+
 // -------------------------------------------------
 void SourceMaterial::setup() {
     allocate(800, 1600);
@@ -17,12 +21,122 @@ void SourceMaterial::setup() {
     ofDrawBitmapStringHighlight("NOT LOADED", 10, 20, ofColor::red, ofColor::white);
     end();
     
+    v = 0;
+    bWarpMode=false;
+    
+    
     state.open(SOURCE_MATERIAL_STATE_JSON);
     
     if (!state.isMember("index")) state["index"] = 0;
     index = state["index"].asInt();
+ 
+    mesh.setMode(OF_PRIMITIVE_TRIANGLES);
+
+    ofVec3f vert;
+    ofVec3f normal(0, 0, 1); // always facing forward //
+    ofVec2f texcoord;
+    int rows = 30;
+    int columns = 4;
+    for(int iy = 0; iy < rows; iy++) {
+        for(int ix = 0; ix < columns; ix++) {
+            
+            // normalized tex coords //
+            texcoord.x = ((float)ix/((float)columns-1.f));
+            texcoord.y = ((float)iy/((float)rows-1.f));
+            
+            vert.x = texcoord.x * getWidth();
+            vert.y = texcoord.y * getHeight();
+            
+            mesh.addVertex(vert);
+            mesh.addTexCoord(texcoord);
+            mesh.addNormal(normal);
+        }
+    }
     
-    load();
+    // Triangles //
+    for(int y = 0; y < rows-1; y++) {
+        for(int x = 0; x < columns-1; x++) {
+            // first triangle //
+            mesh.addIndex((y)*columns + x);
+            mesh.addIndex((y)*columns + x+1);
+            mesh.addIndex((y+1)*columns + x);
+            
+            // second triangle //
+            mesh.addIndex((y)*columns + x+1);
+            mesh.addIndex((y+1)*columns + x+1);
+            mesh.addIndex((y+1)*columns + x);
+        }
+    }
+    
+    
+    loadWarp();
+    loadImage();
+    
+}
+
+// -------------------------------------------------
+void SourceMaterial::onKeyReleased(int key) {
+    
+    
+    if(key=='w') {
+        bWarpMode = !bWarpMode;
+    }
+    
+    if(bWarpMode) {
+        vector<ofPoint>& verts = mesh.getVertices();
+        if(key=='v') {
+            ++v %= verts.size(); // oooh, tricky
+            saveWarp();
+        }
+        if(key=='V') {
+            --v %= verts.size(); // oooh, tricky
+            saveWarp();
+        }
+        if(key==OF_KEY_LEFT) {
+            verts[v].x -=0.5;
+            saveWarp();
+        }
+        if(key==OF_KEY_RIGHT) {
+            verts[v].x +=0.5;
+            saveWarp();
+        }
+        if(key==OF_KEY_UP) {
+            verts[v].y -=0.5;
+            saveWarp();
+        }
+        if(key==OF_KEY_DOWN) {
+            verts[v].y +=0.5;
+            saveWarp();
+        }
+    }
+    drawIntoFBO();
+}
+
+
+// -------------------------------------------------
+void SourceMaterial::saveWarp() {
+    vector<ofVec3f>& verts = mesh.getVertices();
+    for(int i=0; i<verts.size(); i++) {
+        warper["verts"][i]["x"] = verts[i].x;
+        warper["verts"][i]["y"] = verts[i].y;
+    }
+    warper["v"] = v;
+    warper["show"] = bWarpMode;
+    warper.save(SOURCE_MATERIAL_WARP_JSON, true);
+    
+}
+// -------------------------------------------------
+void SourceMaterial::loadWarp() {
+    if(!ofFile::doesFileExist(SOURCE_MATERIAL_WARP_JSON)) return;
+    
+    warper.open(SOURCE_MATERIAL_WARP_JSON);
+    vector<ofVec3f>& verts = mesh.getVertices();
+    for(int i=0; i<verts.size(); i++) {
+        verts[i].x = warper["verts"][i]["x"].asFloat();
+        verts[i].y = warper["verts"][i]["y"].asFloat();
+    }
+    v = warper["v"].asInt();
+    bWarpMode = warper["show"].asBool();
 }
 
 // -------------------------------------------------
@@ -35,7 +149,7 @@ bool SourceMaterial::increment() {
     index++;
     state["index"] = index;
     state.save(SOURCE_MATERIAL_STATE_JSON, true);
-    return load();
+    return loadImage();
 }
 
 // -------------------------------------------------
@@ -43,7 +157,7 @@ void SourceMaterial::reset() {
     index = 0;
     state["index"] = 0;
     state.save(SOURCE_MATERIAL_STATE_JSON, true);
-    load();
+    loadImage();
 }
 
 // -------------------------------------------------
@@ -57,7 +171,7 @@ void SourceMaterial::updatePixels() {
 }
 
 // -------------------------------------------------
-bool SourceMaterial::load() {
+bool SourceMaterial::loadImage() {
     ofDirectory dir;
     dir.listDir("Source");
     
@@ -70,12 +184,39 @@ bool SourceMaterial::load() {
     image.loadImage(dir.getPath(index));
     image.mirror(true, true);
     
+
+    drawIntoFBO();
+    updatePixels();
+    
+    return true;
+}
+
+// -------------------------------------------------
+void SourceMaterial::drawIntoFBO() {
     begin();
+    
     ofClear(ofColor::black);
     ofSetColor(ofColor::white);
-    image.draw(0, 0, getWidth(), getHeight());
-    end();
     
-    updatePixels();
-    return true;
+    ofEnableNormalizedTexCoords();
+    image.bind();
+    mesh.draw();
+    image.unbind();
+    ofDisableNormalizedTexCoords();
+    
+    if(bWarpMode) {
+        
+        vector<ofPoint>& verts = mesh.getVertices();
+        for(int i=0; i<verts.size(); i++) {
+            if(i==v) {
+                ofFill();
+                ofSetColor(ofColor::green);
+            } else {
+                ofNoFill();
+                ofSetColor(ofColor::gray);
+            }
+            ofCircle(verts[i], 5);
+        }
+    }
+    end();
 }

@@ -11,6 +11,7 @@
 		084025DA517D8329301FE1B6 /* ofxUIEventArgs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A8896AC3BECAAA504E3828F4 /* ofxUIEventArgs.cpp */; };
 		1587708E3CAC72997E43504E /* ofxUIRangeSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2813E36CEFD8D1C1B70E600 /* ofxUIRangeSlider.cpp */; };
 		1DAAC3FB4B98B08AE63F4687 /* ofxUISuperCanvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38EBD5650A3BF5A499B07525 /* ofxUISuperCanvas.cpp */; };
+		1F00C8121B3447F70058F433 /* ContourLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F00C8101B3447F70058F433 /* ContourLine.cpp */; };
 		1F459DB21B2E2A47002302ED /* DPP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F459DA91B2E2A3D002302ED /* DPP.framework */; };
 		1F459DB31B2E2A47002302ED /* EDSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F459DAA1B2E2A3D002302ED /* EDSDK.framework */; };
 		1F459DB41B2E2A5A002302ED /* DPP.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1F459DA91B2E2A3D002302ED /* DPP.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -145,6 +146,8 @@
 		1C43CDB79BF40EA7424B9680 /* ofxUISuperCanvas.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxUISuperCanvas.h; path = ../../../addons/ofxUI/src/ofxUISuperCanvas.h; sourceTree = SOURCE_ROOT; };
 		1C5ED4467DFF0AC3482E9362 /* ofxUIMultiImageToggle.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxUIMultiImageToggle.cpp; path = ../../../addons/ofxUI/src/ofxUIMultiImageToggle.cpp; sourceTree = SOURCE_ROOT; };
 		1E29C7E8C47E3E2DB1C58766 /* ofxUIRectangle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxUIRectangle.h; path = ../../../addons/ofxUI/src/ofxUIRectangle.h; sourceTree = SOURCE_ROOT; };
+		1F00C8101B3447F70058F433 /* ContourLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContourLine.cpp; sourceTree = "<group>"; };
+		1F00C8111B3447F70058F433 /* ContourLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContourLine.h; sourceTree = "<group>"; };
 		1F459DA91B2E2A3D002302ED /* DPP.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DPP.framework; sourceTree = "<group>"; };
 		1F459DAA1B2E2A3D002302ED /* EDSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = EDSDK.framework; sourceTree = "<group>"; };
 		1F459DAD1B2E2A3D002302ED /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -766,6 +769,8 @@
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
 				1FCEDED61B32308400B57D5F /* SourceMaterial.cpp */,
 				1FCEDED71B32308400B57D5F /* SourceMaterial.h */,
+				1F00C8101B3447F70058F433 /* ContourLine.cpp */,
+				1F00C8111B3447F70058F433 /* ContourLine.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -947,6 +952,7 @@
 				5AE95ADB5549701423B6DA48 /* ofxUITabBar.cpp in Sources */,
 				C961BE22AB9A8CCF037FC18F /* ofxUITextArea.cpp in Sources */,
 				F8D05F7C7F785CE323983B47 /* ofxUITextInput.cpp in Sources */,
+				1F00C8121B3447F70058F433 /* ContourLine.cpp in Sources */,
 				04C82720B149CE576B8CBB06 /* ofxUIToggle.cpp in Sources */,
 				E3A1109F67D711D6C256031E /* ofxUIToggleMatrix.cpp in Sources */,
 				60012C723B05938A3D388335 /* ofxUIValuePlotter.cpp in Sources */,

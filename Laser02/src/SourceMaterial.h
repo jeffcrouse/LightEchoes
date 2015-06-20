@@ -10,7 +10,6 @@
 #include "ofMain.h"
 #include "ofxJSON.h"
 
-#define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 
 class SourceMaterial : public ofFbo {
 public:
@@ -21,16 +20,27 @@ public:
     void reset();
     int getIndex();
     
+    void onKeyReleased(int key);
+    
 protected:
     
     void updatePixels();
-    bool load();
-    
+    bool loadImage();
+    void drawIntoFBO();
     ofPixels pixels;
     string name;
     ofImage image;
     string dirPath;
     int index;
     ofxJSONElement state;
+    ofxJSONElement warper;
     
+    void saveWarp();
+    void loadWarp();
+    
+    int v;
+    bool bWarpMode;
+    ofMesh mesh;
+    
+    ofPlanePrimitive plane;
 };

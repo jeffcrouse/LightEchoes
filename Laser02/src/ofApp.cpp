@@ -38,7 +38,8 @@ void ofApp::setup(){
     // SETUP AND INITIALIZE!!!
     //
     etherdream.setup();
-    camera.setup();
+    //camera.setup();
+    //camera.lockUI();
     if(camera.isConnected()) camera.releaseShutterButton();
     dmx.connect("tty.usbserial-EN169701");
     font.loadFont("fonts/verdana.ttf", 24);
@@ -49,6 +50,8 @@ void ofApp::setup(){
     brightness = 0;
     brightnessVelocity = 0;
     mainLine.drawPos.y = 0.5;
+    pendulum.bDraw=false;
+    
     // LOAD SOUNDS
     startClap.loadSound("sounds/LE.Elements_0617.start_clap.aif");
     endClap.loadSound("sounds/LE.Elements_0617.end_clap.aif");
@@ -56,14 +59,24 @@ void ofApp::setup(){
     kick.loadSound("sounds/LE.Elements_0617.kick.aif");
     snare.loadSound("sounds/LE.Elements_0617.snare.aif");
     
-    arpPad.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
-    arpPad.setLoop(true);
-    arpPad.play();
+    //arpPad.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
+    //arpPad.setLoop(true);
+    //arpPad.play();
 
     bed.loadSound("sounds/LE.Elements_0617.bed.aif");
     bed.setLoop(true);
     bed.play();
     
+    ofDirectory dir;
+    dir.allowExt("aif");
+    dir.listDir("sounds/harp");
+    //harp.assign(dir.size(), ofSoundPlayer());
+    for(int i=0; i<(int)dir.size(); i++) {
+        ofLogNotice() << "loading " << dir.getPath(i);
+        ofSoundPlayer s;
+        s.loadSound(dir.getPath(i));
+        harp.push_back(s);
+    }
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -75,6 +88,8 @@ void ofApp::setup(){
     } else makeNewName();
     
     
+
+
     
     //
     //  Set up the source material object
@@ -97,12 +112,21 @@ void ofApp::setup(){
     directionToggle = gui->addLabelToggle("FORWARD", &bForward);
     autoRunToggle = gui->addLabelToggle("AUTO RUN", false);
     autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 6, 30, 10);
-
+    //cutout = gui->addRangeSlider("CUTOUT", 0, 1, 0.4, 0.6);
+    forceOnToggle = gui->addLabelToggle("FORCE ON", false);
+    trackPosSlider = gui->addSlider("TRACK POSITION", 0.0, 1.0, 0.0);
+    
+    gui->addSpacer();
+    colorAdjust[0] = gui->addSlider("RED ADJUST", -1, 0, 1);
+    colorAdjust[1] = gui->addSlider("GREEN ADJUST", -1, 0, 1);
+    colorAdjust[2] = gui->addSlider("BLUE ADJUST", -1, 0, 1);
+    
     gui->addSpacer();
     gui->addLabel("MAIN LINE");
     gui->addIntSlider("LINE END COUNT", 0, 50, 10);
     gui->addIntSlider("LINE BLANK COUNT", 0, 50, 10);
     
+    /*
     gui->addSpacer();
     gui->addLabel("PENDULUM");
     pendulum.draw = gui->addLabelToggle("DRAW PENDULUM", true);
@@ -121,9 +145,10 @@ void ofApp::setup(){
         pendulum.stripeX.push_back(s);
         x += gap;
     }
+     */
     gui->addSpacer();
     gui->addLabel("SOUND");
-    bingThreshold = gui->addSlider("BING THRESHOLD", 0, 0.2, 0.05);
+    briChangeThresh = gui->addSlider("PLUCK THRESHOLD", 0, 0.2, 0.05);
     
     
     gui->autoSizeToFitWidgets();
@@ -132,19 +157,66 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
+ofFloatColor ofApp::mapColor(ofFloatColor c) {
+    c.r += colorAdjust[0]->getValue();
+    c.g += colorAdjust[1]->getValue();
+    c.b += colorAdjust[2]->getValue();
+    
+    c.r = ofClamp(c.r, 0, 1);
+    c.g = ofClamp(c.g, 0, 1);
+    c.b = ofClamp(c.b, 0, 1);
+    
+    return c;
+}
+
+//--------------------------------------------------------------
 void ofApp::exit() {
     dmx.clear();
     dmx.update(true); // black on shutdown
     
-    bed.stop();
-    arpPad.stop();
+//    bed.stop();
+//    arpPad.stop();
 
     camera.releaseShutterButton();
+    camera.unlockUI();
     camera.close();
     
     gui->saveSettings(GUI_SETTINGS_XML);
     persist.save(PERSIST_JSON_FILE, true);
     delete gui;
+}
+
+//--------------------------------------------------------------
+void ofApp::drawSafetyPattern() {
+    ofxIlda::Frame safetyPattern[3];
+    
+    safetyPattern[0].clear();
+    safetyPattern[1].clear();
+    safetyPattern[2].clear();
+    
+    safetyPattern[0].params.output.color = mapColor(ofFloatColor::red);
+    safetyPattern[1].params.output.color = mapColor(ofFloatColor::green);
+    safetyPattern[2].params.output.color = mapColor(ofFloatColor::blue);
+    
+    ofPolyline line1;
+    line1.addVertex(0, 0.25);
+    line1.addVertex(1, 0.25);
+    safetyPattern[0].addPoly(line1);
+    
+    ofPolyline line2;
+    line2.addVertex(0, 0.5);
+    line2.addVertex(1, 0.5);
+    safetyPattern[1].addPoly(line2);
+    
+    ofPolyline line3;
+    line3.addVertex(0, 0.75);
+    line3.addVertex(1, 0.75);
+    safetyPattern[2].addPoly(line3);
+    
+    for(int i=0; i<3; i++) {
+        safetyPattern[i].update();
+        etherdream.addPoints(safetyPattern[i]);
+    }
 }
 
 //--------------------------------------------------------------
@@ -154,6 +226,9 @@ void ofApp::update(){
     
     camera.update();
     dmx.update();
+    etherdream.clear();
+    
+    //drawSafetyPattern();
     
     // RUN LOGIC
     if(bRunning) {
@@ -163,14 +238,17 @@ void ofApp::update(){
             trackPos = bForward
                 ? ofMap(now, startTime, endTime, 0, 1, true)
                 : ofMap(now, startTime, endTime, 1, 0, true);
-            
-            etherdream.clear();
-            drawMainLine();
-            drawPendulum();
+            trackPosSlider->setValue(trackPos);
         }
     }
     
-    if(!bRunning && startTime != -1) {
+    if(bRunning || forceOnToggle->getValue()) {
+        drawMainLine();
+        drawPendulum();
+    }
+    
+    
+    if(!bRunning && startTime != -1 && autoRunToggle->getValue()) {
         float timeToStart = startTime - now;
         if(timeToStart < 2.975 && !startClap.getIsPlaying()) startClap.play();
         if(timeToStart < 0) startRun();
@@ -199,41 +277,42 @@ void ofApp::draw(){
     
     updatePreviewFBO();
     
-    
-    ofPushMatrix();
-    ofTranslate(250, 0);
-    
-        // Brightness bars
-        ofSetColor(ofColor::red);
-        ofRect(0, 0, ofMap(brightness, 0, 1, 0, ofGetWidth()), 10);
-        ofRect(0, 10, ofMap(brightnessVelocity, 0, 1, 0, ofGetWidth()), 10);
-        
-        // LEFT SIDE
-        ofSetColor(ofColor::white);
-        preview.draw(0, 30, 500, 1000);
 
-        if(camera.isConnected()) {
-            // UPPER LEFT - live camera image
-            camera.draw(540, 30, 640, 480);
-            
-            // LOWER LEFT - most recent photo
-            camera.drawPhoto(540, 520, 640, 480);
-        } else {
-            ofDrawBitmapStringHighlight("NO CAMERA", 540, 30, ofColor::red, ofColor::white);
-        }
+    // Brightness bars
+    ofFill();
+    ofSetColor(ofColor::red);
+    ofRect(0, 0, ofMap(brightness, 0, 1, 0, ofGetWidth()), 10);
+    ofRect(0, 10, ofMap(brightnessVelocity, 0, 1, 0, ofGetWidth()), 10);
     
+    // LEFT SIDE
+    ofSetColor(ofColor::white);
+    preview.draw(250, 30, 500, 1000);
+
+    stringstream info;
+    info << "index = " << source.getIndex();
+    ofDrawBitmapStringHighlight(info.str(), 250, ofGetHeight()-40);
+    
+    
+    if(camera.isConnected()) {
+        // UPPER LEFT - live camera image
+        camera.draw(790, 30, 640, 480);
+        
+        // LOWER LEFT - most recent photo
+        camera.drawPhoto(790, 520, 640, 480);
+        
         stringstream ss;
         ss << "BulbExposureTime: " << camera.bulbExposureTime;
-        ofDrawBitmapStringHighlight(ss.str(), 0, ofGetHeight()-30,
-                                    ofColor::black,
-                                    camera.isShutterButtonPressed()
-                                        ? ofColor::green
-                                        : ofColor::red);
-    ofPopMatrix();
+        ofColor textColor = camera.isShutterButtonPressed()? ofColor::green: ofColor::red;
+        ofDrawBitmapStringHighlight(ss.str(), 790, ofGetHeight()-30, ofColor::black, textColor);
+        
+    } else {
+        ofDrawBitmapStringHighlight("NO CAMERA", 790, 30, ofColor::red, ofColor::white);
+    }
+
+
     
-    
-    
-    // Draw some circles to show what the laser is projecting
+
+    // Draw some stuff to show what the laser is projecting
     ofRectMode(OF_RECTMODE_CENTER);
     for(int i=0; i<mainLine.points.size(); i++) {
         ofxIlda::Point& pt = mainLine.points[i];
@@ -264,17 +343,14 @@ void ofApp::updatePreviewFBO() {
         float y1 = trackPos * source.getHeight();
         ofLine(0, y1, source.getWidth(), y1);
         
-        if(pendulum.draw->getValue()) {
+        if(bRunning && pendulum.bDraw) {
             ofSetColor(ofColor::red);
             float min = y1 - 100;
             float max = y1 + 100;
             float y2 = ofMap(pendulum.sin, -1, 1, min, max);
             ofLine(0, y2, source.getWidth(), y2);
         }
-    
-        stringstream info;
-        info << "index = " << source.getIndex() << endl;
-        ofDrawBitmapStringHighlight(info.str(), 20, preview.getHeight()-20);
+
         ofPopStyle();
     preview.end();
 }
@@ -285,7 +361,7 @@ void ofApp::updatePreviewFBO() {
 void ofApp::drawPendulum() {
     pendulum.frame.clear();
     
-    if(pendulum.draw->getValue())
+    if(pendulum.bDraw)
     {
         pendulum.frame.params.output.color = pendulum.color;
         float oldSin = pendulum.sin;
@@ -352,16 +428,19 @@ void ofApp::drawMainLine() {
     int sampleX;
     for (int sampleX=0; sampleX<source.getWidth(); sampleX++) {
      
-        color = (sampleX%10<9)
-            ? source.getColor(sampleX, sampleY)
-            : ofFloatColor::black;
-        
-        totalBrightness += color.getBrightness() ;
-        
         mainLine.drawPos.x = sampleX / (float)source.getWidth();
+        //bool inCutout = ofInRange(mainLine.drawPos.x, cutout->getValueLow(), cutout->getValueHigh());
+
+        color = (sampleX%10<9)
+            ? mapColor( source.getColor(sampleX, sampleY) )
+            : ofFloatColor::black;
+
+        totalBrightness += color.getBrightness();
+        
         mainLine.drawPos.x = ofClamp(mainLine.drawPos.x, 0, 1);
         
         pts.push_back(ofxIlda::Point(mainLine.drawPos, color));
+
     }
     
     float oldBrightness = brightness;
@@ -372,8 +451,10 @@ void ofApp::drawMainLine() {
     brightnessVelocity = diff;
 
     
-    if(brightnessVelocity > bingThreshold->getValue()) {
-        
+    if(brightnessVelocity > briChangeThresh->getValue()) {
+        int n = ofRandom(harp.size());
+        ofLogNotice() << "harp " << n;
+        harp[n].play();
     }
 
     
@@ -554,6 +635,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
         mainLine.blankCount = slider->getValue();
     }
+    else if(name == "TRACK POSITION")
+    {
+        ofxUISlider *slider = (ofxUISlider*)e.getSlider();
+        trackPos = slider->getValue();
+    }
     gui->saveSettings(GUI_SETTINGS_XML);
 }
 
@@ -577,11 +663,19 @@ void ofApp::keyReleased(int key){
     if(key=='e') {
         etherdream.setup();
     }
+    if(key=='h') {
+        int n = ofRandom(harp.size());
+        ofLogNotice() << "harp " << n;
+        harp[n].play();
+    }
+
+    source.onKeyReleased(key);
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-
+    
+    
 }
 
 //--------------------------------------------------------------

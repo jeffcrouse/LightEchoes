@@ -28,6 +28,8 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		void guiEvent(ofxUIEventArgs &e);
     
+        ofFloatColor mapColor(ofFloatColor c);
+        void drawSafetyPattern();
         void incrementSource();
         void makeNewName();
         string getSavePath();
@@ -45,8 +47,10 @@ class ofApp : public ofBaseApp{
         ofxDmx dmx;
         ofTrueTypeFont font;
         ofxIlda::Frame calibPattern;
-        string currentName; // The name of the video we are working on
+        ofxUISlider* colorAdjust[3];
+        //ofxUIRangeSlider* cutout;
     
+        string currentName; // The name of the video we are working on
         float trackPos;
         float startTime;
         bool bForward;
@@ -56,14 +60,17 @@ class ofApp : public ofBaseApp{
         ofxUIToggle* directionToggle;
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;
+        ofxUILabelToggle* forceOnToggle;
+        ofxUISlider* trackPosSlider;
     
         ofSoundPlayer endClap;
         ofSoundPlayer startClap;
-        ofSoundPlayer arpPad;
+        //ofSoundPlayer arpPad;
         ofSoundPlayer kick;
         ofSoundPlayer snare;
         ofSoundPlayer hihat;
         ofSoundPlayer bed;
+        vector<ofSoundPlayer> harp;
     
         ofxJSONElement persist;
         SourceMaterial source;
@@ -79,7 +86,7 @@ class ofApp : public ofBaseApp{
             float offset;
             int blankCount;
             float sin;
-            ofxUILabelToggle* draw;
+            bool bDraw;
             float vel;
         } pendulum;
     
@@ -88,11 +95,10 @@ class ofApp : public ofBaseApp{
             int endCount;
             int blankCount;
             int lastSampleY;
-       
             ofPoint drawPos;    // Where in the etherdream frame are we drawing the sampled color?
         } mainLine;
     
         float brightness;
         float brightnessVelocity;
-        ofxUISlider* bingThreshold;
+        ofxUISlider* briChangeThresh;
 };
