@@ -2,8 +2,8 @@
     <Kind>40</Kind>
     <Name>OFX_UI_WIDGET_CANVAS</Name>
     <IsMinified>0</IsMinified>
-    <XPosition>2.000000000</XPosition>
-    <YPosition>35.000000000</YPosition>
+    <XPosition>0.000000000</XPosition>
+    <YPosition>0.000000000</YPosition>
 </Canvas>
 <Widget>
     <Kind>42</Kind>
@@ -33,7 +33,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>POST RUN PAUSE</Name>
-    <Value>18.177341461</Value>
+    <Value>12.502462387</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -43,7 +43,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TRACK POSITION</Name>
-    <Value>0.143303037</Value>
+    <Value>0.978097916</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -73,17 +73,17 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TEMPO</Name>
-    <Value>108.078819275</Value>
+    <Value>84.433502197</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>PLUCK THRESHOLD</Name>
-    <Value>0.044334974</Value>
+    <Value>0.081773400</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>FX VOLUME</Name>
-    <Value>0.384236455</Value>
+    <Value>0.231527090</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -99,5 +99,5 @@
 <Widget>
     <Kind>4</Kind>
     <Name>DRUM VOLUME</Name>
-    <Value>0.807881773</Value>
+    <Value>0.295566499</Value>
 </Widget>

@@ -39,7 +39,7 @@ void ofApp::setup(){
     //
     etherdream.setup();
     camera.setup();
-    camera.lockUI();
+    //camera.lockUI();
     if(camera.isConnected()) camera.releaseShutterButton();
     dmx.connect("tty.usbserial-EN169701");
     font.loadFont("fonts/verdana.ttf", 24);
@@ -161,7 +161,7 @@ void ofApp::exit() {
 //    arpPad.stop();
 
     camera.releaseShutterButton();
-    camera.unlockUI();
+    //camera.unlockUI();
     camera.close();
     
     gui->saveSettings(GUI_SETTINGS_XML);
@@ -206,6 +206,8 @@ void ofApp::drawSafetyPattern() {
 void ofApp::update(){
     float now = ofGetElapsedTimef();
     float endTime = startTime + trackTimeSlider->getValue();
+    
+    //etherdream.checkConnection(true);
     
     camera.update();
     dmx.update();
@@ -264,6 +266,12 @@ void ofApp::draw(){
     
     updatePreviewFBO();
     
+    
+    stringstream info1;
+    info1 << "Etherdream = " << etherdream.getState();
+    ofDrawBitmapStringHighlight(info1.str(), 10, ofGetHeight()-40);
+    
+    
 
     // Brightness bars
     ofFill();
@@ -275,9 +283,10 @@ void ofApp::draw(){
     ofSetColor(ofColor::white);
     preview.draw(250, 30, 500, 1000);
 
-    stringstream info;
-    info << "index = " << source.getIndex();
-    ofDrawBitmapStringHighlight(info.str(), 250, ofGetHeight()-40);
+    stringstream info2;
+    info2 << "index = " << source.getIndex() << endl;
+    info2 << "name = " << source.getName();
+    ofDrawBitmapStringHighlight(info2.str(), 250, ofGetHeight()-40);
     
     
     if(camera.isConnected()) {
@@ -287,10 +296,10 @@ void ofApp::draw(){
         // LOWER LEFT - most recent photo
         camera.drawPhoto(790, 520, 640, 480);
         
-        stringstream ss;
-        ss << "BulbExposureTime: " << camera.bulbExposureTime;
+        stringstream info3;
+        info3 << "BulbExposureTime: " << camera.bulbExposureTime;
         ofColor textColor = camera.isShutterButtonPressed()? ofColor::green: ofColor::red;
-        ofDrawBitmapStringHighlight(ss.str(), 790, ofGetHeight()-30, ofColor::black, textColor);
+        ofDrawBitmapStringHighlight(info3.str(), 790, ofGetHeight()-30, ofColor::black, textColor);
         
     } else {
         ofDrawBitmapStringHighlight("NO CAMERA", 790, 30, ofColor::red, ofColor::white);

@@ -8,6 +8,8 @@
 
 #include "SourceMaterial.h"
 
+#define SOURCE_DIR "SourceAlt"
+
 #define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 #define SOURCE_MATERIAL_WARP_JSON "warper.json"
 #define NUM_ROWS 30
@@ -80,6 +82,7 @@ void SourceMaterial::onKeyReleased(int key) {
     
     if(key=='w') {
         bWarpMode = !bWarpMode;
+        saveWarp();
     }
     
     if(bWarpMode) {
@@ -172,10 +175,9 @@ void SourceMaterial::updatePixels() {
 
 // -------------------------------------------------
 bool SourceMaterial::loadImage() {
-    ofDirectory dir;
-    dir.listDir("Source");
+    dir.listDir(SOURCE_DIR);
     
-    if(dir.size()==0 || index > dir.size()-1)
+    if(dir.size()==0 || index > dir.size()-1 || index < 0)
         return false;
     
     ofLogNotice("SourceMaterial") << "Loading " << index;

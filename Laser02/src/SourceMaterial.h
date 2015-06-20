@@ -19,7 +19,9 @@ public:
     bool increment();
     void reset();
     int getIndex();
-    
+    string getName() {
+        return dir.getName(index);
+    }
     void onKeyReleased(int key);
     
 protected:
@@ -34,6 +36,7 @@ protected:
     int index;
     ofxJSONElement state;
     ofxJSONElement warper;
+    ofDirectory dir;
     
     void saveWarp();
     void loadWarp();
