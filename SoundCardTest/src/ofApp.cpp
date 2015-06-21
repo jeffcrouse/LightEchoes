@@ -2,50 +2,28 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetWindowTitle("LightEchoes Generative Frame Test");
-    ofSetFrameRate(60);
-    ofSetLogLevel(OF_LOG_VERBOSE);
-    ofBackground(50);
-    ofSetEscapeQuitsApp(false);
     
-    bAutoAdvance = false;
-    frame.setup();
+    harp[0].loadSound("LE.Elements_0619.harp_A.aif");
+    harp[1].loadSound("LE.Elements_0619.harp_B.aif");
+    harp[2].loadSound("LE.Elements_0619.harp_D.aif");
+    harp[3].loadSound("LE.Elements_0619.harp_E.aif");
+    harp[4].loadSound("LE.Elements_0619.harp_G.aif");
+    harp[5].loadSound("LE.Elements_0619.harp_A.aif");
     
-    frameRate = 60;
+    ofFmodSelectDriver(0);
+    ofFmodSetNumOutputs(6);
     
-    index = 0;
-    frame.generate(index);
-    incrementAt = ofGetElapsedTimef()+(1/frameRate);
+    ofLogNotice() << "outputs = " << ofFmodGetNumOutputs();
 }
-
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
-    float now = ofGetElapsedTimef();
-    
-    if(bAutoAdvance && now > incrementAt) {
-        index++;
-        frame.generate(index);
-        
-        incrementAt = ofGetElapsedTimef()+(1/frameRate);
-    }
+    ofFmodSoundUpdate();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofSetColor(ofColor::white);
-    
-    float ratio = (ofGetWidth()-20) / frame.getWidth();
-    float width = frame.getWidth() * ratio;
-    float height = frame.getHeight() * ratio;
-    frame.draw(10, 50, width, height);
-    
-    
-    stringstream info;
-    info << "frameRate = " << ofGetFrameRate() << endl;
-    info << "size = " << frame.getWidth() << "x" << frame.getHeight();
-    ofDrawBitmapStringHighlight(info.str(), 10, 20);
+
 }
 
 //--------------------------------------------------------------
@@ -55,11 +33,21 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-    if(key==OF_KEY_RETURN) {
-        index++;
-        frame.generate(index);
+    if(key>='1' && key <= '6') {
+        int n = key-49;
+        ofLogNotice() << "speaker " << n;
+        harp[n].playTo(n);
     }
-    if(key=='a') bAutoAdvance = !bAutoAdvance;
+    
+    if(key=='f') {
+        harp[0].playTo(0, 1);
+    }
+    if(key=='m') {
+        harp[1].playTo(2, 3);
+    }
+    if(key=='b') {
+        harp[2].playTo(4, 5);
+    }
 }
 
 //--------------------------------------------------------------

@@ -77,7 +77,7 @@ void ofApp::setup(){
     gui->addIntSlider("PPS", 10000, 60000, 30000);
     drawCalibPatternToggle = gui->addLabelToggle("CALIBRATION PATTERN", false);
     trackTimeSlider = gui->addSlider("TRACK TIME", 60, 210, 150);
-    directionToggle = gui->addLabelToggle("FORWARD", &bForward);
+    //directionToggle = gui->addLabelToggle("FORWARD", &bForward);
     autoRunToggle = gui->addLabelToggle("AUTO RUN", false);
     autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 6, 30, 10);
     //cutout = gui->addRangeSlider("CUTOUT", 0, 1, 0.4, 0.6);
@@ -123,8 +123,12 @@ void ofApp::setup(){
     sound.padVolume = gui->addSlider("PAD VOLUME", 0, 1, 1);
     sound.harpVolume = gui->addRangeSlider("HARP VOLUME", 0, 1, 0.25, 0.75);
     sound.drumVolume = gui->addSlider("DRUM VOLUME", 0, 1, 1);
+    sound.arpVolume = gui->addSlider("ARP VOUME", 0, 1, 0.5);
+    sound.lightATheEndVolume = gui->addSlider("LIGHT VOLUME", 0, 1, 0.5);
+    
     
     gui->autoSizeToFitWidgets();
+    gui->setPosition(0, 20);
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
     gui->loadSettings(GUI_SETTINGS_XML);
     
@@ -206,7 +210,7 @@ void ofApp::update(){
     dmx.setLevel(3, dmxLevels[2]);
     
     dmx.update();
-    sound.update();
+    sound.update(trackPos);
     
     //drawSafetyPattern();
     
@@ -215,17 +219,19 @@ void ofApp::update(){
         if(now > endTime) {
             endRun();
         } else {
-            trackPos = bForward
-                ? ofMap(now, startTime, endTime, 0, 1, true)
-                : ofMap(now, startTime, endTime, 1, 0, true);
+//            trackPos = bForward
+//                ? ofMap(now, startTime, endTime, 0, 1, true)
+//                : ofMap(now, startTime, endTime, 1, 0, true);
+            trackPos = ofMap(now, startTime, endTime, 0, 1, true);
             trackPosSlider->setValue(trackPos);
         }
     }
-    if(!bRunning && startTime != -1 && autoRunToggle->getValue()) {
+    
+    if(!bRunning && startTime != -1) {
         float timeToStart = startTime - now;
         
         if(timeToStart < 2.975 && !sound.startClap.getIsPlaying())
-            sound.startClap.play();
+            sound.startClap.playTo(0, 1);
         
         if(timeToStart < 0) startRun();
     }
@@ -444,7 +450,7 @@ void ofApp::drawMainLine() {
 
     
     if(brightnessVelocity > briChangeThresh->getValue()) {
-        sound.randomHarp();
+        sound.playHarp();
     }
 
     
@@ -483,11 +489,9 @@ void ofApp::startRun() {
     ofLogNotice() << "startRun";
     startTime = ofGetElapsedTimef();
     
-    if(bForward) {
-        dmx.setLevel(1, 100);
-    } else {
-        dmx.setLevel(1, 0);
-    }
+    sound.newMelody();
+    
+    // DMX START MOTOR
     
     ofLogNotice() << "===== Pressing shutter button";
     if(camera.isConnected()) camera.pressShutterButton();
@@ -504,19 +508,29 @@ void ofApp::endRun() {
     
     bRunning = false;
     
-    sound.endClap.play();
-    toggleDirection();
+    sound.endClap.playTo(4, 5);
     incrementSource();
     
-    if(autoRunToggle->getValue())
+    
+    // DMX RETURN CARRIAGE
+    //toggleDirection();
+    
+    
+    
+    if(autoRunToggle->getValue()) {
         startTime = ofGetElapsedTimef() + autoRunDelaySlider->getValue();
+    } else {
+        startTime = -1;
+    }
 }
 
+/*
 //--------------------------------------------------------------
 void ofApp::toggleDirection() {
     bForward = !bForward;
     directionToggle->setValue(bForward);
 }
+*/
 
 //--------------------------------------------------------------
 void ofApp::incrementSource() {
@@ -600,11 +614,13 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUIIntSlider *slider = (ofxUIIntSlider *) e.getSlider();
         etherdream.setPPS(slider->getValue());
     }
+    /*
     else if(name == "FORWARD")
     {
         ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
         bForward = toggle->getValue();
     }
+     */
     else if(name=="SWING SPEED")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
@@ -669,8 +685,7 @@ void ofApp::keyReleased(int key){
         incrementSource();
     }
     if(key==OF_KEY_RETURN) {
-        sound.endClap.play();
-        startRun();
+        startTime = ofGetElapsedTimef() + 5;
     }
     if(key==OF_KEY_ESC) {
         endRun();
@@ -680,7 +695,10 @@ void ofApp::keyReleased(int key){
         etherdream.setup();
     }
     if(key=='h') {
-        sound.randomHarp();
+        sound.playHarp();
+    }
+    if(key=='s') {
+        sound.newMelody();
     }
     if(key=='p') {
         bPaused=!bPaused;

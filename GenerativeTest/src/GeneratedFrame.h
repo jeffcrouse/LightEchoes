@@ -9,25 +9,36 @@
 #pragma once
 #include "ofMain.h"
 
+class GeneratedFrame;
+
 class TextLine {
 public:
-    TextLine(int size, int height, string textPath, bool flipped=false);
+    TextLine(GeneratedFrame* parent, int size, int height, string textPath, bool flipped=false);
     void draw(int index, int yPos);
     int getHeight();
+    
+
+protected:
+    bool isRed(string word);
     
     int height;
     bool flipped;
     string line;
+    float speed;
+    float spaceWidth;
     vector<string> words;
     ofTrueTypeFont font;
     ofRectangle bounds;
 };
 
 
+
 class GeneratedFrame : public ofFbo {
 public:
     void setup();
     void generate(int index);
+    ofFloatColor getColor(int x, int y);
     
+    ofPixels pixels;
     vector<TextLine*> lines;
 };

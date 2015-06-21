@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "GeneratedFrame.h"
+#include "ofxSoundPlayerMultiOutput.h"
 
 class ofApp : public ofBaseApp{
 
@@ -20,10 +20,6 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-        bool bAutoAdvance;
-        float frameRate;
-        int index;
-        GeneratedFrame frame;
-        float incrementAt;
-
+        ofxSoundPlayerMultiOutput harp[6];
+    
 };

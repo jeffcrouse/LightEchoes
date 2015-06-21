@@ -11,6 +11,10 @@
 
 // ------------------------------------------------
 void SoundEngine::setup() {
+    
+    ofFmodSelectDriver(0);
+    ofFmodSetNumOutputs(6);
+    
     // LOAD SOUNDS
     hihat.loadSound("sounds/LE.Elements_0617.hihat.aif");
     kick.loadSound("sounds/LE.Elements_0617.kick.aif");
@@ -19,25 +23,38 @@ void SoundEngine::setup() {
     startClap.loadSound("sounds/LE.Elements_0617.start_clap.aif");
     endClap.loadSound("sounds/LE.Elements_0617.end_clap.aif");
     
+    lightATheEnd.loadSound("sounds/LE.Elements_0617.light_at_the_end.aif");
+    lightATheEnd.setLoop(true);
+    lightATheEnd.playTo(2, 3);
     
-    pad[0].loadSound("sounds/pad/LE.Elements_0619.pad_A.aif");
-    pad[1].loadSound("sounds/pad/LE.Elements_0619.pad_C.aif");
-    pad[2].loadSound("sounds/pad/LE.Elements_0619.pad_e.aif");
-    pad[3].loadSound("sounds/pad/LE.Elements_0619.pad_G.aif");
+    arp.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
+    arp.setLoop(true);
+    //arp.play();
     
-    harp[0].loadSound("sounds/harp/LE.Elements_0619.harp_A.aif");
-    harp[1].loadSound("sounds/harp/LE.Elements_0619.harp_B.aif");
-    harp[2].loadSound("sounds/harp/LE.Elements_0619.harp_D.aif");
-    harp[3].loadSound("sounds/harp/LE.Elements_0619.harp_E.aif");
-    harp[4].loadSound("sounds/harp/LE.Elements_0619.harp_G.aif");
+    front = 1.0;
+    middle = 1.0;
+    back = 1.0;
     
-    fx[0].loadSound("sounds/LE.Elements_0617.railroad.aif");
-    fx[1].loadSound("sounds/LE.Elements_0617.machine_down.aif");
-    fx[2].loadSound("sounds/LE.Elements_0617.machine_up.aif");
-    fx[3].loadSound("sounds/LE.Elements_0617.rolled_synth_2.aif");
-    fx[4].loadSound("sounds/LE.Elements_0617.rolled_synth_downbeat.aif");
-    fx[5].loadSound("sounds/LE.Elements_0617.pitched_synth.aif");
-    fx[6].loadSound("sounds/LE.Elements_0617.warped_synth_downbeat.aif");
+    pads[0].setup("sounds/pad/LE.Elements_0619.pad_A.aif");
+    pads[1].setup("sounds/pad/LE.Elements_0619.pad_C.aif");
+    pads[2].setup("sounds/pad/LE.Elements_0619.pad_e.aif");
+    pads[3].setup("sounds/pad/LE.Elements_0619.pad_G.aif");
+    padIndex = 0;
+    
+    harp[0].setup("sounds/harp/LE.Elements_0619.harp_A.aif");
+    harp[1].setup("sounds/harp/LE.Elements_0619.harp_B.aif");
+    harp[2].setup("sounds/harp/LE.Elements_0619.harp_D.aif");
+    harp[3].setup("sounds/harp/LE.Elements_0619.harp_E.aif");
+    harp[4].setup("sounds/harp/LE.Elements_0619.harp_G.aif");
+    
+    fx[0].setup("sounds/LE.Elements_0617.railroad.aif");
+    fx[1].setup("sounds/LE.Elements_0617.machine_down.aif");
+    fx[2].setup("sounds/LE.Elements_0617.machine_up.aif");
+    fx[3].setup("sounds/LE.Elements_0617.rolled_synth_2.aif");
+    fx[4].setup("sounds/LE.Elements_0617.rolled_synth_downbeat.aif");
+    fx[5].setup("sounds/LE.Elements_0617.pitched_synth.aif");
+    fx[6].setup("sounds/LE.Elements_0617.warped_synth_downbeat.aif");
+    
     
     nextFX = 8;
     nextBeat = ofGetElapsedTimef()+(60.0/tempo->getValue());
@@ -48,29 +65,31 @@ void SoundEngine::setup() {
 // ------------------------------------------------
 void SoundEngine::onBeat() {
     
+    lightATheEnd.setVolume(lightATheEndVolume->getValue());
+    arp.setVolume(arpVolume->getValue());
     hihat.setVolume(drumVolume->getValue());
     kick.setVolume(drumVolume->getValue());
     snare.setVolume(drumVolume->getValue());
     
-    hihat.play();
+    hihat.playTo(4, 5);
 
     if(beat % 4 == 0) {
-        kick.play();
-    }
-    
-    if(beat % 2 == 0) {
-        if(beat%4 != 0) snare.play();
+        kick.playTo(4, 5);
+    } else if(beat % 2 == 0) {
+        snare.playTo(4, 5);
     }
     
     if(beat % 8 == 0) {
-        pad[padIndex].setVolume( padVolume->getValue() );
-        pad[padIndex].play();
+        pads[padIndex].volume = padVolume->getValue();
+        pads[padIndex].setLevels(front, middle, back);
+        pads[padIndex].play();
         ++padIndex %= NUM_PADS;
     }
     
     if(beat > nextFX) {
         int n = ofRandom(NUM_FXS);
-        fx[n].setVolume( fxVolume->getValue() );
+        fx[n].volume = fxVolume->getValue();
+        fx[n].setLevels(front, middle, back);
         fx[n].play();
         nextFX = beat + ofRandom(4, 12) * 2;
     }
@@ -79,8 +98,13 @@ void SoundEngine::onBeat() {
 }
 
 // ------------------------------------------------
-void SoundEngine::update() {
+void SoundEngine::update(float trackPos) {
     ofFmodSoundUpdate();
+    
+    front = ofMap(trackPos, 0, 0.4, 1, 0, true);
+    middle = ofMap(cos(trackPos * TWO_PI), -1, 1, 1, 0);
+    back = ofMap(trackPos, 0.6, 1, 0, 1, true);
+
     
     float now = ofGetElapsedTimef();
     if(now > nextBeat) {
@@ -92,12 +116,17 @@ void SoundEngine::update() {
 }
 
 // ------------------------------------------------
-void SoundEngine::randomHarp() {
+void SoundEngine::playHarp() {
     if(harpCooldown>0) return;
     
-    int n = ofRandom(NUM_HARPS);
-    float vol = ofRandom(harpVolume->getValueLow(), harpVolume->getValueHigh());
-    harp[n].setVolume(vol);
+    int n = *melodyIt;
+    
+    harp[n].volume = ofRandom(harpVolume->getValueLow(), harpVolume->getValueHigh());
+    harp[n].setLevels(front, middle, back);
     harp[n].play();
     harpCooldown = (30.0/tempo->getValue());
+    
+    melodyIt++;
+    if(melodyIt == melody.end())
+        melodyIt = melody.begin();
 }

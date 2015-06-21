@@ -38,7 +38,7 @@ class ofApp : public ofBaseApp{
         //void processFrames();
         void startRun();
         void endRun();
-        void toggleDirection();
+        //void toggleDirection();
         void updatePreviewFBO();
         void drawPendulum();
         void drawMainLine();
@@ -59,11 +59,11 @@ class ofApp : public ofBaseApp{
         //string currentName; // The name of the video we are working on
         float trackPos;
         float startTime;
-        bool bForward;
+        //bool bForward;
         bool bRunning;
         ofxUISlider* trackTimeSlider;
         ofxUISlider* autoRunDelaySlider;
-        ofxUIToggle* directionToggle;
+        //ofxUIToggle* directionToggle;
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;
         ofxUILabelToggle* forceOnToggle;

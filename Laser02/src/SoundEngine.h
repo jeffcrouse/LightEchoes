@@ -15,34 +15,84 @@
 #define NUM_HARPS 5
 #define NUM_PADS 4
 
+class CurveSound  {
+public:
+    CurveSound() {
+        volume = 1.0;
+    }
+    
+    void setup(string path) {
+        front.loadSound(path);
+        middle.loadSound(path);
+        back.loadSound(path);
+    }
+    
+    void play() {
+        front.playTo(0, 1);
+        middle.playTo(2, 3);
+        back.playTo(4, 5);
+    }
+    
+    void setLevels(float f, float m, float b) {
+        front.setVolume(f*volume);
+        middle.setVolume(m*volume);
+        back.setVolume(b*volume);
+    }
+    
+    float volume;
+    ofxSoundPlayerMultiOutput front;
+    ofxSoundPlayerMultiOutput middle;
+    ofxSoundPlayerMultiOutput back;
+};
+
+
 class SoundEngine {
 public:
     
-
     void setup();
     void onBeat();
-    void update();
-    void randomHarp();
+    void update(float trackPos);
+    void playHarp();
+    void newMelody() {
+        melody.clear();
+        int len = ofRandom(5, 10);
+        for(int i=0; i<len; i++) {
+            melody.push_back( ofRandom(0, NUM_HARPS) );
+        }
+        melodyIt = melody.begin();
+    }
     
     float nextBeat;
     float nextFX;
     float harpCooldown;
-    int padIndex;
     int beat;
+    
     
     ofxUISlider* tempo;
     ofxUIRangeSlider* harpVolume;
     ofxUISlider* padVolume;
     ofxUISlider* fxVolume;
+    ofxUISlider* arpVolume;
     ofxUISlider* drumVolume;
+    ofxUISlider* lightATheEndVolume;
     
+    int padIndex;
+    float front, middle, back;
+    CurveSound pads[NUM_PADS];
+    CurveSound fx[NUM_FXS];
+    CurveSound harp[NUM_HARPS];
+    
+    
+    vector<int> melody;
+    vector<int>::iterator melodyIt;
+    
+    ofxSoundPlayerMultiOutput arp;
     ofxSoundPlayerMultiOutput endClap;
     ofxSoundPlayerMultiOutput startClap;
     ofxSoundPlayerMultiOutput kick;
     ofxSoundPlayerMultiOutput snare;
     ofxSoundPlayerMultiOutput hihat;
-    ofxSoundPlayerMultiOutput pad[NUM_PADS];
-    ofxSoundPlayerMultiOutput harp[NUM_HARPS];
-    ofxSoundPlayerMultiOutput fx[NUM_FXS];
     
+    
+    ofxSoundPlayerMultiOutput lightATheEnd;
 };
