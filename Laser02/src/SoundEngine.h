@@ -65,8 +65,12 @@ public:
     float nextBeat;
     float nextFX;
     float harpCooldown;
+    int padIndex;
+    float front, middle, back;
     int beat;
     
+    vector<int> melody;
+    vector<int>::iterator melodyIt;
     
     ofxUISlider* tempo;
     ofxUIRangeSlider* harpVolume;
@@ -76,15 +80,9 @@ public:
     ofxUISlider* drumVolume;
     ofxUISlider* lightATheEndVolume;
     
-    int padIndex;
-    float front, middle, back;
     CurveSound pads[NUM_PADS];
     CurveSound fx[NUM_FXS];
     CurveSound harp[NUM_HARPS];
-    
-    
-    vector<int> melody;
-    vector<int>::iterator melodyIt;
     
     ofxSoundPlayerMultiOutput arp;
     ofxSoundPlayerMultiOutput endClap;

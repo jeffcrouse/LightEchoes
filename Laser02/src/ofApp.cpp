@@ -515,8 +515,6 @@ void ofApp::endRun() {
     // DMX RETURN CARRIAGE
     //toggleDirection();
     
-    
-    
     if(autoRunToggle->getValue()) {
         startTime = ofGetElapsedTimef() + autoRunDelaySlider->getValue();
     } else {

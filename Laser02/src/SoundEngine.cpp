@@ -105,7 +105,6 @@ void SoundEngine::update(float trackPos) {
     middle = ofMap(cos(trackPos * TWO_PI), -1, 1, 1, 0);
     back = ofMap(trackPos, 0.6, 1, 0, 1, true);
 
-    
     float now = ofGetElapsedTimef();
     if(now > nextBeat) {
         onBeat();
