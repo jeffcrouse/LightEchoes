@@ -17,11 +17,10 @@ public:
     void draw(int index, int yPos);
     int getHeight();
     
-
 protected:
     bool isRed(string word);
     
-    int height;
+    int margin;
     bool flipped;
     string line;
     float speed;
