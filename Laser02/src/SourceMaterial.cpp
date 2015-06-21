@@ -18,6 +18,11 @@
 void SourceMaterial::setup() {
     allocate(800, 1600);
     
+    fonts["small"].loadFont("fonts/HelveticaNeueLTCom-Th.ttf", 100);
+    fonts["med"].loadFont("fonts/HelveticaNeueLTCom-Th.ttf", 200);
+    fonts["large"].loadFont("fonts/HelveticaNeueLTCom-Th.ttf", 300);
+    
+    
     begin();
     ofClear(ofColor::black);
     ofDrawBitmapStringHighlight("NOT LOADED", 10, 20, ofColor::red, ofColor::white);
@@ -146,12 +151,12 @@ ofFloatColor SourceMaterial::getColor(int x, int y) {
 }
 
 // -------------------------------------------------
-bool SourceMaterial::increment() {
+void SourceMaterial::increment() {
     index++;
     index %= dir.size();
     state["index"] = index;
     state.save(SOURCE_MATERIAL_STATE_JSON, true);
-    return loadImage();
+    loadImage();
 }
 
 // -------------------------------------------------
@@ -165,21 +170,25 @@ void SourceMaterial::updatePixels() {
 }
 
 // -------------------------------------------------
-bool SourceMaterial::loadImage() {
+void SourceMaterial::loadImage() {
     
     if(dir.size()==0 || index > dir.size()-1 || index < 0)
         return false;
     
     ofLogNotice("SourceMaterial") << "Loading " << index;
+    
+    
     name = dir.getName(index);
     image.clear();
     image.loadImage(dir.getPath(index));
     image.mirror(true, true);
     
+    
+    
+    
+    
     drawIntoFBO();
     updatePixels();
-    
-    return true;
 }
 
 // -------------------------------------------------

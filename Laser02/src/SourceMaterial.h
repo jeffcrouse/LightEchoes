@@ -16,7 +16,7 @@ public:
     
     void setup();
     ofFloatColor getColor(int x, int y);
-    bool increment();
+    void increment();
     int getIndex();
     string getName() {
         return dir.getName(index);
@@ -26,7 +26,7 @@ public:
 protected:
     
     void updatePixels();
-    bool loadImage();
+    void loadImage();
     void drawIntoFBO();
     ofPixels pixels;
     string name;
@@ -36,6 +36,7 @@ protected:
     ofxJSONElement state;
     ofxJSONElement warper;
     ofDirectory dir;
+    map<string,ofTrueTypeFont> fonts;
     
     void saveWarp();
     void loadWarp();
