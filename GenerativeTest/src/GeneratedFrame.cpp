@@ -38,8 +38,8 @@ void TextLine::draw(int index, int yPos) {
     ofPushMatrix();
     if(flipped) {
         ofRotateZ(180);
-        float d = (yPos * 2) - font.getSize() + margin; // fuck
-        ofTranslate(-bounds.getWidth(), -d);
+        float y = (yPos * -2) + font.getSize(); // fuck
+        ofTranslate(-bounds.getWidth(), y);
     }
     
     float xPos = index * speed;
@@ -79,9 +79,9 @@ void GeneratedFrame::setup() {
     lines.push_back(new TextLine(this, 100, 10, "text/line03.txt"));
     lines.push_back(new TextLine(this, 200, 10, "text/line04.txt"));
     lines.push_back(new TextLine(this, 400, 10, "text/line05.txt"));
-    lines.push_back(new TextLine(this, 100, 10, "text/line06.txt", true));
-    lines.push_back(new TextLine(this, 60, 15, "text/line07.txt", true));
-    lines.push_back(new TextLine(this, 400, 20, "text/line08.txt", true));
+    lines.push_back(new TextLine(this, 100, 40, "text/line06.txt", true));
+    lines.push_back(new TextLine(this, 60, 10, "text/line07.txt", true));
+    lines.push_back(new TextLine(this, 400, 10, "text/line08.txt", true));
 }
 
 // ---------------------------------------------
@@ -92,7 +92,7 @@ ofFloatColor GeneratedFrame::getColor(int x, int y) {
 // ---------------------------------------------
 void GeneratedFrame::generate(int index) {
     
-    int y = -200;
+    int y = -300;
     
     begin();
     ofClear(ofColor::black);
