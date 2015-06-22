@@ -46,6 +46,7 @@ class ofApp : public ofBaseApp{
         void updatePreviewFBO();
         void drawPendulum();
         void drawMainLine();
+        string toHMS(int seconds);
     
         ofxEtherdream etherdream;
         ofxEdsdk::Camera camera;
@@ -65,7 +66,7 @@ class ofApp : public ofBaseApp{
         //bool bForward;
         bool bRunning;
         //ofxUISlider* trackTimeSlider;
-        ofxUISlider* autoRunDelaySlider;
+        //ofxUISlider* autoRunDelaySlider;
         //ofxUIToggle* directionToggle;
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;

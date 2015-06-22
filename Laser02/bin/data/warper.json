@@ -1,6 +1,6 @@
 {
-   "show" : true,
-   "v" : 6,
+   "show" : false,
+   "v" : 40,
    "verts" : [
       {
          "x" : 0,

@@ -39,7 +39,7 @@ void ofApp::setup(){
     //camera.lockUI();
     if(camera.isConnected()) camera.releaseShutterButton();
     
-    font.loadFont("fonts/verdana.ttf", 24);
+    font.loadFont("fonts/Neue Helvetica/HelveticaNeueLTCom-Bd.ttf", 420);
     calibPattern.drawCalibration();
     startTime = -1;
     bRunning = false;
@@ -94,7 +94,7 @@ void ofApp::setup(){
     //trackTimeSlider = gui->addSlider("TRACK TIME", 60, 210, 150);
     //directionToggle = gui->addLabelToggle("FORWARD", &bForward);
     autoRunToggle = gui->addLabelToggle("AUTO RUN", false);
-    autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 6, 30, 10);
+    //autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 6, 30, 10);
     //cutout = gui->addRangeSlider("CUTOUT", 0, 1, 0.4, 0.6);
     forceOnToggle = gui->addLabelToggle("FORCE ON", false);
     trackPosSlider = gui->addSlider("TRACK POSITION", 0.0, 1.0, 0.0);
@@ -295,6 +295,17 @@ void ofApp::update(){
 }
 
 //--------------------------------------------------------------
+string ofApp::toHMS(int time) {
+    int minutes = time / 60;
+    int seconds = time - (minutes*60);
+    stringstream ss;
+    ss << std::setfill('0') << std::setw(1) << minutes;
+    ss << ":";
+    ss << std::setfill('0') << std::setw(2) << seconds;
+    return ss.str();
+}
+
+//--------------------------------------------------------------
 void ofApp::draw(){
     
     updatePreviewFBO();
@@ -336,6 +347,19 @@ void ofApp::draw(){
         
     } else {
         ofDrawBitmapStringHighlight("NO CAMERA", 790, 30, ofColor::red, ofColor::white);
+    }
+    
+    
+    if(!bRunning && startTime != -1) {
+        float timeToStart = startTime - ofGetElapsedTimef();
+        string message = toHMS(timeToStart); //ofToString((int)timeToStart+1);
+        ofRectangle bb = font.getStringBoundingBox(message, 0, 0);
+        float x = (ofGetWidth()/2.0) - (bb.width/2.0);
+        float y = (ofGetHeight()/2.0) + (bb.getHeight()*0.5);
+        ofSetColor(ofColor::black);
+        font.drawString(message, x+5, y+5);
+        ofSetColor(ofColor::white);
+        font.drawString(message, x, y);
     }
     
 
@@ -561,7 +585,7 @@ void ofApp::endRun() {
     //toggleDirection();
     
     if(autoRunToggle->getValue()) {
-        startTime = ofGetElapsedTimef() + autoRunDelaySlider->getValue();
+        startTime = ofGetElapsedTimef() + TRACK_TIME + 10;
     } else {
         startTime = -1;
     }
