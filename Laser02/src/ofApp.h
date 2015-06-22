@@ -38,6 +38,8 @@ class ofApp : public ofBaseApp{
         //void processFrames();
         void startRun();
         void endRun();
+        void laserRelease();
+        void laserReturn();
         //void toggleDirection();
         void updatePreviewFBO();
         void drawPendulum();
@@ -52,7 +54,7 @@ class ofApp : public ofBaseApp{
         ofxIlda::Frame calibPattern;
         ofxUISlider* colorAdjust[3];
         //ofxUIRangeSlider* cutout;
-        string savePath;
+        string savePathRaw, savePathSmall;
         bool bPaused;
 
     

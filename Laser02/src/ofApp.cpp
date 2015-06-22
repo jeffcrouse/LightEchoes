@@ -54,9 +54,15 @@ void ofApp::setup(){
     
     Poco::Path path = Poco::Path::home();
     path.pushDirectory("Desktop");
-    path.pushDirectory("LightEchoes");
-    savePath = path.toString();
+    path.pushDirectory("LightEchoesRaw");
+    savePathRaw = path.toString();
+    ofDirectory::createDirectory(savePathRaw, false, true);
     
+    path = Poco::Path::home();
+    path.pushDirectory("Desktop");
+    path.pushDirectory("LightEchoesSmall");
+    savePathSmall = path.toString();
+    ofDirectory::createDirectory(savePathSmall, false, true);
     
     
     //
@@ -254,11 +260,17 @@ void ofApp::update(){
     
     // Deal with photos from the camera
     if(camera.isPhotoNew()) {
-        ofDirectory::createDirectory(savePath, false, true);
+        string basename = ofGetTimestampString("%m-%d-%H-%M-%S-%i");
+        
         stringstream path;
-        path << savePath << "/" << ofGetTimestampString("%m-%d-%H-%M-%S-%i") << ".jpg";
+        path << savePathRaw << "/" << basename << ".jpg";
         ofLogNotice() << "=== SAVING " << path.str();
         camera.savePhoto(path.str());
+        
+        stringstream cmd;
+        cmd << "sips -Z 1920 " << path << " --out " << savePathSmall << "/" << basename << ".jpg";
+        ofLogNotice() << "=== RESIZING " << cmd.str();
+        ofSystem(cmd.str());
     }
 }
 
@@ -452,7 +464,6 @@ void ofApp::drawMainLine() {
     if(brightnessVelocity > briChangeThresh->getValue()) {
         sound.playHarp();
     }
-
     
     mainLine.points.clear();
     
@@ -482,6 +493,21 @@ void ofApp::drawMainLine() {
     mainLine.lastSampleY = sampleY;
 }
 
+
+//--------------------------------------------------------------
+void ofApp::laserRelease() {
+    dmxLevels[0] = 512;
+    dmxLevels[1] = 0;
+    dmxLevels[2] = 0;
+}
+
+//--------------------------------------------------------------
+void ofApp::laserReturn() {
+    dmxLevels[0] = 0;
+    dmxLevels[1] = 0;
+    dmxLevels[2] = 512;
+}
+
 //--------------------------------------------------------------
 void ofApp::startRun() {
     if(bRunning) return;
@@ -491,7 +517,7 @@ void ofApp::startRun() {
     
     sound.newMelody();
     
-    // DMX START MOTOR
+    laserRelease();
     
     ofLogNotice() << "===== Pressing shutter button";
     if(camera.isConnected()) camera.pressShutterButton();
@@ -512,7 +538,7 @@ void ofApp::endRun() {
     incrementSource();
     
     
-    // DMX RETURN CARRIAGE
+    laserReturn();
     //toggleDirection();
     
     if(autoRunToggle->getValue()) {

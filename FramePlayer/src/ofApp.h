@@ -4,7 +4,11 @@
 
 #define NUM_FRAMES 45
 #define FRAMERATE 24.0
+#define PAUSE_ON_NEW_FRAME 30
 
+
+#define STATE_LOOKING_FOR_DIR 1
+#define STATE_RUNNING 2
 
 class ofApp : public ofBaseApp {
 
@@ -23,18 +27,23 @@ class ofApp : public ofBaseApp {
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-    
+        void loadContent();
         void checkForNewFrame();
         void onNewFrame(string path);
     
+        ofTrueTypeFont font;
     
         ofImage loader;
         Poco::Timestamp newest;
-        string videoFolder;
+        string contentPath;
         ofDirectory dir;
     
         vector<ofTexture> frames;
         vector<ofTexture>::iterator it;
         float nextFrameAt;
         ofRectangle bounds;
+    
+        int state;
+        float nextContentCheck;
+    
 };

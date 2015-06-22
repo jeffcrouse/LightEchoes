@@ -11,22 +11,13 @@ void ofApp::setup(){
     ofSetLogLevel("ofDirectory", OF_LOG_SILENT);
     ofSetDataPathRoot("../Resources/data/");
     
+    font.loadFont("verdana.ttf", 24);
+    
     ofBuffer buffer = ofBufferFromFile("framespath.txt");
-    videoFolder = buffer.getFirstLine();
-    
-    dir.allowExt("jpg");
-    dir.listDir(videoFolder);
-    dir.sort();
-    
-    for(int i=max(0, (int)dir.size()-NUM_FRAMES); i<dir.size(); i++) {
-        
-        loader.loadImage( dir.getPath(i) );
-        frames.push_back( loader.getTextureReference() );
-        newest = dir.getFile(i).getPocoFile().created();
-    }
-    
-    it = frames.begin();
-    nextFrameAt=0;
+    contentPath = buffer.getFirstLine();
+
+    nextContentCheck=5;
+    state = STATE_LOOKING_FOR_DIR;
 }
 
 
@@ -34,7 +25,13 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     float now = ofGetElapsedTimef();
-    if (now > nextFrameAt) {
+    
+    if(state==STATE_LOOKING_FOR_DIR && now > nextContentCheck) {
+        loadContent();
+        nextContentCheck = now + 5;
+    }
+    
+    if(state==STATE_RUNNING && now > nextFrameAt) {
         it++;
         
         if(it == frames.end()) {
@@ -46,19 +43,55 @@ void ofApp::update(){
     }
 }
 
+//--------------------------------------------------------------
+void ofApp::loadContent() {
+    if(!ofFile::doesFileExist(contentPath)) return;
+        
+    dir.allowExt("jpg");
+    dir.listDir(contentPath);
+    dir.sort();
+    
+    int start = max(0, (int)dir.size()-NUM_FRAMES);
+    for(int i=start; i<dir.size(); i++) {
+        string path = dir.getPath(i);
+        loader.clear();
+        ofLogNotice() << "Loading " << frames.size() << ": " << path;
+        loader.loadImage( path );
+        frames.push_back( loader.getTextureReference() );
+        newest = dir.getFile(i).getPocoFile().created();
+    }
+    
+    if(frames.size()) {
+        it = frames.begin();
+        nextFrameAt = ofGetElapsedTimef();
+        state = STATE_RUNNING;
+    }
+}
 
 //--------------------------------------------------------------
 void ofApp::checkForNewFrame(){
-    dir.allowExt("jpg");
-    dir.listDir(videoFolder);
-    dir.sort();
     
-    for(int i= max(0, (int)dir.size()-NUM_FRAMES); i<dir.size(); i++) {
-        Poco::Timestamp created = dir.getFile(i).getPocoFile().created();
-        if(created > newest) {
-            onNewFrame( dir.getPath(i) );
-            newest = created;
+    if(ofFile::doesFileExist(contentPath)) {
+    
+        dir.allowExt("jpg");
+        dir.listDir(contentPath);
+        dir.sort();
+        
+        // If any frames are newer than newest, do onNewFrame
+        // and update the newest file date
+        int start = max(0, (int)dir.size()-NUM_FRAMES);
+        for(int i= start; i<dir.size(); i++) {
+            Poco::Timestamp created = dir.getFile(i).getPocoFile().created();
+            if(created > newest) {
+                onNewFrame( dir.getPath(i) );
+                newest = created;
+            }
         }
+        
+    } else {
+        
+        nextContentCheck = ofGetElapsedTimef() + 5;
+        state = STATE_LOOKING_FOR_DIR;
     }
 }
 
@@ -66,42 +99,59 @@ void ofApp::checkForNewFrame(){
 void ofApp::onNewFrame(string path) {
     
     loader.loadImage( path );
+    
     frames.push_back( loader.getTextureReference() );
     loader.clear();
     
-    it = frames.begin()+ (frames.size()-1);
-    
+    it = frames.begin() + (frames.size()-1);
     
     if(frames.size() > NUM_FRAMES) {
         frames.erase( frames.begin() );
     }
     
-    nextFrameAt = ofGetElapsedTimef() + 10;
+    nextFrameAt = ofGetElapsedTimef() + PAUSE_ON_NEW_FRAME;
 }
 
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    if(it == frames.end()) {
+    ofSetColor(ofColor::white);
+    
+    if(state==STATE_LOOKING_FOR_DIR) {
+        stringstream msg;
+        msg << "Looking for directory" << endl;
+        msg << contentPath << endl;
+        int time = nextContentCheck - ofGetElapsedTimef();
+        msg << "next check in " << time;
+        ofRectangle bb = font.getStringBoundingBox(msg.str(), 0, 0);
+        float x = (ofGetWidth()/2.0) - (bb.getWidth()/2.0);
+        float y = (ofGetHeight()/2.0);
         
         
-    } else {
-        ofTexture& frame = *it;
-        
-        float ratio =  ofGetHeight() / frame.getHeight();
-        bounds.height = frame.getHeight() * ratio;
-        bounds.width = frame.getWidth() * ratio;
-        bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
-        bounds.y = 0;
-        
-        frame.draw(bounds);
+        font.drawString(msg.str(), x, y);
     }
+    
+    if(state==STATE_RUNNING) {
+    
+        if(it != frames.end()) {
+            
+            ofTexture& frame = *it;
+            
+            float ratio =  ofGetHeight() / frame.getHeight();
+            bounds.height = frame.getHeight() * ratio;
+            bounds.width = frame.getWidth() * ratio;
+            bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
+            bounds.y = 0;
+            
+            frame.draw(bounds);
+        }
+    }
+    
     
     stringstream ss;
     ss << ofGetFrameRate();
     ofDrawBitmapStringHighlight(ss.str(), 10, 20);
-    
 }
 
 //--------------------------------------------------------------
@@ -138,13 +188,6 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
-    float ratio =  ofGetHeight() / it->getHeight();
-    bounds.height = it->getHeight() * ratio;
-    bounds.width = it->getWidth() * ratio;
-    bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
-    bounds.y = 0;
-
 }
 
 //--------------------------------------------------------------
