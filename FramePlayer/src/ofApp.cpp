@@ -11,9 +11,10 @@ void ofApp::setup(){
     ofSetLogLevel("ofDirectory", OF_LOG_SILENT);
     ofSetDataPathRoot("../Resources/data/");
     
+    bDebug = false;
     font.loadFont("verdana.ttf", 24);
     
-    ofBuffer buffer = ofBufferFromFile("framespath.txt");
+    ofBuffer buffer = ofBufferFromFile("contentPath.txt");
     contentPath = buffer.getFirstLine();
 
     nextContentCheck=5;
@@ -38,7 +39,7 @@ void ofApp::update(){
             it = frames.begin();
             checkForNewFrame();
         } else {
-            nextFrameAt = now + (1/FRAMERATE);
+            nextFrameAt = now + (1/PLAYBACK_FRAMERATE);
         }
     }
 }
@@ -61,7 +62,7 @@ void ofApp::loadContent() {
         newest = dir.getFile(i).getPocoFile().created();
     }
     
-    if(frames.size()) {
+    if(frames.size()>0) {
         it = frames.begin();
         nextFrameAt = ofGetElapsedTimef();
         state = STATE_RUNNING;
@@ -119,6 +120,7 @@ void ofApp::draw(){
     ofSetColor(ofColor::white);
     
     if(state==STATE_LOOKING_FOR_DIR) {
+        
         stringstream msg;
         msg << "Looking for directory" << endl;
         msg << contentPath << endl;
@@ -148,10 +150,15 @@ void ofApp::draw(){
         }
     }
     
-    
-    stringstream ss;
-    ss << ofGetFrameRate();
-    ofDrawBitmapStringHighlight(ss.str(), 10, 20);
+    if(bDebug) {
+        stringstream ss;
+        ss << "framerate " << ofGetFrameRate() << endl;
+        ss << "contentPath " << contentPath << " (change in contentPath.txt)" << endl;
+        ss << "NUM_FRAMES " << NUM_FRAMES << endl;
+        ss << "PLAYBACK_FRAMERATE " << PLAYBACK_FRAMERATE << endl;
+        ss << "PAUSE_ON_NEW_FRAME " << PAUSE_ON_NEW_FRAME;
+        ofDrawBitmapStringHighlight(ss.str(), 10, 20);
+    }
 }
 
 //--------------------------------------------------------------
@@ -163,6 +170,9 @@ void ofApp::keyPressed(int key){
 void ofApp::keyReleased(int key){
     if(key=='f') {
         ofToggleFullscreen();
+    }
+    if(key=='d') {
+        bDebug = !bDebug;
     }
 }
 

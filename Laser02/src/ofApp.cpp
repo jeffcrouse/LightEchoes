@@ -319,7 +319,6 @@ void ofApp::draw(){
     }
 
 
-    
 
     // Draw some stuff to show what the laser is projecting
     ofRectMode(OF_RECTMODE_CENTER);

@@ -3,7 +3,7 @@
 #include "ofMain.h"
 
 #define NUM_FRAMES 45
-#define FRAMERATE 24.0
+#define PLAYBACK_FRAMERATE 24.0
 #define PAUSE_ON_NEW_FRAME 30
 
 
@@ -43,7 +43,7 @@ class ofApp : public ofBaseApp {
         float nextFrameAt;
         ofRectangle bounds;
     
+        bool bDebug;
         int state;
         float nextContentCheck;
-    
 };
