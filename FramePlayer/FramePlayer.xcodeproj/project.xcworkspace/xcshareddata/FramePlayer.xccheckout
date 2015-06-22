@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>6D3ED3F3-25E4-476F-A2BC-1AA42E274990</string>
 	<key>IDESourceControlProjectName</key>
-	<string>FramePlayer</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>https://github.com/seethroughlab/LightEchoes.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>FramePlayer/FramePlayer.xcodeproj</string>
+	<string>FramePlayer/FramePlayer.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>

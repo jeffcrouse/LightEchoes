@@ -63,7 +63,7 @@ public:
     }
     
     float nextBeat;
-    float nextFX;
+    //float nextFX;
     float harpCooldown;
     int padIndex;
     float front, middle, back;
@@ -81,7 +81,7 @@ public:
     ofxUISlider* lightATheEndVolume;
     
     CurveSound pads[NUM_PADS];
-    CurveSound fx[NUM_FXS];
+    ofxSoundPlayerMultiOutput fx[NUM_FXS];
     CurveSound harp[NUM_HARPS];
     
     ofxSoundPlayerMultiOutput arp;
@@ -91,6 +91,7 @@ public:
     ofxSoundPlayerMultiOutput snare;
     ofxSoundPlayerMultiOutput hihat;
     
+
     
     ofxSoundPlayerMultiOutput lightATheEnd;
 };

@@ -7,7 +7,7 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>4F1FCF06-7208-4A28-ADA7-2AC091448A3C</string>
 	<key>IDESourceControlProjectName</key>
-	<string>Laser02</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>1C584D82D8F91B619E103DBEA051F0CCC0070ED3</key>
@@ -27,34 +27,34 @@
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>https://github.com/seethroughlab/LightEchoes.git</string>
 		<key>C1E8919E75191C5A81309888FBBC5793267330D8</key>
-		<string>https://github.com/memo/ofxEtherdream.git</string>
+		<string>https://github.com/pach/ofxEtherdream.git</string>
 		<key>F71958031D205D2C5B7FC71EE73A2878789BBF46</key>
 		<string>https://github.com/memo/ofxIlda.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Laser02/Laser02.xcodeproj</string>
+	<string>Laser02/Laser02.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>1C584D82D8F91B619E103DBEA051F0CCC0070ED3</key>
-		<string>../../../../addons/ofxDmx</string>
+		<string>../../../../../addons/ofxDmx</string>
 		<key>36985836DF35EF8F5D7D4E20C1E7B9D301114BDF</key>
-		<string>../../../../addons/ofxEdsdk</string>
+		<string>../../../../../addons/ofxEdsdk</string>
 		<key>5DB7C332A3A89035E93556A2A38BF414005BA671</key>
-		<string>../../../../addons/ofxJSON</string>
+		<string>../../../../../addons/ofxJSON</string>
 		<key>7E804D925461714118DB355C65BC964B41D94376</key>
-		<string>../../../../addons/ofxUI</string>
+		<string>../../../../../addons/ofxUI</string>
 		<key>822CBBF35EE99AD08308D0A6CCA015A457F9E7CD</key>
-		<string>../../../../addons/ofxModifierKeys</string>
+		<string>../../../../../addons/ofxModifierKeys</string>
 		<key>90E2F969A762FB62C413A0C44D1F334E6EC3F531</key>
-		<string>../../../../addons/ofxMidi</string>
+		<string>../../../../../addons/ofxMidi</string>
 		<key>A07761EFE28259701C86F29F3992B643D9DB6851</key>
-		<string>../../../../addons/ofxSoundPlayerMultiOutput</string>
+		<string>../../../../../addons/ofxSoundPlayerMultiOutput</string>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>../../..</string>
 		<key>C1E8919E75191C5A81309888FBBC5793267330D8</key>
-		<string>../../../../addons/ofxEtherdream</string>
+		<string>../../../../../addons/ofxEtherdream</string>
 		<key>F71958031D205D2C5B7FC71EE73A2878789BBF46</key>
-		<string>../../../../addons/ofxIlda</string>
+		<string>../../../../../addons/ofxIlda</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/seethroughlab/LightEchoes.git</string>

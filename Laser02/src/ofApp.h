@@ -10,6 +10,7 @@
 #include "SourceMaterial.h"
 #include "SoundEngine.h"
 
+#define NUM_DMX_CHANNELS 3
 
 class ofApp : public ofBaseApp{
 
@@ -49,7 +50,7 @@ class ofApp : public ofBaseApp{
         ofxEdsdk::Camera camera;
         ofxUISuperCanvas *gui;
         ofxDmx dmx;
-        int dmxLevels[3];
+        int dmxLevels[NUM_DMX_CHANNELS];
         ofTrueTypeFont font;
         ofxIlda::Frame calibPattern;
         ofxUISlider* colorAdjust[3];
@@ -95,7 +96,7 @@ class ofApp : public ofBaseApp{
             vector<ofxIlda::Point> points;
             int endCount;
             int blankCount;
-            int lastSampleY;
+            //int lastSampleY;
             ofPoint drawPos;    // Where in the etherdream frame are we drawing the sampled color?
         } mainLine;
     

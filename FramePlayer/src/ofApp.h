@@ -29,14 +29,15 @@ class ofApp : public ofBaseApp {
 		
         void loadContent();
         void checkForNewFrame();
-        void onNewFrame(string path);
+        bool onNewFrame(string path);
     
         ofTrueTypeFont font;
     
         ofImage loader;
-        Poco::Timestamp newest;
+        //Poco::Timestamp newest;
+        int newest;
         string contentPath;
-        string mountCommand;
+        //string mountCommand;
         ofDirectory dir;
     
         vector<ofTexture> frames;

@@ -4,7 +4,21 @@
 #define GUI_SETTINGS_XML "settings.xml"
 #define PERSIST_JSON_FILE "persist.json"
 
-
+//--------------------------------------------------------------
+string ofSystemCall(string command) {
+    
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    string result = "";
+    while(!feof(pipe)) {
+        if(fgets(buffer, 128, pipe) != NULL)
+            result += buffer;
+    }
+    pclose(pipe);
+    result.erase(remove(result.begin(), result.end(), '\n'), result.end());
+    return result;
+}
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -14,10 +28,6 @@ void ofApp::setup(){
     ofBackground(100);
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
-    
-    ofSerial serial;
-    serial.listDevices();
-    
     
     //
     // SETUP AND INITIALIZE!!!
@@ -91,9 +101,9 @@ void ofApp::setup(){
     trackPosSlider = gui->addSlider("TRACK POSITION", 0.0, 1.0, 0.0);
     
     gui->addSpacer();
-    colorAdjust[0] = gui->addSlider("RED ADJUST", -1, 0, 1);
-    colorAdjust[1] = gui->addSlider("GREEN ADJUST", -1, 0, 1);
-    colorAdjust[2] = gui->addSlider("BLUE ADJUST", -1, 0, 1);
+    colorAdjust[0] = gui->addSlider("RED ADJUST", 0, 1, 1);
+    colorAdjust[1] = gui->addSlider("GREEN ADJUST", 0, 1, 1);
+    colorAdjust[2] = gui->addSlider("BLUE ADJUST", 0, 1, 1);
     
     gui->addSpacer();
     gui->addLabel("MAIN LINE");
@@ -122,6 +132,7 @@ void ofApp::setup(){
      */
     gui->addSpacer();
     
+    
     gui->addLabel("SOUND");
     sound.tempo = gui->addSlider("TEMPO", 60, 220, 90);
     briChangeThresh = gui->addSlider("PLUCK THRESHOLD", 0, 0.2, 0.05);
@@ -138,17 +149,15 @@ void ofApp::setup(){
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
     gui->loadSettings(GUI_SETTINGS_XML);
     
-    
-    
-    sound.setup();
 
+    sound.setup();
 }
 
 //--------------------------------------------------------------
 ofFloatColor ofApp::mapColor(ofFloatColor c) {
-    c.r += colorAdjust[0]->getValue();
-    c.g += colorAdjust[1]->getValue();
-    c.b += colorAdjust[2]->getValue();
+    c.r *= colorAdjust[0]->getValue();
+    c.g *= colorAdjust[1]->getValue();
+    c.b *= colorAdjust[2]->getValue();
     
     c.r = ofClamp(c.r, 0, 1);
     c.g = ofClamp(c.g, 0, 1);
@@ -265,12 +274,12 @@ void ofApp::update(){
         stringstream path;
         path << savePathRaw << "/" << basename << ".jpg";
         ofLogNotice() << "=== SAVING " << path.str();
-        camera.savePhoto(path.str());
+        camera.savePhoto( path.str() );
         
         stringstream cmd;
         cmd << "sips -Z 1920 " << path << " --out " << savePathSmall << "/" << basename << ".jpg";
         ofLogNotice() << "=== RESIZING " << cmd.str();
-        ofSystem(cmd.str());
+        ofLogNotice() << ofSystemCall( cmd.str() );
     }
 }
 
@@ -317,8 +326,7 @@ void ofApp::draw(){
     } else {
         ofDrawBitmapStringHighlight("NO CAMERA", 790, 30, ofColor::red, ofColor::white);
     }
-
-
+    
 
     // Draw some stuff to show what the laser is projecting
     ofRectMode(OF_RECTMODE_CENTER);
@@ -344,7 +352,6 @@ void ofApp::updatePreviewFBO() {
         ofSetColor(ofColor::white);
         source.draw(0, 0);
         
-    
         ofNoFill();
         ofSetLineWidth(3);
         ofSetColor(bRunning ? ofColor::green : ofColor::red);
@@ -438,9 +445,8 @@ void ofApp::drawMainLine() {
     for (int sampleX=0; sampleX<source.getWidth(); sampleX++) {
      
         mainLine.drawPos.x = sampleX / (float)source.getWidth();
-        //bool inCutout = ofInRange(mainLine.drawPos.x, cutout->getValueLow(), cutout->getValueHigh());
-
-        color = (sampleX%10<9)
+  
+        color = (sampleX % 10<9)
             ? mapColor( source.getColor(sampleX, sampleY) )
             : ofFloatColor::black;
 
@@ -489,7 +495,7 @@ void ofApp::drawMainLine() {
     
     etherdream.addPoints(mainLine.points);
     
-    mainLine.lastSampleY = sampleY;
+    //mainLine.lastSampleY = sampleY;
 }
 
 
@@ -536,7 +542,6 @@ void ofApp::endRun() {
     sound.endClap.playTo(4, 5);
     incrementSource();
     
-    
     laserReturn();
     //toggleDirection();
     
@@ -546,14 +551,6 @@ void ofApp::endRun() {
         startTime = -1;
     }
 }
-
-/*
-//--------------------------------------------------------------
-void ofApp::toggleDirection() {
-    bForward = !bForward;
-    directionToggle->setValue(bForward);
-}
-*/
 
 //--------------------------------------------------------------
 void ofApp::incrementSource() {
@@ -573,19 +570,9 @@ void ofApp::incrementSource() {
 
 /*
 //--------------------------------------------------------------
-string ofSystemCall(string command)
-{
-    FILE* pipe = popen(command.c_str(), "r");
-    if (!pipe) return "ERROR";
-    char buffer[128];
-    string result = "";
-    while(!feof(pipe)) {
-        if(fgets(buffer, 128, pipe) != NULL)
-            result += buffer;
-    }
-    pclose(pipe);
-    result.erase(remove(result.begin(), result.end(), '\n'), result.end());
-    return result;
+void ofApp::toggleDirection() {
+    bForward = !bForward;
+    directionToggle->setValue(bForward);
 }
 
 //--------------------------------------------------------------
@@ -728,13 +715,11 @@ void ofApp::keyReleased(int key){
     }
 
     if(key==OF_KEY_UP) {
-        dmxLevels[0] = 255;
-        dmxLevels[2] = 0;
+        laserRelease();
     }
     
     if(key==OF_KEY_DOWN) {
-        dmxLevels[0] = 0;
-        dmxLevels[2] = 255;
+        laserReturn();
     }
     
     source.onKeyReleased(key);
@@ -775,3 +760,4 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
 }
+

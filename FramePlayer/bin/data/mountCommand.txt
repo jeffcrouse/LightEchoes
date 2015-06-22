@@ -1,1 +1,0 @@
-mkdir -p /Volumes/LELaser; mount_afp -s afp://admin:barbican@LELaser._afpovertcp._tcp.local/admin /Volumes/LELaser

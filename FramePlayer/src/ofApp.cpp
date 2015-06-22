@@ -14,12 +14,18 @@ void ofApp::setup(){
     bDebug = false;
     font.loadFont("verdana.ttf", 24);
     
-    ofBuffer buffer = ofBufferFromFile("contentPath.txt");
-    contentPath = buffer.getFirstLine();
+    //ofBuffer buffer = ofBufferFromFile("contentPath.txt");
+    //contentPath = buffer.getFirstLine();
 
-    buffer = ofBufferFromFile("mountCommand.txt");
-    mountCommand = buffer.getFirstLine();
+    Poco::Path path = Poco::Path::home();
+    path.pushDirectory("Desktop");
+    path.pushDirectory("LightEchoesSmall");
+    contentPath = path.toString();
+    ofDirectory::createDirectory(contentPath, false, true);
     
+//    buffer = ofBufferFromFile("mountCommand.txt");
+//    mountCommand = buffer.getFirstLine();
+  
     nextContentCheck=5;
     state = STATE_LOOKING_FOR_DIR;
 }
@@ -66,11 +72,6 @@ string ofSystemCall(string command)
 //--------------------------------------------------------------
 void ofApp::loadContent() {
     
-    ofLogNotice() << mountCommand;
-    string result = ofSystemCall(mountCommand);
-    ofSystem(result);
-    
-    
     if(!ofFile::doesFileExist(contentPath)) return;
     
     dir.allowExt("jpg");
@@ -84,7 +85,7 @@ void ofApp::loadContent() {
         ofLogNotice() << "Loading " << frames.size() << ": " << path;
         loader.loadImage( path );
         frames.push_back( loader.getTextureReference() );
-        newest = dir.getFile(i).getPocoFile().created();
+        newest = i; //dir.getFile(i).getPocoFile().created();
     }
     
     if(frames.size()>0) {
@@ -97,45 +98,46 @@ void ofApp::loadContent() {
 //--------------------------------------------------------------
 void ofApp::checkForNewFrame(){
     
-    if(ofFile::doesFileExist(contentPath)) {
-    
-        dir.allowExt("jpg");
-        dir.listDir(contentPath);
-        dir.sort();
-        
-        // If any frames are newer than newest, do onNewFrame
-        // and update the newest file date
-        int start = max(0, (int)dir.size()-NUM_FRAMES);
-        for(int i= start; i<dir.size(); i++) {
-            Poco::Timestamp created = dir.getFile(i).getPocoFile().created();
-            if(created > newest) {
-                onNewFrame( dir.getPath(i) );
-                newest = created;
-            }
-        }
-        
-    } else {
-        
+    if(!ofFile::doesFileExist(contentPath)) {
+        frames.clear();
         nextContentCheck = ofGetElapsedTimef() + 5;
         state = STATE_LOOKING_FOR_DIR;
+        return;
+    }
+    
+    dir.allowExt("jpg");
+    dir.listDir(contentPath);
+    dir.sort();
+    
+    // If any frames are newer than newest, do onNewFrame
+    // and update the newest file date
+    int start = max(0, (int)dir.size()-NUM_FRAMES);
+    for(int i= start; i<dir.size(); i++) {
+        //Poco::Timestamp created = dir.getFile(i).getPocoFile().created();
+        
+        if(i > newest && onNewFrame( dir.getPath(i) )) {
+            newest = i;
+        }
     }
 }
 
 //--------------------------------------------------------------
-void ofApp::onNewFrame(string path) {
+bool ofApp::onNewFrame(string path) {
     
-    loader.loadImage( path );
-    
-    frames.push_back( loader.getTextureReference() );
-    loader.clear();
-    
-    it = frames.begin() + (frames.size()-1);
-    
-    if(frames.size() > NUM_FRAMES) {
-        frames.erase( frames.begin() );
+    bool loaded = loader.loadImage( path );
+    if(loaded) {
+        frames.push_back( loader.getTextureReference() );
+        loader.clear();
+        
+        it = frames.begin() + (frames.size()-1);
+        
+        if(frames.size() > NUM_FRAMES) {
+            frames.erase( frames.begin() );
+        }
+        
+        nextFrameAt = ofGetElapsedTimef() + PAUSE_ON_NEW_FRAME;
     }
-    
-    nextFrameAt = ofGetElapsedTimef() + PAUSE_ON_NEW_FRAME;
+    return loaded;
 }
 
 
@@ -149,7 +151,7 @@ void ofApp::draw(){
         stringstream msg;
         msg << "Looking for directory" << endl;
         msg << contentPath << endl;
-        int time = nextContentCheck - ofGetElapsedTimef();
+        int time = (nextContentCheck - ofGetElapsedTimef())+1;
         msg << "next check in " << time;
         ofRectangle bb = font.getStringBoundingBox(msg.str(), 0, 0);
         float x = (ofGetWidth()/2.0) - (bb.getWidth()/2.0);

@@ -8,6 +8,9 @@
 
 #include "SoundEngine.h"
 
+#define NEAR 0,1
+#define MID 2,3
+#define FAR 4,5
 
 // ------------------------------------------------
 void SoundEngine::setup() {
@@ -30,7 +33,7 @@ void SoundEngine::setup() {
     arp.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
     arp.setLoop(true);
     //arp.play();
-    
+
     front = 1.0;
     middle = 1.0;
     back = 1.0;
@@ -47,20 +50,22 @@ void SoundEngine::setup() {
     harp[3].setup("sounds/harp/LE.Elements_0619.harp_E.aif");
     harp[4].setup("sounds/harp/LE.Elements_0619.harp_G.aif");
     
-    fx[0].setup("sounds/LE.Elements_0617.railroad.aif");
-    fx[1].setup("sounds/LE.Elements_0617.machine_down.aif");
-    fx[2].setup("sounds/LE.Elements_0617.machine_up.aif");
-    fx[3].setup("sounds/LE.Elements_0617.rolled_synth_2.aif");
-    fx[4].setup("sounds/LE.Elements_0617.rolled_synth_downbeat.aif");
-    fx[5].setup("sounds/LE.Elements_0617.pitched_synth.aif");
-    fx[6].setup("sounds/LE.Elements_0617.warped_synth_downbeat.aif");
+    fx[0].loadSound("sounds/LE.Elements_0617.railroad.aif");
+    fx[1].loadSound("sounds/LE.Elements_0617.machine_down.aif");
+    fx[2].loadSound("sounds/LE.Elements_0617.machine_up.aif");
+    fx[3].loadSound("sounds/LE.Elements_0617.rolled_synth_2.aif");
+    fx[4].loadSound("sounds/LE.Elements_0617.rolled_synth_downbeat.aif");
+    fx[5].loadSound("sounds/LE.Elements_0617.pitched_synth.aif");
+    fx[6].loadSound("sounds/LE.Elements_0617.warped_synth_downbeat.aif");
     
     
-    nextFX = 8;
+    //nextFX = 8;
     nextBeat = ofGetElapsedTimef()+(60.0/tempo->getValue());
     beat = 0;
     padIndex=0;
 }
+
+
 
 // ------------------------------------------------
 void SoundEngine::onBeat() {
@@ -71,29 +76,42 @@ void SoundEngine::onBeat() {
     kick.setVolume(drumVolume->getValue());
     snare.setVolume(drumVolume->getValue());
     
-    hihat.playTo(4, 5);
-
+    hihat.playTo(FAR);
+    
     if(beat % 4 == 0) {
-        kick.playTo(4, 5);
+        kick.playTo(FAR);
     } else if(beat % 2 == 0) {
-        snare.playTo(4, 5);
+        snare.playTo(FAR);
     }
+    
     
     if(beat % 8 == 0) {
         pads[padIndex].volume = padVolume->getValue();
         pads[padIndex].setLevels(front, middle, back);
         pads[padIndex].play();
         ++padIndex %= NUM_PADS;
+        
+        int nfx = ofRandom(2, 4);
+        vector<int> ids;
+        while(ids.size() < nfx) {
+            int n = ofRandom(NUM_FXS);
+            if(find(ids.begin(), ids.end(), n) == ids.end()) {
+                ids.push_back(n);
+                fx[n].setVolume(fxVolume->getValue());
+                fx[n].playTo(FAR);
+            }
+        }
     }
     
+    /*
     if(beat > nextFX) {
         int n = ofRandom(NUM_FXS);
-        fx[n].volume = fxVolume->getValue();
-        fx[n].setLevels(front, middle, back);
-        fx[n].play();
+        //fx[n].volume = fxVolume->getValue();
+        //fx[n].setLevels(front, middle, back);
+        //fx[n].play();
         nextFX = beat + ofRandom(4, 12) * 2;
     }
-
+     */
     beat++;
 }
 
