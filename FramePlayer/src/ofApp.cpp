@@ -14,14 +14,19 @@ void ofApp::setup(){
     bDebug = false;
     font.loadFont("verdana.ttf", 24);
     
-    //ofBuffer buffer = ofBufferFromFile("contentPath.txt");
-    //contentPath = buffer.getFirstLine();
-
     Poco::Path path = Poco::Path::home();
     path.pushDirectory("Desktop");
     path.pushDirectory("LightEchoesSmall");
     contentPath = path.toString();
     ofDirectory::createDirectory(contentPath, false, true);
+    
+    
+    path = Poco::Path::home();
+    path.pushDirectory("Desktop");
+    path.setFileName("sync.lock");
+    lockfile = path.toString();
+    ofLogNotice() << "lockfile: " << lockfile;
+    
     
 //    buffer = ofBufferFromFile("mountCommand.txt");
 //    mountCommand = buffer.getFirstLine();
@@ -83,9 +88,10 @@ void ofApp::loadContent() {
         string path = dir.getPath(i);
         loader.clear();
         ofLogNotice() << "Loading " << frames.size() << ": " << path;
-        loader.loadImage( path );
-        frames.push_back( loader.getTextureReference() );
-        newest = i; //dir.getFile(i).getPocoFile().created();
+        if(loader.loadImage( path )) {
+            frames.push_back( loader.getTextureReference() );
+            newest = i; //dir.getFile(i).getPocoFile().created();
+        }
     }
     
     if(frames.size()>0) {
@@ -105,17 +111,25 @@ void ofApp::checkForNewFrame(){
         return;
     }
     
+    if(ofFile::doesFileExist(lockfile)){
+        ofLogNotice() << "Waiting for sync to complete.";
+        return;
+    };
+    
     dir.allowExt("jpg");
     dir.listDir(contentPath);
     dir.sort();
     
     // If any frames are newer than newest, do onNewFrame
     // and update the newest file date
+    
     int start = max(0, (int)dir.size()-NUM_FRAMES);
+    ofLogNotice() << "checking frames " << start << " to " << dir.size();
+    
     for(int i= start; i<dir.size(); i++) {
         //Poco::Timestamp created = dir.getFile(i).getPocoFile().created();
-        
-        if(i > newest && onNewFrame( dir.getPath(i) )) {
+        string path = dir.getPath(i);
+        if(i > newest && onNewFrame( path )) {
             newest = i;
         }
     }
@@ -123,20 +137,31 @@ void ofApp::checkForNewFrame(){
 
 //--------------------------------------------------------------
 bool ofApp::onNewFrame(string path) {
+    loader.clear();
     
+    ofLogNotice() << "Loading: " << path;
     bool loaded = loader.loadImage( path );
+    
     if(loaded) {
+        ofLogNotice() << "LOADING SUCCEEDED!";
         frames.push_back( loader.getTextureReference() );
-        loader.clear();
         
-        it = frames.begin() + (frames.size()-1);
+        ofLogNotice() << "ADDED TEXTURE";
         
         if(frames.size() > NUM_FRAMES) {
+            ofLogNotice() << "REMOVING OLD TEXTURE";
             frames.erase( frames.begin() );
         }
         
+        ofLogNotice() << "PAUSING ON FRAME " << frames.size()-1;
+        it = frames.begin() + (frames.size()-1);
+        
         nextFrameAt = ofGetElapsedTimef() + PAUSE_ON_NEW_FRAME;
+    } else {
+        ofLogNotice() << "LOADING FAILED!";
     }
+    
+    ofLogNotice() << "DONE";
     return loaded;
 }
 

@@ -3,6 +3,7 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 #define PERSIST_JSON_FILE "persist.json"
+#define TRACK_TIME 196.5 // 3:16.5
 
 //--------------------------------------------------------------
 string ofSystemCall(string command) {
@@ -32,11 +33,12 @@ void ofApp::setup(){
     //
     // SETUP AND INITIALIZE!!!
     //
+    dmx.connect(0, 3); // or use a number
     etherdream.setup();
     camera.setup();
     //camera.lockUI();
     if(camera.isConnected()) camera.releaseShutterButton();
-    dmx.connect(0);
+    
     font.loadFont("fonts/verdana.ttf", 24);
     calibPattern.drawCalibration();
     startTime = -1;
@@ -48,9 +50,6 @@ void ofApp::setup(){
     pendulum.bDraw=false;
     bPaused = false;
 
-    dmxLevels[0] = 0;
-    dmxLevels[1] = 0;
-    dmxLevels[2] = 0;
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -92,13 +91,19 @@ void ofApp::setup(){
     gui->addLabel("LASER SETTINGS");
     gui->addIntSlider("PPS", 10000, 60000, 30000);
     drawCalibPatternToggle = gui->addLabelToggle("CALIBRATION PATTERN", false);
-    trackTimeSlider = gui->addSlider("TRACK TIME", 60, 210, 150);
+    //trackTimeSlider = gui->addSlider("TRACK TIME", 60, 210, 150);
     //directionToggle = gui->addLabelToggle("FORWARD", &bForward);
     autoRunToggle = gui->addLabelToggle("AUTO RUN", false);
     autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 6, 30, 10);
     //cutout = gui->addRangeSlider("CUTOUT", 0, 1, 0.4, 0.6);
     forceOnToggle = gui->addLabelToggle("FORCE ON", false);
     trackPosSlider = gui->addSlider("TRACK POSITION", 0.0, 1.0, 0.0);
+    
+    gui->addSpacer();
+    gui->addLabel("DMX");
+    for(int i=0; i<NUM_DMX_CHANNELS; i++) {
+        dmxLevel[i] = gui->addSlider("DMX "+ofToString(i), 0, 512, 100);
+    }
     
     gui->addSpacer();
     colorAdjust[0] = gui->addSlider("RED ADJUST", 0, 1, 1);
@@ -134,6 +139,7 @@ void ofApp::setup(){
     
     
     gui->addLabel("SOUND");
+    sound.masterVolume = gui->addSlider("MASTER VOLUME", 0, 1, 1);
     sound.tempo = gui->addSlider("TEMPO", 60, 220, 90);
     briChangeThresh = gui->addSlider("PLUCK THRESHOLD", 0, 0.2, 0.05);
     sound.fxVolume = gui->addSlider("FX VOLUME", 0, 1, 1);
@@ -149,7 +155,11 @@ void ofApp::setup(){
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
     gui->loadSettings(GUI_SETTINGS_XML);
     
-
+    // Don't want to send unnecessary DMX messages
+    for(int i=0; i<NUM_DMX_CHANNELS; i++) {
+        dmxLevel[i]->setValue(0);
+    }
+    forceOnToggle->setValue(false);
     sound.setup();
 }
 
@@ -216,15 +226,16 @@ void ofApp::drawSafetyPattern() {
 //--------------------------------------------------------------
 void ofApp::update(){
     float now = ofGetElapsedTimef();
-    float endTime = startTime + trackTimeSlider->getValue();
+    float endTime = startTime + TRACK_TIME; //trackTimeSlider->getValue();
     
     camera.update();
     
-    dmx.setLevel(1, dmxLevels[0]);
-    dmx.setLevel(2, dmxLevels[1]);
-    dmx.setLevel(3, dmxLevels[2]);
-    
+    for(int i=0; i<NUM_DMX_CHANNELS; i++) {
+        int channel = i+1;
+        dmx.setLevel(channel, dmxLevel[i]->getValue());
+    }
     dmx.update();
+    
     sound.update(trackPos);
     
     //drawSafetyPattern();
@@ -245,7 +256,7 @@ void ofApp::update(){
     if(!bRunning && startTime != -1) {
         float timeToStart = startTime - now;
         
-        if(timeToStart < 2.975 && !sound.startClap.getIsPlaying())
+        if(timeToStart < 2.964 && !sound.startClap.getIsPlaying())
             sound.startClap.playTo(0, 1);
         
         if(timeToStart < 0) startRun();
@@ -253,7 +264,7 @@ void ofApp::update(){
     
     
     etherdream.clear();
-    if(bRunning || forceOnToggle->getValue()) {
+    if(bRunning || bPaused || forceOnToggle->getValue()) {
         if(etherdream.checkConnection(true)) {
             drawMainLine();
             drawPendulum();
@@ -272,12 +283,12 @@ void ofApp::update(){
         string basename = ofGetTimestampString("%m-%d-%H-%M-%S-%i");
         
         stringstream path;
-        path << savePathRaw << "/" << basename << ".jpg";
+        path << savePathRaw << basename << ".jpg";
         ofLogNotice() << "=== SAVING " << path.str();
         camera.savePhoto( path.str() );
         
         stringstream cmd;
-        cmd << "sips -Z 1920 " << path << " --out " << savePathSmall << "/" << basename << ".jpg";
+        cmd << "sips -Z 1920 " << path.str() << " --out " << savePathSmall << basename << ".jpg";
         ofLogNotice() << "=== RESIZING " << cmd.str();
         ofLogNotice() << ofSystemCall( cmd.str() );
     }
@@ -500,17 +511,21 @@ void ofApp::drawMainLine() {
 
 
 //--------------------------------------------------------------
-void ofApp::laserRelease() {
-    dmxLevels[0] = 512;
-    dmxLevels[1] = 0;
-    dmxLevels[2] = 0;
+void ofApp::laserReturn() {
+    dmxLevel[0]->setValue(255);
+    dmxLevel[2]->setValue(0);
 }
 
 //--------------------------------------------------------------
-void ofApp::laserReturn() {
-    dmxLevels[0] = 0;
-    dmxLevels[1] = 0;
-    dmxLevels[2] = 512;
+void ofApp::laserRelease() {
+    dmxLevel[0]->setValue(0);
+    dmxLevel[2]->setValue(255);
+}
+
+//--------------------------------------------------------------
+void ofApp::laserStopSignal() {
+    dmxLevel[0]->setValue(0);
+    dmxLevel[2]->setValue(0);
 }
 
 //--------------------------------------------------------------
@@ -708,7 +723,7 @@ void ofApp::keyReleased(int key){
         sound.playHarp();
     }
     if(key=='s') {
-        sound.newMelody();
+        laserStopSignal();
     }
     if(key=='p') {
         bPaused=!bPaused;

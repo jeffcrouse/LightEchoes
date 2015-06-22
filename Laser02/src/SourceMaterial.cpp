@@ -7,11 +7,14 @@
 //
 
 #include "SourceMaterial.h"
+#include "ofxModifierKeys.h"
 
-#define SOURCE_DIR "Source"
+#define SOURCE_DIR "SourceAlt"
 #define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 #define SOURCE_MATERIAL_WARP_JSON "warper.json"
 #define NUM_ROWS 30
+#define NUM_COLS 4
+
 
 // -------------------------------------------------
 void SourceMaterial::setup() {
@@ -38,16 +41,19 @@ void SourceMaterial::setup() {
  
     mesh.setMode(OF_PRIMITIVE_TRIANGLES);
 
+    float col_pos[NUM_COLS] = {0.0, 170/800.0, 628/800.0, 1.0};
+    
     ofVec3f vert;
     ofVec3f normal(0, 0, 1); // always facing forward //
     ofVec2f texcoord;
-    int rows = 30;
-    int columns = 4;
+    int rows = NUM_ROWS;
+    int columns = NUM_COLS;
     for(int iy = 0; iy < rows; iy++) {
         for(int ix = 0; ix < columns; ix++) {
             
             // normalized tex coords //
-            texcoord.x = ((float)ix/((float)columns-1.f));
+            //texcoord.x = ((float)ix/((float)columns-1.f));
+            texcoord.x = col_pos[ix];
             texcoord.y = ((float)iy/((float)rows-1.f));
             
             vert.x = texcoord.x * getWidth();
@@ -98,19 +104,23 @@ void SourceMaterial::onKeyReleased(int key) {
             saveWarp();
         }
         if(key==OF_KEY_LEFT) {
-            verts[v].x -=0.5;
+            verts[v].x -= ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
+            updatePixels();
             saveWarp();
         }
         if(key==OF_KEY_RIGHT) {
-            verts[v].x +=0.5;
+            verts[v].x += ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
+            updatePixels();
             saveWarp();
         }
         if(key==OF_KEY_UP) {
-            verts[v].y -=0.5;
+            verts[v].y -= ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
+            updatePixels();
             saveWarp();
         }
         if(key==OF_KEY_DOWN) {
-            verts[v].y +=0.5;
+            verts[v].y += ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
+            updatePixels();
             saveWarp();
         }
     }
@@ -176,7 +186,6 @@ void SourceMaterial::loadImage() {
     
     ofLogNotice("SourceMaterial") << "Loading " << index;
     
-    
     name = dir.getName(index);
     image.clear();
     image.loadImage(dir.getPath(index));
@@ -210,7 +219,7 @@ void SourceMaterial::drawIntoFBO() {
                 ofNoFill();
                 ofSetColor(ofColor::gray);
             }
-            ofCircle(verts[i], 5);
+            ofCircle(verts[i], 10);
         }
     }
     end();

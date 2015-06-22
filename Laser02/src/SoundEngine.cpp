@@ -117,7 +117,9 @@ void SoundEngine::onBeat() {
 
 // ------------------------------------------------
 void SoundEngine::update(float trackPos) {
+    ofFmodSoundSetVolume(masterVolume->getValue());
     ofFmodSoundUpdate();
+    
     
     front = ofMap(trackPos, 0, 0.4, 1, 0, true);
     middle = ofMap(cos(trackPos * TWO_PI), -1, 1, 1, 0);

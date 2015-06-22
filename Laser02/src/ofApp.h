@@ -10,7 +10,7 @@
 #include "SourceMaterial.h"
 #include "SoundEngine.h"
 
-#define NUM_DMX_CHANNELS 3
+#define NUM_DMX_CHANNELS 5
 
 class ofApp : public ofBaseApp{
 
@@ -41,6 +41,7 @@ class ofApp : public ofBaseApp{
         void endRun();
         void laserRelease();
         void laserReturn();
+        void laserStopSignal();
         //void toggleDirection();
         void updatePreviewFBO();
         void drawPendulum();
@@ -50,7 +51,6 @@ class ofApp : public ofBaseApp{
         ofxEdsdk::Camera camera;
         ofxUISuperCanvas *gui;
         ofxDmx dmx;
-        int dmxLevels[NUM_DMX_CHANNELS];
         ofTrueTypeFont font;
         ofxIlda::Frame calibPattern;
         ofxUISlider* colorAdjust[3];
@@ -64,13 +64,15 @@ class ofApp : public ofBaseApp{
         float startTime;
         //bool bForward;
         bool bRunning;
-        ofxUISlider* trackTimeSlider;
+        //ofxUISlider* trackTimeSlider;
         ofxUISlider* autoRunDelaySlider;
         //ofxUIToggle* directionToggle;
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;
         ofxUILabelToggle* forceOnToggle;
         ofxUISlider* trackPosSlider;
+    
+        ofxUISlider* dmxLevel[NUM_DMX_CHANNELS];
     
         SoundEngine sound;
     

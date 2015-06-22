@@ -72,6 +72,7 @@ public:
     vector<int> melody;
     vector<int>::iterator melodyIt;
     
+    ofxUISlider* masterVolume;
     ofxUISlider* tempo;
     ofxUIRangeSlider* harpVolume;
     ofxUISlider* padVolume;

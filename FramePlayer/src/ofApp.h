@@ -40,6 +40,9 @@ class ofApp : public ofBaseApp {
         //string mountCommand;
         ofDirectory dir;
     
+        string lockfile;
+
+    
         vector<ofTexture> frames;
         vector<ofTexture>::iterator it;
         float nextFrameAt;
