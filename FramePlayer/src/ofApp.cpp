@@ -17,6 +17,9 @@ void ofApp::setup(){
     ofBuffer buffer = ofBufferFromFile("contentPath.txt");
     contentPath = buffer.getFirstLine();
 
+    buffer = ofBufferFromFile("mountCommand.txt");
+    mountCommand = buffer.getFirstLine();
+    
     nextContentCheck=5;
     state = STATE_LOOKING_FOR_DIR;
 }
@@ -45,9 +48,31 @@ void ofApp::update(){
 }
 
 //--------------------------------------------------------------
+string ofSystemCall(string command)
+{
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    string result = "";
+    while(!feof(pipe)) {
+        if(fgets(buffer, 128, pipe) != NULL)
+            result += buffer;
+    }
+    pclose(pipe);
+    result.erase(remove(result.begin(), result.end(), '\n'), result.end());
+    return result;
+}
+
+//--------------------------------------------------------------
 void ofApp::loadContent() {
+    
+    ofLogNotice() << mountCommand;
+    string result = ofSystemCall(mountCommand);
+    ofSystem(result);
+    
+    
     if(!ofFile::doesFileExist(contentPath)) return;
-        
+    
     dir.allowExt("jpg");
     dir.listDir(contentPath);
     dir.sort();
@@ -153,7 +178,7 @@ void ofApp::draw(){
     if(bDebug) {
         stringstream ss;
         ss << "framerate " << ofGetFrameRate() << endl;
-        ss << "contentPath " << contentPath << " (change in contentPath.txt)" << endl;
+        ss << "contentPath " << contentPath << endl;
         ss << "NUM_FRAMES " << NUM_FRAMES << endl;
         ss << "PLAYBACK_FRAMERATE " << PLAYBACK_FRAMERATE << endl;
         ss << "PAUSE_ON_NEW_FRAME " << PAUSE_ON_NEW_FRAME;

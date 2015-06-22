@@ -36,6 +36,7 @@ class ofApp : public ofBaseApp {
         ofImage loader;
         Poco::Timestamp newest;
         string contentPath;
+        string mountCommand;
         ofDirectory dir;
     
         vector<ofTexture> frames;
