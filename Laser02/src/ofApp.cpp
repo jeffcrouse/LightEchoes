@@ -17,10 +17,10 @@
 #define DMX_CHANNEL_LIGHT_R DMX_CHANNEL_LIGHT+0
 #define DMX_CHANNEL_LIGHT_G DMX_CHANNEL_LIGHT+1
 #define DMX_CHANNEL_LIGHT_B DMX_CHANNEL_LIGHT+2
-#define DMX_CHANNEL_LIGHT_COLOR_MIX DMX_CHANNEL_LIGHT+3
-#define DMX_CHANNEL_LIGHT_STROBE DMX_CHANNEL_LIGHT+4
-#define DMX_CHANNEL_LIGHT_SOUND_ACTIVE DMX_CHANNEL_LIGHT+5
-#define DMX_CHANNEL_LIGHT_DIMMER DMX_CHANNEL_LIGHT+6
+//#define DMX_CHANNEL_LIGHT_COLOR_MIX DMX_CHANNEL_LIGHT+3
+//#define DMX_CHANNEL_LIGHT_STROBE DMX_CHANNEL_LIGHT+4
+//#define DMX_CHANNEL_LIGHT_SOUND_ACTIVE DMX_CHANNEL_LIGHT+5
+//#define DMX_CHANNEL_LIGHT_DIMMER DMX_CHANNEL_LIGHT+6
 
 #define LIGHT_R 192
 #define LIGHT_G 191
@@ -61,7 +61,7 @@ void ofApp::setup(){
     ofSetWindowTitle("LightEchoes");
     ofSetFrameRate(60);
     ofSetLogLevel(OF_LOG_VERBOSE);
-    ofBackground(100);
+    ofBackground(50);
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
     
@@ -315,7 +315,7 @@ void ofApp::update(){
     
     // RUN LOGIC
     if(bRunning && !bPaused) {
-        float endTime = startTime + TRACK_TIME;
+        endTime = startTime + TRACK_TIME;
         if(elapsedTime > endTime) {
             endRun();
         } else {
@@ -400,7 +400,9 @@ void ofApp::draw(){
 
     stringstream info2;
     info2 << "index = " << source.getIndex() << endl;
-    info2 << "name = " << source.getName();
+    info2 << "name = " << source.getName() << endl;
+    if(startTime!=-1 && elapsedTime > startTime)
+        info2 << "time = " << toHMS(endTime - elapsedTime);
     ofDrawBitmapStringHighlight(info2.str(), 250, ofGetHeight()-60);
     
     

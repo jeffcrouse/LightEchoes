@@ -74,7 +74,7 @@ class ofApp : public ofBaseApp{
         bool bLightOn;
         bool bRunning;
         float trackPos;
-        float startTime;
+        float startTime,endTime;
     
 
     
