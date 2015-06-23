@@ -46,13 +46,13 @@ public:
     ofxSoundPlayerMultiOutput back;
 };
 */
-
+class ofApp;
 class SoundEngine {
 public:
     ~SoundEngine();
     void setup();
     void onBeat();
-    void update(float trackPos);
+    void update(); //float trackPos);
     void playHarp();
     void newMelody() {
         melody.clear();
@@ -72,6 +72,7 @@ public:
     
     vector<int> melody;
     vector<int>::iterator melodyIt;
+    ofApp* app;
     
     ofxUISlider* masterVolume;
     ofxUISlider* tempo;

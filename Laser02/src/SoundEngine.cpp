@@ -7,6 +7,7 @@
 //
 
 #include "SoundEngine.h"
+#include "ofApp.h"
 
 #define NEAR 0,1
 #define MID 2,3
@@ -69,7 +70,8 @@ void SoundEngine::setup() {
     
     
     //nextFX = 8;
-    nextBeat = ofGetElapsedTimef()+(60.0/tempo->getValue());
+    app = (ofApp*)ofGetAppPtr();
+    nextBeat = app->elapsedTime+(60.0/tempo->getValue());
     beat = 0;
     padIndex=0;
 }
@@ -126,7 +128,7 @@ void SoundEngine::onBeat() {
 }
 
 // ------------------------------------------------
-void SoundEngine::update(float trackPos) {
+void SoundEngine::update() { // float trackPos) {
     
     ofFmodSoundUpdate();
     ofFmodSoundSetVolume(masterVolume->getValue());
@@ -138,10 +140,10 @@ void SoundEngine::update(float trackPos) {
 //    middle = ofMap(cos(trackPos * TWO_PI), -1, 1, 1, 0);
 //    back = ofMap(trackPos, 0.6, 1, 0, 1, true);
 
-    float now = ofGetElapsedTimef();
-    if(now > nextBeat) {
+
+    if(app->elapsedTime > nextBeat) {
         onBeat();
-        nextBeat = now + (60.0/tempo->getValue());
+        nextBeat = app->elapsedTime + (60.0/tempo->getValue());
     }
     
     harpCooldown -= ofGetLastFrameTime();

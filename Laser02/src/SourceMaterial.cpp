@@ -206,6 +206,8 @@ void SourceMaterial::loadImage() {
 // -------------------------------------------------
 void SourceMaterial::drawIntoFBO() {
     begin();
+    ofPushStyle();
+    ofSetRectMode(OF_RECTMODE_CENTER);
     
     ofClear(ofColor::black);
     ofSetColor(ofColor::white);
@@ -227,8 +229,10 @@ void SourceMaterial::drawIntoFBO() {
                 ofNoFill();
                 ofSetColor(ofColor::gray);
             }
-            ofCircle(verts[i], 10);
+            ofRect(verts[i], 20, 20);
         }
     }
+    
+    ofPopStyle();
     end();
 }

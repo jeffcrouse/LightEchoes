@@ -3,10 +3,12 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 #define PERSIST_JSON_FILE "persist.json"
-#define TRACK_TIME 196.5 // 3:16.5
+#define TRACK_TIME 20 //196.5 // 3:16.5
 // DAY 1 // 2:53 // 2:55
 // DAY 2 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
 // DAY 3 // 2:45 // 2:35
+
+#define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
 #define PIXELS_OFF 10
 #define DMX_CHANNEL_MOTOR_RELEASE 3
@@ -69,7 +71,9 @@ void ofApp::setup(){
     pendulum.bDraw=false;
     bPaused = false;
     bReturnClap=false;
+    bStartClap=false;
     bLightOn=false;
+    elapsedTime = 0;
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -116,7 +120,7 @@ void ofApp::setup(){
     autoRunToggle = gui->addLabelToggle("AUTO RUN", false);
     //autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 6, 30, 10);
     //cutout = gui->addRangeSlider("CUTOUT", 0, 1, 0.4, 0.6);
-    forceOnToggle = gui->addLabelToggle("FORCE ON", false);
+    forceOnToggle = gui->addLabelToggle("FORCE LASER ON", false);
     trackPosSlider = gui->addSlider("TRACK POSITION", 0.0, 1.0, 0.0);
     
     gui->addSpacer();
@@ -181,6 +185,7 @@ void ofApp::setup(){
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
     gui->loadSettings(GUI_SETTINGS_XML);
 
+    trackPosSlider->setValue(trackPos);
     motorReturnToggle->setValue(false);
     motorReleaseToggle->setValue(false);
     forceOnToggle->setValue(false);
@@ -254,26 +259,38 @@ void ofApp::drawSafetyPattern() {
 }
 
 //--------------------------------------------------------------
+void ofApp::pause() {
+    bPaused = true;
+}
+
+//--------------------------------------------------------------
+void ofApp::unpause() {
+    bPaused = false;
+    
+}
+//--------------------------------------------------------------
+void ofApp::togglePaused() {
+    if(bPaused) unpause();
+    else pause();
+}
+
+
+//--------------------------------------------------------------
 void ofApp::update(){
-    float now = ofGetElapsedTimef();
-    float endTime = startTime + TRACK_TIME; //trackTimeSlider->getValue();
+    if(!bPaused)
+        elapsedTime += ofGetLastFrameTime();
     
     camera.update();
     dmx.update();
-    sound.update(trackPos);
-    
-    lightLevel += (lightLevelTarget-lightLevel) / 5.0;
-    
-    /*
-    for(int i=0; i<NUM_DMX_CHANNELS; i++) {
-        int channel = i+1;
-        int value = (bPaused) ? 0 : dmxLevel[i]->getValue();
-        dmx.setLevel(channel, value);
-    }
-    */
+    sound.update();
 
-    dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
-    dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, !motorReleaseToggle->getValue() || bPaused ? 0 : 255);
+    if(bPaused) {
+        dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, 0);
+        dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, 0);
+    } else {
+        dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
+        dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 0 : 255);
+    }
     
     dmx.setLevel(DMX_CHANNEL_LIGHT_R, lightColorSlider[0]->getValue());
     dmx.setLevel(DMX_CHANNEL_LIGHT_G, lightColorSlider[1]->getValue());
@@ -281,47 +298,32 @@ void ofApp::update(){
     //dmx.setLevel(DMX_CHANNEL_LIGHT_DIMMER, lightDimmerSlider->getValue());
     //dmx.setLevel(DMX_CHANNEL_LIGHT_STROBE, lightStrobeSlider->getValue());
     
-    /*
-    if(stopMotorSignalAt!=-1 && now > stopMotorSignalAt) {
-        motorStopSignal();
-        stopMotorSignalAt=-1;
-    }
-    */
-    //drawSafetyPattern();
     
     // RUN LOGIC
     if(bRunning && !bPaused) {
-        if(now > endTime) {
+        float endTime = startTime + TRACK_TIME;
+        if(elapsedTime > endTime) {
             endRun();
         } else {
-//            trackPos = bForward
-//                ? ofMap(now, startTime, endTime, 0, 1, true)
-//                : ofMap(now, startTime, endTime, 1, 0, true);
-            trackPos = ofMap(now, startTime, endTime, 0, 1, true);
+            trackPos = ofMap(elapsedTime, startTime, endTime, 0, 1, true);
             trackPosSlider->setValue(trackPos);
         }
     }
 
-    if(!bRunning && startTime != -1) {
-        float timeToStart = startTime - now;
+    if(startTime != -1) {
+        float timeToStart = startTime - elapsedTime;
         
-        if(timeToStart < 2.964 && !sound.startClap.getIsPlaying())
+        if(timeToStart < 2.964 && bStartClap) {
             sound.startClap.playTo(0, 1);
+            bStartClap = false;
+        }
         
-        if(timeToStart < 0) startRun();
-        
-        if(timeToStart<10 && bReturnClap) {
+        if(timeToStart<POST_RETURN_PAUSE && bReturnClap) {
             sound.endClap.playTo(0,1);
             bReturnClap = false;
         }
         
-//        if(timeToStart < 5 && now > nextCountdown) {
-//            stringstream cmd;
-//            cmd << "say " << ofToString( (int)timeToStart+1);
-//            ofLogNotice() << cmd.str();
-//            ofSystemCall( cmd.str() );
-//            nextCountdown = now+1;
-//        }
+        if(timeToStart <= 0) startRun();
     }
     
     
@@ -417,7 +419,7 @@ void ofApp::draw(){
     
     
     if(!bRunning && startTime != -1) {
-        float timeToStart = startTime - ofGetElapsedTimef();
+        float timeToStart = startTime - elapsedTime;
         string message = toHMS(timeToStart+1); //ofToString((int)timeToStart+1);
         ofRectangle bb = font.getStringBoundingBox(message, 0, 0);
         float x = (ofGetWidth()/2.0) - (bb.width/2.0);
@@ -454,7 +456,7 @@ void ofApp::updatePreviewFBO() {
         source.draw(0, 0);
         
         ofNoFill();
-        ofSetLineWidth(3);
+        ofSetLineWidth(10);
         ofSetColor(bRunning ? ofColor::green : ofColor::red);
         float y1 = ofMap(trackPos, 0, 1, source.getHeight(), 0);
         ofLine(0, y1, source.getWidth(), y1);
@@ -481,7 +483,7 @@ void ofApp::drawPendulum() {
     {
         pendulum.frame.params.output.color = pendulum.color;
         float oldSin = pendulum.sin;
-        float newSin =sin(ofGetElapsedTimef() * pendulum.speed);
+        float newSin =sin(elapsedTime * pendulum.speed);
         float oldVel = pendulum.vel;
         float newVel = newSin-oldSin;
         pendulum.vel = newVel;
@@ -624,7 +626,7 @@ void ofApp::startRun() {
     if(bRunning) return;
     
     ofLogNotice() << "startRun";
-    startTime = ofGetElapsedTimef();
+    startTime = elapsedTime;
 
     sound.newMelody();
     
@@ -649,15 +651,15 @@ void ofApp::endRun() {
     
     sound.endClap.playTo(4, 5);
     incrementSource();
-    
     motorReturn();
-    //toggleDirection();
     lightOn();
-
     
+    //toggleDirection();
+
     if(autoRunToggle->getValue()) {
-        startTime = ofGetElapsedTimef() + TRACK_TIME + 10;
+        startTime = elapsedTime + TRACK_TIME + POST_RETURN_PAUSE;
         bReturnClap = true;
+        bStartClap = true;
     } else {
         startTime = -1;
     }
@@ -835,33 +837,24 @@ void ofApp::keyReleased(int key){
         incrementSource();
     }
     if(key==OF_KEY_RETURN) {
-        startTime = ofGetElapsedTimef() + 5;
+        startTime = elapsedTime + 5;
+        bStartClap = true;
     }
     if(key==OF_KEY_ESC) {
         endRun();
-        startTime = -1;
     }
     if(key=='e') {
         etherdream.setup();
     }
-    if(key=='h') {
-        sound.playHarp();
-    }
-    if(key=='s') {
-        motorStopSignal();
-    }
     if(key=='p') {
-        bPaused=!bPaused;
+        togglePaused();
     }
-
     if(key=='l'){
         lightToggle();
     }
-    
     if(key=='m') {
         motorRelease();
     }
-    
     if(key=='M') {
         motorReturn();
     }

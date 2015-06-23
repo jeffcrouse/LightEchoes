@@ -52,10 +52,10 @@ class ofApp : public ofBaseApp{
         void drawMainLine();
         string toHMS(int seconds);
     
-        float lightLevel;
-        float lightLevelTarget;
     
         bool bReturnClap;
+        bool bStartClap;
+    
         bool bLightOn;
         ofxEtherdream etherdream;
         ofxEdsdk::Camera camera;
@@ -67,7 +67,11 @@ class ofApp : public ofBaseApp{
         //ofxUIRangeSlider* cutout;
         string savePathRaw, savePathSmall;
         bool bPaused;
-
+        float elapsedTime;
+        void pause();
+        void unpause();
+        void togglePaused();
+   
     
         //string currentName; // The name of the video we are working on
         float trackPos;
