@@ -31,6 +31,10 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		void guiEvent(ofxUIEventArgs &e);
     
+    
+        float elapsedTime;
+    
+    
         ofFloatColor mapColor(ofFloatColor c);
         void drawSafetyPattern();
         void incrementSource();
@@ -45,18 +49,16 @@ class ofApp : public ofBaseApp{
         void lightOn();
         void lightOff();
         void lightToggle();
-        //float stopMotorSignalAt;
         //void toggleDirection();
         void updatePreviewFBO();
         void drawPendulum();
         void drawMainLine();
-        string toHMS(int seconds);
+        void pause();
+        void unpause();
+        void togglePaused();
     
     
-        bool bReturnClap;
-        bool bStartClap;
-    
-        bool bLightOn;
+
         ofxEtherdream etherdream;
         ofxEdsdk::Camera camera;
         ofxUISuperCanvas *gui;
@@ -65,20 +67,19 @@ class ofApp : public ofBaseApp{
         ofxIlda::Frame calibPattern;
         ofxUISlider* colorAdjust[3];
         //ofxUIRangeSlider* cutout;
-        string savePathRaw, savePathSmall;
+        string savePathBig, savePathSmall;
         bool bPaused;
-        float elapsedTime;
-        void pause();
-        void unpause();
-        void togglePaused();
-   
-    
-        //string currentName; // The name of the video we are working on
+        bool bReturnClap;
+        bool bStartClap;
+        bool bLightOn;
+        bool bRunning;
         float trackPos;
         float startTime;
-        
+    
+
+    
+        //string currentName; // The name of the video we are working on
         //bool bForward;
-        bool bRunning;
         //ofxUISlider* trackTimeSlider;
         //ofxUISlider* autoRunDelaySlider;
         //ofxUIToggle* directionToggle;
@@ -86,17 +87,15 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* autoRunToggle;
         ofxUILabelToggle* forceOnToggle;
         ofxUISlider* trackPosSlider;
-
         ofxUILabelToggle* motorReturnToggle;
         ofxUILabelToggle* motorReleaseToggle;
         ofxUIIntSlider* lightColorSlider[3];
-    
 //        ofxUIIntSlider* lightDimmerSlider;
 //        ofxUIIntSlider* lightStrobeSlider;
     
         SoundEngine sound;
     
-        ofxJSONElement persist;
+        //ofxJSONElement persist;
         SourceMaterial source;
         ofFbo preview;
 

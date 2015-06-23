@@ -2,7 +2,7 @@
 #include "ofxModifierKeys.h"
 
 #define GUI_SETTINGS_XML "settings.xml"
-#define PERSIST_JSON_FILE "persist.json"
+//#define PERSIST_JSON_FILE "persist.json"
 #define TRACK_TIME 20 //196.5 // 3:16.5
 // DAY 1 // 2:53 // 2:55
 // DAY 2 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
@@ -41,6 +41,20 @@ string ofSystemCall(string command) {
     result.erase(remove(result.begin(), result.end(), '\n'), result.end());
     return result;
 }
+
+//--------------------------------------------------------------
+string toHMS(int time) {
+    int minutes = time / 60;
+    int seconds = time - (minutes*60);
+    stringstream ss;
+    ss << std::setfill('0') << std::setw(1) << minutes;
+    ss << ":";
+    ss << std::setfill('0') << std::setw(2) << seconds;
+    return ss.str();
+}
+
+
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -88,8 +102,8 @@ void ofApp::setup(){
     Poco::Path path = Poco::Path::home();
     path.pushDirectory("Desktop");
     path.pushDirectory("LightEchoesBig");
-    savePathRaw = path.toString();
-    ofDirectory::createDirectory(savePathRaw, false, true);
+    savePathBig = path.toString();
+    ofDirectory::createDirectory(savePathBig, false, true);
     
     path = Poco::Path::home();
     path.pushDirectory("Desktop");
@@ -221,7 +235,7 @@ void ofApp::exit() {
     camera.close();
     
     gui->saveSettings(GUI_SETTINGS_XML);
-    persist.save(PERSIST_JSON_FILE, true);
+    //persist.save(PERSIST_JSON_FILE, true);
     delete gui;
 }
 
@@ -347,7 +361,7 @@ void ofApp::update(){
         string basename = ofGetTimestampString("%m-%d-%H-%M-%S-%i");
         
         stringstream path;
-        path << savePathRaw << basename << ".jpg";
+        path << savePathBig << basename << ".jpg";
         ofLogNotice() << "=== SAVING " << path.str();
         camera.savePhoto( path.str() );
         
@@ -356,17 +370,6 @@ void ofApp::update(){
         ofLogNotice() << "=== RESIZING " << cmd.str();
         ofLogNotice() << ofSystemCall( cmd.str() );
     }
-}
-
-//--------------------------------------------------------------
-string ofApp::toHMS(int time) {
-    int minutes = time / 60;
-    int seconds = time - (minutes*60);
-    stringstream ss;
-    ss << std::setfill('0') << std::setw(1) << minutes;
-    ss << ":";
-    ss << std::setfill('0') << std::setw(2) << seconds;
-    return ss.str();
 }
 
 //--------------------------------------------------------------
