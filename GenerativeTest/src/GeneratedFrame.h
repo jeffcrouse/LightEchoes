@@ -38,6 +38,8 @@ public:
     void generate(int index);
     ofFloatColor getColor(int x, int y);
     
+    ofImage theTemplate;
+    
     ofPixels pixels;
     vector<TextLine*> lines;
 };

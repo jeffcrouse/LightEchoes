@@ -4,6 +4,25 @@
 #define GUI_SETTINGS_XML "settings.xml"
 #define PERSIST_JSON_FILE "persist.json"
 #define TRACK_TIME 196.5 // 3:16.5
+// DAY 1 // 2:53 // 2:55
+// DAY 2 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
+// DAY 3 // 2:45 // 2:35
+#define PIXELS_ON 10
+#define PIXELS_OFF 10
+#define DMX_CHANNEL_MOTOR_RELEASE 3
+#define DMX_CHANNEL_MOTOR_RETURN 1
+#define DMX_CHANNEL_LIGHT 15
+#define DMX_CHANNEL_LIGHT_R DMX_CHANNEL_LIGHT+0
+#define DMX_CHANNEL_LIGHT_G DMX_CHANNEL_LIGHT+1
+#define DMX_CHANNEL_LIGHT_B DMX_CHANNEL_LIGHT+2
+#define DMX_CHANNEL_LIGHT_COLOR_MIX DMX_CHANNEL_LIGHT+3
+#define DMX_CHANNEL_LIGHT_STROBE DMX_CHANNEL_LIGHT+4
+#define DMX_CHANNEL_LIGHT_SOUND_ACTIVE DMX_CHANNEL_LIGHT+5
+#define DMX_CHANNEL_LIGHT_DIMMER DMX_CHANNEL_LIGHT+6
+
+#define LIGHT_R 192
+#define LIGHT_G 191
+#define LIGHT_B 173
 
 //--------------------------------------------------------------
 string ofSystemCall(string command) {
@@ -33,7 +52,7 @@ void ofApp::setup(){
     //
     // SETUP AND INITIALIZE!!!
     //
-    dmx.connect(0, 3); // or use a number
+    dmx.connect(0, 64); // or use a number
     etherdream.setup();
     camera.setup();
     //camera.lockUI();
@@ -49,7 +68,8 @@ void ofApp::setup(){
     mainLine.drawPos.y = 0.5;
     pendulum.bDraw=false;
     bPaused = false;
-
+    bReturnClap=false;
+    bLightOn=false;
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -101,11 +121,16 @@ void ofApp::setup(){
     
     gui->addSpacer();
     gui->addLabel("DMX");
-    for(int i=0; i<NUM_DMX_CHANNELS; i++) {
-        dmxLevel[i] = gui->addSlider("DMX "+ofToString(i), 0, 512, 100);
-    }
+    motorReleaseToggle = gui->addLabelToggle("MOTOR RELEASE", false);
+    motorReturnToggle = gui->addLabelToggle("MOTOR RETURN", false);
+    lightColorSlider[0] = gui->addIntSlider("LIGHT RED", 0, 255, 0);
+    lightColorSlider[1] = gui->addIntSlider("LIGHT GREEN", 0, 255, 0);
+    lightColorSlider[2] = gui->addIntSlider("LIGHT BLUE", 0, 255, 0);
+    //lightDimmerSlider = gui->addIntSlider("LIGHT LEVEL", 0, 255, 0);
+    //lightStrobeSlider = gui->addIntSlider("LIGHT STROBE", 0, 255, 0);
     
     gui->addSpacer();
+    gui->addLabel("LASER COLOR ADJUST");
     colorAdjust[0] = gui->addSlider("RED ADJUST", 0, 1, 1);
     colorAdjust[1] = gui->addSlider("GREEN ADJUST", 0, 1, 1);
     colorAdjust[2] = gui->addSlider("BLUE ADJUST", 0, 1, 1);
@@ -146,7 +171,8 @@ void ofApp::setup(){
     sound.padVolume = gui->addSlider("PAD VOLUME", 0, 1, 1);
     sound.harpVolume = gui->addRangeSlider("HARP VOLUME", 0, 1, 0.25, 0.75);
     sound.drumVolume = gui->addSlider("DRUM VOLUME", 0, 1, 1);
-    sound.arpVolume = gui->addSlider("ARP VOUME", 0, 1, 0.5);
+    sound.clapVolume = gui->addSlider("CLAP VOUME", 0, 1, 1);
+    //sound.arpVolume = gui->addSlider("ARP VOUME", 0, 1, 0.5);
     sound.lightATheEndVolume = gui->addSlider("LIGHT VOLUME", 0, 1, 0.5);
     
     
@@ -154,12 +180,16 @@ void ofApp::setup(){
     gui->setPosition(0, 20);
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
     gui->loadSettings(GUI_SETTINGS_XML);
-    
-    // Don't want to send unnecessary DMX messages
-    for(int i=0; i<NUM_DMX_CHANNELS; i++) {
-        dmxLevel[i]->setValue(0);
-    }
+
+    motorReturnToggle->setValue(false);
+    motorReleaseToggle->setValue(false);
     forceOnToggle->setValue(false);
+//    lightStrobeSlider->setValue(0);
+//    lightDimmerSlider->setValue(0);
+    lightColorSlider[0]->setValue(LIGHT_R);
+    lightColorSlider[1]->setValue(LIGHT_G);
+    lightColorSlider[2]->setValue(LIGHT_B);
+    
     sound.setup();
 }
 
@@ -198,7 +228,7 @@ void ofApp::drawSafetyPattern() {
     safetyPattern[1].clear();
     safetyPattern[2].clear();
     
-    safetyPattern[0].params.output.color = mapColor(ofFloatColor::red);
+    safetyPattern[0].params.output.color = mapColor(ofFloatColor::white);
     safetyPattern[1].params.output.color = mapColor(ofFloatColor::green);
     safetyPattern[2].params.output.color = mapColor(ofFloatColor::blue);
     
@@ -232,11 +262,24 @@ void ofApp::update(){
     dmx.update();
     sound.update(trackPos);
     
+    lightLevel += (lightLevelTarget-lightLevel) / 5.0;
+    
+    /*
     for(int i=0; i<NUM_DMX_CHANNELS; i++) {
         int channel = i+1;
         int value = (bPaused) ? 0 : dmxLevel[i]->getValue();
         dmx.setLevel(channel, value);
     }
+    */
+
+    dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
+    dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, !motorReleaseToggle->getValue() || bPaused ? 0 : 255);
+    
+    dmx.setLevel(DMX_CHANNEL_LIGHT_R, lightColorSlider[0]->getValue());
+    dmx.setLevel(DMX_CHANNEL_LIGHT_G, lightColorSlider[1]->getValue());
+    dmx.setLevel(DMX_CHANNEL_LIGHT_B, lightColorSlider[2]->getValue());
+    //dmx.setLevel(DMX_CHANNEL_LIGHT_DIMMER, lightDimmerSlider->getValue());
+    //dmx.setLevel(DMX_CHANNEL_LIGHT_STROBE, lightStrobeSlider->getValue());
     
     /*
     if(stopMotorSignalAt!=-1 && now > stopMotorSignalAt) {
@@ -258,7 +301,7 @@ void ofApp::update(){
             trackPosSlider->setValue(trackPos);
         }
     }
-    
+
     if(!bRunning && startTime != -1) {
         float timeToStart = startTime - now;
         
@@ -266,6 +309,19 @@ void ofApp::update(){
             sound.startClap.playTo(0, 1);
         
         if(timeToStart < 0) startRun();
+        
+        if(timeToStart<10 && bReturnClap) {
+            sound.endClap.playTo(0,1);
+            bReturnClap = false;
+        }
+        
+//        if(timeToStart < 5 && now > nextCountdown) {
+//            stringstream cmd;
+//            cmd << "say " << ofToString( (int)timeToStart+1);
+//            ofLogNotice() << cmd.str();
+//            ofSystemCall( cmd.str() );
+//            nextCountdown = now+1;
+//        }
     }
     
     
@@ -362,10 +418,10 @@ void ofApp::draw(){
     
     if(!bRunning && startTime != -1) {
         float timeToStart = startTime - ofGetElapsedTimef();
-        string message = toHMS(timeToStart); //ofToString((int)timeToStart+1);
+        string message = toHMS(timeToStart+1); //ofToString((int)timeToStart+1);
         ofRectangle bb = font.getStringBoundingBox(message, 0, 0);
         float x = (ofGetWidth()/2.0) - (bb.width/2.0);
-        float y = (ofGetHeight()/2.0) + (bb.getHeight()*0.5);
+        float y = (ofGetHeight()/2.0) + 200;
         ofSetColor(ofColor::black);
         font.drawString(message, x+5, y+5);
         ofSetColor(ofColor::white);
@@ -400,7 +456,7 @@ void ofApp::updatePreviewFBO() {
         ofNoFill();
         ofSetLineWidth(3);
         ofSetColor(bRunning ? ofColor::green : ofColor::red);
-        float y1 = trackPos * source.getHeight();
+        float y1 = ofMap(trackPos, 0, 1, source.getHeight(), 0);
         ofLine(0, y1, source.getWidth(), y1);
         
         if(bRunning && pendulum.bDraw) {
@@ -476,9 +532,11 @@ void ofApp::drawPendulum() {
 }
 
 
+
 //--------------------------------------------------------------
 void ofApp::drawMainLine() {
-    int sampleY = trackPos * source.getHeight();
+    // Scan image from "bottom" (max height) to "top" (0)
+    int sampleY = ofMap(trackPos, 0, 1, source.getHeight(), 0);
     
     //if(sampleY==mainLine.lastSampleY) return;
     
@@ -491,7 +549,7 @@ void ofApp::drawMainLine() {
      
         mainLine.drawPos.x = sampleX / (float)source.getWidth();
   
-        color = (sampleX % 10<9)
+        color = (sampleX % PIXELS_ON<PIXELS_OFF)
             ? mapColor( source.getColor(sampleX, sampleY) )
             : ofFloatColor::black;
 
@@ -539,27 +597,26 @@ void ofApp::drawMainLine() {
     }
     
     etherdream.addPoints(mainLine.points);
-    
-    //mainLine.lastSampleY = sampleY;
 }
+
 
 
 //--------------------------------------------------------------
 void ofApp::motorReturn() {
-    dmxLevel[0]->setValue(255);
-    dmxLevel[2]->setValue(0);
+    motorReturnToggle->setValue(true);
+    motorReleaseToggle->setValue(false);
 }
 
 //--------------------------------------------------------------
 void ofApp::motorRelease() {
-    dmxLevel[0]->setValue(0);
-    dmxLevel[2]->setValue(255);
+    motorReturnToggle->setValue(false);
+    motorReleaseToggle->setValue(true);
 }
 
 //--------------------------------------------------------------
 void ofApp::motorStopSignal() {
-    dmxLevel[0]->setValue(0);
-    dmxLevel[2]->setValue(0);
+    motorReturnToggle->setValue(false);
+    motorReleaseToggle->setValue(false);
 }
 
 //--------------------------------------------------------------
@@ -568,11 +625,13 @@ void ofApp::startRun() {
     
     ofLogNotice() << "startRun";
     startTime = ofGetElapsedTimef();
-    
+
     sound.newMelody();
     
     motorRelease();
 
+    lightOff();
+    
     ofLogNotice() << "===== Pressing shutter button";
     if(camera.isConnected()) camera.pressShutterButton();
     bRunning=true;
@@ -593,13 +652,38 @@ void ofApp::endRun() {
     
     motorReturn();
     //toggleDirection();
+    lightOn();
+
     
     if(autoRunToggle->getValue()) {
         startTime = ofGetElapsedTimef() + TRACK_TIME + 10;
+        bReturnClap = true;
     } else {
         startTime = -1;
     }
 }
+//--------------------------------------------------------------
+void ofApp::lightOn() {
+    
+    lightColorSlider[0]->setValue(LIGHT_R);
+    lightColorSlider[1]->setValue(LIGHT_G);
+    lightColorSlider[2]->setValue(LIGHT_B);
+    bLightOn = true;
+    
+}
+//--------------------------------------------------------------
+void ofApp::lightOff() {
+    for(int i=0; i<3; i++)
+        lightColorSlider[i]->setValue(0);
+    bLightOn = false;
+}
+
+//--------------------------------------------------------------
+void ofApp::lightToggle() {
+    if(bLightOn) lightOff();
+    else lightOn();
+}
+
 
 //--------------------------------------------------------------
 void ofApp::incrementSource() {
@@ -729,6 +813,14 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUISlider *slider = (ofxUISlider*)e.getSlider();
         trackPos = slider->getValue();
     }
+    else if(name=="MOTOR RELEASE")
+    {
+        motorReturnToggle->setValue(false);
+    }
+    else if(name=="MOTOR RETURN")
+    {
+        motorReleaseToggle->setValue(false);
+    }
     gui->saveSettings(GUI_SETTINGS_XML);
 }
 
@@ -762,6 +854,10 @@ void ofApp::keyReleased(int key){
         bPaused=!bPaused;
     }
 
+    if(key=='l'){
+        lightToggle();
+    }
+    
     if(key=='m') {
         motorRelease();
     }

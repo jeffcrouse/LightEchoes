@@ -17,7 +17,7 @@ TextLine::TextLine(GeneratedFrame* parent, int _size, int _margin, string _textP
     bounds.set(0, 0, parent->getWidth(), parent->getHeight());
     flipped = _flipped;
     margin = _margin;
-    speed = font.getSize() * -0.1;
+    speed = font.getSize() * -0.05;
     spaceWidth = font.getSize() * 0.4;
     
     string text = ofToUpper(ofBufferFromFile(_textPath));
@@ -74,7 +74,10 @@ int TextLine::getHeight() {
 // ---------------------------------------------
 void GeneratedFrame::setup() {
     allocate(4000, 1600);
-    lines.push_back(new TextLine(this, 600, 10, "text/line01.txt"));
+    
+    theTemplate.loadImage("bars_1600.jpg");
+    
+    lines.push_back(new TextLine(this, 621, 10, "text/line01.txt"));
     lines.push_back(new TextLine(this, 200, 10, "text/line02.txt"));
     lines.push_back(new TextLine(this, 100, 10, "text/line03.txt"));
     lines.push_back(new TextLine(this, 200, 10, "text/line04.txt"));
@@ -97,6 +100,8 @@ void GeneratedFrame::generate(int index) {
     begin();
     ofClear(ofColor::black);
     ofSetColor(ofColor::white);
+    theTemplate.draw(0, 0);
+    
     for(int i=0; i<lines.size(); i++) {
         y += lines[i]->getHeight();
         lines[i]->draw(index, y);

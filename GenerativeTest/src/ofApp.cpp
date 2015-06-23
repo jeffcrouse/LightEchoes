@@ -13,6 +13,14 @@ void ofApp::setup(){
     
     frameRate = 60;
     
+    Poco::Path path = Poco::Path::home();
+    path.pushDirectory("Dropbox");
+    path.pushDirectory("LE Shared");
+    path.pushDirectory("GeneratedFrames");
+    outputPath = path.toString();
+    ofDirectory::createDirectory(outputPath, false, true);
+    
+    
     index = 0;
     frame.generate(index);
     incrementAt = ofGetElapsedTimef()+(1/frameRate);
@@ -27,6 +35,13 @@ void ofApp::update(){
     if(bAutoAdvance && now > incrementAt) {
         index++;
         frame.generate(index);
+        
+        stringstream path;
+        path << outputPath << std::setw(5) << std::setfill('0') << index << ".png";
+        saver.setFromPixels(frame.pixels);
+        saver.rotate90(1);
+        saver.saveImage(path.str());
+        
         
         incrementAt = ofGetElapsedTimef()+(1/frameRate);
     }

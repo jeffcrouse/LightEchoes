@@ -15,6 +15,7 @@
 #define NUM_HARPS 5
 #define NUM_PADS 4
 
+/*
 class CurveSound  {
 public:
     CurveSound() {
@@ -44,11 +45,11 @@ public:
     ofxSoundPlayerMultiOutput middle;
     ofxSoundPlayerMultiOutput back;
 };
-
+*/
 
 class SoundEngine {
 public:
-    
+    ~SoundEngine();
     void setup();
     void onBeat();
     void update(float trackPos);
@@ -66,7 +67,7 @@ public:
     //float nextFX;
     float harpCooldown;
     int padIndex;
-    float front, middle, back;
+    //float front, middle, back;
     int beat;
     
     vector<int> melody;
@@ -77,15 +78,16 @@ public:
     ofxUIRangeSlider* harpVolume;
     ofxUISlider* padVolume;
     ofxUISlider* fxVolume;
-    ofxUISlider* arpVolume;
+    //ofxUISlider* arpVolume;
+    ofxUISlider* clapVolume;
     ofxUISlider* drumVolume;
     ofxUISlider* lightATheEndVolume;
     
-    CurveSound pads[NUM_PADS];
+    ofxSoundPlayerMultiOutput pads[NUM_PADS];
     ofxSoundPlayerMultiOutput fx[NUM_FXS];
-    CurveSound harp[NUM_HARPS];
+    ofxSoundPlayerMultiOutput harp[NUM_HARPS];
     
-    ofxSoundPlayerMultiOutput arp;
+    //ofxSoundPlayerMultiOutput arp;
     ofxSoundPlayerMultiOutput endClap;
     ofxSoundPlayerMultiOutput startClap;
     ofxSoundPlayerMultiOutput kick;

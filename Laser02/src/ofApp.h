@@ -10,7 +10,7 @@
 #include "SourceMaterial.h"
 #include "SoundEngine.h"
 
-#define NUM_DMX_CHANNELS 5
+#define NUM_DMX_CHANNELS 10
 
 class ofApp : public ofBaseApp{
 
@@ -42,6 +42,9 @@ class ofApp : public ofBaseApp{
         void motorRelease();
         void motorReturn();
         void motorStopSignal();
+        void lightOn();
+        void lightOff();
+        void lightToggle();
         //float stopMotorSignalAt;
         //void toggleDirection();
         void updatePreviewFBO();
@@ -49,6 +52,11 @@ class ofApp : public ofBaseApp{
         void drawMainLine();
         string toHMS(int seconds);
     
+        float lightLevel;
+        float lightLevelTarget;
+    
+        bool bReturnClap;
+        bool bLightOn;
         ofxEtherdream etherdream;
         ofxEdsdk::Camera camera;
         ofxUISuperCanvas *gui;
@@ -64,6 +72,7 @@ class ofApp : public ofBaseApp{
         //string currentName; // The name of the video we are working on
         float trackPos;
         float startTime;
+        
         //bool bForward;
         bool bRunning;
         //ofxUISlider* trackTimeSlider;
@@ -73,8 +82,13 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* autoRunToggle;
         ofxUILabelToggle* forceOnToggle;
         ofxUISlider* trackPosSlider;
+
+        ofxUILabelToggle* motorReturnToggle;
+        ofxUILabelToggle* motorReleaseToggle;
+        ofxUIIntSlider* lightColorSlider[3];
     
-        ofxUISlider* dmxLevel[NUM_DMX_CHANNELS];
+//        ofxUIIntSlider* lightDimmerSlider;
+//        ofxUIIntSlider* lightStrobeSlider;
     
         SoundEngine sound;
     

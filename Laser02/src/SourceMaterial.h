@@ -13,12 +13,13 @@
 
 class SourceMaterial : public ofFbo {
 public:
-    
+
     void setup();
     ofFloatColor getColor(int x, int y);
     void increment();
     int getIndex();
     string getName() {
+        if(index > dir.size()-1 || index < 0) return "NONE";
         return dir.getName(index);
     }
     void onKeyReleased(int key);

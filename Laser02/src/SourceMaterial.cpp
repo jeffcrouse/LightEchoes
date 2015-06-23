@@ -18,7 +18,7 @@
 
 // -------------------------------------------------
 void SourceMaterial::setup() {
-    allocate(800, 1600);
+    allocate(800, 5000);
     
     fonts["small"].loadFont("fonts/HelveticaNeueLTCom-Th.ttf", 100);
     fonts["med"].loadFont("fonts/HelveticaNeueLTCom-Th.ttf", 200);
@@ -32,7 +32,6 @@ void SourceMaterial::setup() {
     
     v = 0;
     bWarpMode=false;
-    
     
     state.open(SOURCE_MATERIAL_STATE_JSON);
     
@@ -88,43 +87,52 @@ void SourceMaterial::setup() {
 // -------------------------------------------------
 void SourceMaterial::onKeyReleased(int key) {
     
+    bool dirty = false;
+    
+    if(key=='O') {
+        drawIntoFBO();
+        updatePixels();
+        ofSaveImage(pixels, "WarpedImage.png");
+    }
+    
     if(key=='w') {
         bWarpMode = !bWarpMode;
-        saveWarp();
+        dirty = true;
     }
     
     if(bWarpMode) {
         vector<ofPoint>& verts = mesh.getVertices();
         if(key=='v') {
             ++v %= verts.size(); // oooh, tricky
-            saveWarp();
+            dirty = true;
         }
         if(key=='V') {
             --v %= verts.size(); // oooh, tricky
-            saveWarp();
+            dirty = true;
         }
         if(key==OF_KEY_LEFT) {
             verts[v].x -= ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
-            updatePixels();
-            saveWarp();
+            dirty = true;
         }
         if(key==OF_KEY_RIGHT) {
             verts[v].x += ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
-            updatePixels();
-            saveWarp();
+            dirty = true;
         }
         if(key==OF_KEY_UP) {
             verts[v].y -= ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
-            updatePixels();
-            saveWarp();
+            dirty = true;
         }
         if(key==OF_KEY_DOWN) {
             verts[v].y += ofGetModifierPressed(OF_KEY_SHIFT) ? 4 : 0.5;
-            updatePixels();
-            saveWarp();
+            dirty = true;
         }
     }
-    drawIntoFBO();
+    
+    if(dirty) {
+        drawIntoFBO();
+        updatePixels();
+        saveWarp();
+    }
 }
 
 
@@ -189,7 +197,7 @@ void SourceMaterial::loadImage() {
     name = dir.getName(index);
     image.clear();
     image.loadImage(dir.getPath(index));
-    image.mirror(true, true);
+    //image.mirror(true, false);
     
     drawIntoFBO();
     updatePixels();

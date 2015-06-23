@@ -25,5 +25,6 @@ class ofApp : public ofBaseApp{
         int index;
         GeneratedFrame frame;
         float incrementAt;
-
+        string outputPath;
+    ofImage saver;
 };
