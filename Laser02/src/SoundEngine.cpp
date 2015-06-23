@@ -18,6 +18,8 @@ void SoundEngine::setup() {
     ofFmodSelectDriver(0);
     ofFmodSetNumOutputs(6);
     
+    newMelody();
+    
     // LOAD SOUNDS
     hihat.loadSound("sounds/LE.Elements_0617.hihat.aif");
     kick.loadSound("sounds/LE.Elements_0617.kick.aif");

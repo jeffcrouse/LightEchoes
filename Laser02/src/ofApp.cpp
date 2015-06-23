@@ -63,7 +63,7 @@ void ofApp::setup(){
     
     Poco::Path path = Poco::Path::home();
     path.pushDirectory("Desktop");
-    path.pushDirectory("LightEchoesRaw");
+    path.pushDirectory("LightEchoesBig");
     savePathRaw = path.toString();
     ofDirectory::createDirectory(savePathRaw, false, true);
     
@@ -229,15 +229,21 @@ void ofApp::update(){
     float endTime = startTime + TRACK_TIME; //trackTimeSlider->getValue();
     
     camera.update();
+    dmx.update();
+    sound.update(trackPos);
     
     for(int i=0; i<NUM_DMX_CHANNELS; i++) {
         int channel = i+1;
-        dmx.setLevel(channel, dmxLevel[i]->getValue());
+        int value = (bPaused) ? 0 : dmxLevel[i]->getValue();
+        dmx.setLevel(channel, value);
     }
-    dmx.update();
     
-    sound.update(trackPos);
-    
+    /*
+    if(stopMotorSignalAt!=-1 && now > stopMotorSignalAt) {
+        motorStopSignal();
+        stopMotorSignalAt=-1;
+    }
+    */
     //drawSafetyPattern();
     
     // RUN LOGIC
@@ -313,10 +319,14 @@ void ofApp::draw(){
     stringstream info1;
     info1 << "etherdream" << endl;
     info1 << "state = " << etherdream.getState() << endl;
-    info1 << "mainLine = " << mainLine.points.size() << endl;
+    info1 << "mainLine = " << mainLine.points.size();
     ofDrawBitmapStringHighlight(info1.str(), 10, ofGetHeight()-60);
 
-
+    if(bPaused) {
+        ofDrawBitmapStringHighlight("PAUSED", 250, 20);
+    }
+    
+    
     // Brightness bars
     ofFill();
     ofSetColor(ofColor::red);
@@ -535,19 +545,19 @@ void ofApp::drawMainLine() {
 
 
 //--------------------------------------------------------------
-void ofApp::laserReturn() {
+void ofApp::motorReturn() {
     dmxLevel[0]->setValue(255);
     dmxLevel[2]->setValue(0);
 }
 
 //--------------------------------------------------------------
-void ofApp::laserRelease() {
+void ofApp::motorRelease() {
     dmxLevel[0]->setValue(0);
     dmxLevel[2]->setValue(255);
 }
 
 //--------------------------------------------------------------
-void ofApp::laserStopSignal() {
+void ofApp::motorStopSignal() {
     dmxLevel[0]->setValue(0);
     dmxLevel[2]->setValue(0);
 }
@@ -561,8 +571,8 @@ void ofApp::startRun() {
     
     sound.newMelody();
     
-    laserRelease();
-    
+    motorRelease();
+
     ofLogNotice() << "===== Pressing shutter button";
     if(camera.isConnected()) camera.pressShutterButton();
     bRunning=true;
@@ -581,7 +591,7 @@ void ofApp::endRun() {
     sound.endClap.playTo(4, 5);
     incrementSource();
     
-    laserReturn();
+    motorReturn();
     //toggleDirection();
     
     if(autoRunToggle->getValue()) {
@@ -602,7 +612,6 @@ void ofApp::incrementSource() {
         source.reset();
     }
      */
-    
     source.increment();
 }
 
@@ -747,18 +756,18 @@ void ofApp::keyReleased(int key){
         sound.playHarp();
     }
     if(key=='s') {
-        laserStopSignal();
+        motorStopSignal();
     }
     if(key=='p') {
         bPaused=!bPaused;
     }
 
-    if(key==OF_KEY_UP) {
-        laserRelease();
+    if(key=='m') {
+        motorRelease();
     }
     
-    if(key==OF_KEY_DOWN) {
-        laserReturn();
+    if(key=='M') {
+        motorReturn();
     }
     
     source.onKeyReleased(key);

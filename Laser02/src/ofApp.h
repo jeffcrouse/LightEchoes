@@ -39,9 +39,10 @@ class ofApp : public ofBaseApp{
         //void processFrames();
         void startRun();
         void endRun();
-        void laserRelease();
-        void laserReturn();
-        void laserStopSignal();
+        void motorRelease();
+        void motorReturn();
+        void motorStopSignal();
+        //float stopMotorSignalAt;
         //void toggleDirection();
         void updatePreviewFBO();
         void drawPendulum();
