@@ -10,8 +10,6 @@
 #include "SourceMaterial.h"
 #include "SoundEngine.h"
 
-#define NUM_DMX_CHANNELS 10
-
 class ofApp : public ofBaseApp{
 
 	public:
@@ -32,15 +30,9 @@ class ofApp : public ofBaseApp{
 		void guiEvent(ofxUIEventArgs &e);
     
     
-        float elapsedTime;
-    
-    
         ofFloatColor mapColor(ofFloatColor c);
         void drawSafetyPattern();
         void incrementSource();
-        //void makeNewName();
-        //string getSavePath();
-        //void processFrames();
         void startRun();
         void endRun();
         void motorRelease();
@@ -49,24 +41,31 @@ class ofApp : public ofBaseApp{
         void lightOn();
         void lightOff();
         void lightToggle();
-        //void toggleDirection();
         void updatePreviewFBO();
-        void drawPendulum();
         void drawMainLine();
         void pause();
         void unpause();
         void togglePaused();
-    
-    
+        //void drawPendulum();
+        //void toggleDirection();
+        //void makeNewName();
+        //string getSavePath();
+        //void processFrames();
+        
 
         ofxEtherdream etherdream;
         ofxEdsdk::Camera camera;
-        ofxUISuperCanvas *gui;
         ofxDmx dmx;
+        ofxUISuperCanvas *gui;
         ofTrueTypeFont font;
+        SoundEngine sound;
         ofxIlda::Frame calibPattern;
-        ofxUISlider* colorAdjust[3];
-        //ofxUIRangeSlider* cutout;
+        SourceMaterial source;
+        ofFbo preview;
+        //ofxJSONElement persist;
+    
+    
+        float elapsedTime;
         string savePathBig, savePathSmall;
         bool bPaused;
         bool bReturnClap;
@@ -75,14 +74,16 @@ class ofApp : public ofBaseApp{
         bool bRunning;
         float trackPos;
         float startTime,endTime;
-    
+        float brightness;
+        float brightnessVelocity;
 
-    
         //string currentName; // The name of the video we are working on
         //bool bForward;
+        //ofxUIRangeSlider* cutout;
         //ofxUISlider* trackTimeSlider;
         //ofxUISlider* autoRunDelaySlider;
         //ofxUIToggle* directionToggle;
+        ofxUISlider* colorAdjust[3];
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;
         ofxUILabelToggle* forceOnToggle;
@@ -90,15 +91,12 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* motorReturnToggle;
         ofxUILabelToggle* motorReleaseToggle;
         ofxUIIntSlider* lightColorSlider[3];
-//        ofxUIIntSlider* lightDimmerSlider;
-//        ofxUIIntSlider* lightStrobeSlider;
+        ofxUISlider* briChangeThresh;
+        //ofxUIIntSlider* lightDimmerSlider;
+        //ofxUIIntSlider* lightStrobeSlider;
     
-        SoundEngine sound;
     
-        //ofxJSONElement persist;
-        SourceMaterial source;
-        ofFbo preview;
-
+        /*
         struct Pendulum {
             ofxIlda::Frame frame;
             float stripeWidth;
@@ -112,16 +110,14 @@ class ofApp : public ofBaseApp{
             bool bDraw;
             float vel;
         } pendulum;
+         */
     
         struct MainLine {
             vector<ofxIlda::Point> points;
             int endCount;
             int blankCount;
             //int lastSampleY;
-            ofPoint drawPos;    // Where in the etherdream frame are we drawing the sampled color?
         } mainLine;
     
-        float brightness;
-        float brightnessVelocity;
-        ofxUISlider* briChangeThresh;
+
 };

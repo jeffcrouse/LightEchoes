@@ -3,10 +3,11 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 //#define PERSIST_JSON_FILE "persist.json"
-#define TRACK_TIME 20 //196.5 // 3:16.5
-// DAY 1 // 2:53 // 2:55
-// DAY 2 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
-// DAY 3 // 2:45 // 2:35
+#define TRACK_TIME 196.5 
+// TEST 1 // 3:16.5
+// TEST 2 // 2:53 // 2:55
+// TEST 3 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
+// TEST 4 // 2:45 // 2:35
 
 #define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
@@ -81,8 +82,7 @@ void ofApp::setup(){
     trackPos = 0;
     brightness = 0;
     brightnessVelocity = 0;
-    mainLine.drawPos.y = 0.5;
-    pendulum.bDraw=false;
+    //pendulum.bDraw=false;
     bPaused = false;
     bReturnClap=false;
     bStartClap=false;
@@ -345,7 +345,7 @@ void ofApp::update(){
     if(bRunning || bPaused || forceOnToggle->getValue()) {
         if(etherdream.checkConnection(true)) {
             drawMainLine();
-            drawPendulum();
+            //drawPendulum();
         }
     }
     
@@ -465,7 +465,8 @@ void ofApp::updatePreviewFBO() {
         ofSetColor(bRunning ? ofColor::green : ofColor::red);
         float y1 = ofMap(trackPos, 0, 1, source.getHeight(), 0);
         ofLine(0, y1, source.getWidth(), y1);
-        
+    
+    /*
         if(bRunning && pendulum.bDraw) {
             ofSetColor(ofColor::red);
             float min = y1 - 100;
@@ -473,7 +474,7 @@ void ofApp::updatePreviewFBO() {
             float y2 = ofMap(pendulum.sin, -1, 1, min, max);
             ofLine(0, y2, source.getWidth(), y2);
         }
-
+*/
         ofPopStyle();
     preview.end();
 }
@@ -481,6 +482,7 @@ void ofApp::updatePreviewFBO() {
 
 //--------------------------------------------------------------
 // Add the lines to the etherdream that represent the pendulum.
+/*
 void ofApp::drawPendulum() {
     pendulum.frame.clear();
     
@@ -493,7 +495,7 @@ void ofApp::drawPendulum() {
         float newVel = newSin-oldSin;
         pendulum.vel = newVel;
         
-        /*
+
         if(oldSin > 0 && newSin < 0) {
             hihat.play();
             kick.play();
@@ -508,7 +510,6 @@ void ofApp::drawPendulum() {
         if(newVel > 0 && oldVel < 0) {
             hihat.play();
         }
-        */
         
         pendulum.sin = newSin;
         float min = 0.5 - pendulum.height;
@@ -537,7 +538,7 @@ void ofApp::drawPendulum() {
     pendulum.frame.update();
     etherdream.addPoints(pendulum.frame);
 }
-
+*/
 
 
 //--------------------------------------------------------------
@@ -549,22 +550,23 @@ void ofApp::drawMainLine() {
     
     vector<ofxIlda::Point> pts;
     ofFloatColor color;
+    ofPoint drawPos; // Where in the etherdream frame are we drawing the sampled color?
+    drawPos.y = 0.5;
     
     float totalBrightness = 0;
     int sampleX;
     for (int sampleX=0; sampleX<source.getWidth(); sampleX++) {
      
-        mainLine.drawPos.x = sampleX / (float)source.getWidth();
-  
+        drawPos.x = sampleX / (float)source.getWidth();
+        drawPos.x = ofClamp(drawPos.x, 0, 1);
+        
         color = (sampleX % PIXELS_ON<PIXELS_OFF)
             ? mapColor( source.getColor(sampleX, sampleY) )
             : ofFloatColor::black;
 
         totalBrightness += color.getBrightness();
-        
-        mainLine.drawPos.x = ofClamp(mainLine.drawPos.x, 0, 1);
-        
-        pts.push_back(ofxIlda::Point(mainLine.drawPos, color));
+
+        pts.push_back(ofxIlda::Point(drawPos, color));
 
     }
     
@@ -574,11 +576,12 @@ void ofApp::drawMainLine() {
     
     brightness = newBrightness;
     brightnessVelocity = diff;
-
     
     if(brightnessVelocity > briChangeThresh->getValue()) {
         sound.playHarp();
     }
+    
+    
     
     mainLine.points.clear();
     
@@ -769,7 +772,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUIToggle *toggle = (ofxUIToggle *) e.getToggle();
         bForward = toggle->getValue();
     }
-     */
+    
     else if(name=="SWING SPEED")
     {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
@@ -805,6 +808,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         pendulum.stripeWidth = slider->getValue();
     }
+      */
     else if(name == "LINE END COUNT")
     {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
