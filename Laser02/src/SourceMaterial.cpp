@@ -79,7 +79,13 @@ void SourceMaterial::setup() {
         }
     }
     
-    dir.listDir(SOURCE_DIR);
+    Poco::Path path = Poco::Path::home();
+    path.pushDirectory("Dropbox");
+    path.pushDirectory("LE Shared");
+    path.pushDirectory(SOURCE_DIR);
+    ofDirectory::createDirectory(path.toString(), false, true);
+    
+    dir.listDir(path.toString());
     loadWarp();
     loadImage();
 }
