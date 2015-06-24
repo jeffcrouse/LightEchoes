@@ -11,7 +11,7 @@
 
 #define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
-#define PIXELS_OFF 9
+#define PIXELS_OFF 10
 #define DMX_CHANNEL_MOTOR_RELEASE 3
 #define DMX_CHANNEL_MOTOR_RETURN 1
 #define DMX_CHANNEL_LIGHT 15
@@ -108,7 +108,7 @@ void ofApp::setup(){
     path = Poco::Path::home();
     path.pushDirectory("Dropbox");
     path.pushDirectory("LE Shared");
-    path.pushDirectory("_PhotosBig");
+    path.pushDirectory("_PhotosSmall");
     savePathSmall = path.toString();
     ofDirectory::createDirectory(savePathSmall, false, true);
     
