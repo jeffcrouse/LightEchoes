@@ -401,7 +401,7 @@ void ofApp::draw(){
     // LEFT SIDE
     ofSetColor(ofColor::white);
     //float ratio = (ofGetHeight()-40) / (float)preview.getHeight();
-    preview.draw(250, 20, 500, 1050);
+    preview.draw(250, 20, 400, 900);
 
     stringstream info2;
     info2 << "index = " << source.getIndex() << endl;
@@ -413,18 +413,23 @@ void ofApp::draw(){
     
     if(camera.isConnected()) {
         // UPPER LEFT - live camera image
-        camera.draw(790, 30, 640, 480);
+        camera.draw(690, 20, 640, 480);
         
         // LOWER LEFT - most recent photo
-        camera.drawPhoto(790, 520, 640, 480);
+        camera.drawPhoto(690, 510, 640, 480);
         
         stringstream info3;
         info3 << "BulbExposureTime: " << camera.bulbExposureTime;
         ofColor textColor = camera.isShutterButtonPressed()? ofColor::green: ofColor::red;
-        ofDrawBitmapStringHighlight(info3.str(), 790, ofGetHeight()-60, ofColor::black, textColor);
+        ofDrawBitmapStringHighlight(info3.str(), 690, ofGetHeight()-60, ofColor::black, textColor);
         
     } else {
-        ofDrawBitmapStringHighlight("NO CAMERA", 790, 30, ofColor::red, ofColor::white);
+        ofSetColor(ofColor::black);
+        
+        ofRect(690, 20, 640, 480);
+        ofRect(690, 510, 640, 480);
+        
+        ofDrawBitmapStringHighlight("NO CAMERA", 690, ofGetHeight()-60, ofColor::red, ofColor::white);
     }
     
     
