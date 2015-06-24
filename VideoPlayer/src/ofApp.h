@@ -20,12 +20,14 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		
     
-        void nextVideo();
     
-    string currentVideo;
-    string videoFolder;
-    ofDirectory dir;
-    ofVideoPlayer video;
-    ofRectangle bounds;
-    bool bDebug;
+        ofDirectory dir;
+        int numPhotos;
+    
+        string dropboxPath;
+        string videoPath;
+        string photosPath;
+        ofVideoPlayer video;
+        ofRectangle bounds;
+        bool bDebug;
 };

@@ -376,7 +376,7 @@ void ofApp::update(){
         camera.savePhoto( path.str() );
         
         stringstream cmd;
-        cmd << "sips -Z 1920 " << path.str() << " --out \"" << savePathSmall << basename << ".jpg\"";
+        cmd << "sips -Z 1920 \"" << path.str() << "\" --out \"" << savePathSmall << basename << ".jpg\"";
         ofLogNotice() << "=== RESIZING " << cmd.str();
         ofLogNotice() << ofSystemCall( cmd.str() );
     }
