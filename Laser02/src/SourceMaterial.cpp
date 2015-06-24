@@ -40,7 +40,7 @@ void SourceMaterial::setup() {
  
     mesh.setMode(OF_PRIMITIVE_TRIANGLES);
 
-    //float col_pos[NUM_COLS] = {0.0, 170/800.0, 628/800.0, 1.0};
+    float col_pos[NUM_COLS] = {0.0, 0.25, 0.75, 1.0};
     
     ofVec3f vert;
     ofVec3f normal(0, 0, 1); // always facing forward //
@@ -51,8 +51,8 @@ void SourceMaterial::setup() {
         for(int ix = 0; ix < columns; ix++) {
             
             // normalized tex coords //
-            texcoord.x = ((float)ix/((float)columns-1.f));
-            //texcoord.x = col_pos[ix];
+            //texcoord.x = ((float)ix/((float)columns-1.f));
+            texcoord.x = col_pos[ix];
             texcoord.y = ((float)iy/((float)rows-1.f));
             
             vert.x = texcoord.x * getWidth();

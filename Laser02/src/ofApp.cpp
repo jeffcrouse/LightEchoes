@@ -63,7 +63,7 @@ void ofApp::setup(){
     ofBackground(50);
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
-    ofSetDataPathRoot("../Resources/data/");
+    //ofSetDataPathRoot("../Resources/data/");
     
     //
     // SETUP AND INITIALIZE!!!
