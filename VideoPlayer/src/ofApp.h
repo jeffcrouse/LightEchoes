@@ -19,16 +19,22 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-        void onNewPhoto(string path);
+        bool bDebug;
     
         ofDirectory dir;
-        int numPhotos;
         ofImage frame;
-    
-        
-    
-        string dropboxPath;
         ofVideoPlayer video;
         ofRectangle bounds;
-        bool bDebug;
+    
+        int numPhotos;
+        float nextFramecheck;
+        float nextVideoReload;
+    
+        float frameStart,frameEnd;
+        float frameAlpha;
+    
+        string dropboxPath;
+        string videoPath;
+        string photosDir;
+        string lockfilePath;
 };
