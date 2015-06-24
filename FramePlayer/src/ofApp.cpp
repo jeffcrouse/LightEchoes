@@ -15,7 +15,7 @@ void ofApp::setup(){
     font.loadFont("verdana.ttf", 24);
     
     Poco::Path path = Poco::Path::home();
-    path.pushDirectory("Dropbod");
+    path.pushDirectory("Dropbox");
     path.pushDirectory("LE Shared");
     path.pushDirectory("_PhotosSmall");
     contentPath = path.toString();
