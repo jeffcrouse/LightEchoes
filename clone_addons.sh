@@ -5,3 +5,4 @@ git clone https://github.com/jefftimesten/ofxCanon.git ../../addons/ofxCanon
 git clone https://github.com/jefftimesten/ofxJSON.git ../../addons/ofxJSON
 git clone https://github.com/rezaali/ofxUI.git ../../addons/ofxUI
 git clone https://github.com/satoruhiga/ofxModifierKeys.git ../../addons/ofxModifierKeys
+git clone https://github.com/kylemcdonald/ofxDmx.git ../../addons/ofxDmx
