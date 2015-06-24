@@ -90,7 +90,7 @@ class ofApp : public ofBaseApp{
         ofxUISlider* trackPosSlider;
         ofxUILabelToggle* motorReturnToggle;
         ofxUILabelToggle* motorReleaseToggle;
-        ofxUIIntSlider* lightColorSlider[3];
+        ofxUISlider* lightLevelSlider;
         ofxUISlider* briChangeThresh;
         //ofxUIIntSlider* lightDimmerSlider;
         //ofxUIIntSlider* lightStrobeSlider;

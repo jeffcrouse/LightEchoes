@@ -11,7 +11,7 @@
 
 #define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
-#define PIXELS_OFF 10
+#define PIXELS_OFF 9
 #define DMX_CHANNEL_MOTOR_RELEASE 3
 #define DMX_CHANNEL_MOTOR_RETURN 1
 #define DMX_CHANNEL_LIGHT 15
@@ -55,8 +55,6 @@ string toHMS(int time) {
 }
 
 
-
-
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle("LightEchoes");
@@ -65,6 +63,7 @@ void ofApp::setup(){
     ofBackground(50);
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
+    
     
     //
     // SETUP AND INITIALIZE!!!
@@ -100,14 +99,16 @@ void ofApp::setup(){
     
     
     Poco::Path path = Poco::Path::home();
-    path.pushDirectory("Desktop");
-    path.pushDirectory("LightEchoesBig");
+    path.pushDirectory("Dropbox");
+    path.pushDirectory("LE Shared");
+    path.pushDirectory("_PhotosBig");
     savePathBig = path.toString();
     ofDirectory::createDirectory(savePathBig, false, true);
     
     path = Poco::Path::home();
-    path.pushDirectory("Desktop");
-    path.pushDirectory("LightEchoesSmall");
+    path.pushDirectory("Dropbox");
+    path.pushDirectory("LE Shared");
+    path.pushDirectory("_PhotosBig");
     savePathSmall = path.toString();
     ofDirectory::createDirectory(savePathSmall, false, true);
     
@@ -141,9 +142,10 @@ void ofApp::setup(){
     gui->addLabel("DMX");
     motorReleaseToggle = gui->addLabelToggle("MOTOR RELEASE", false);
     motorReturnToggle = gui->addLabelToggle("MOTOR RETURN", false);
-    lightColorSlider[0] = gui->addIntSlider("LIGHT RED", 0, 255, 0);
-    lightColorSlider[1] = gui->addIntSlider("LIGHT GREEN", 0, 255, 0);
-    lightColorSlider[2] = gui->addIntSlider("LIGHT BLUE", 0, 255, 0);
+    lightLevelSlider = gui->addSlider("LIGHT LEVEL", 0.0, 1.0, 0.0);
+//    lightColorSlider[0] = gui->addIntSlider("LIGHT RED", 0, 255, 0);
+//    lightColorSlider[1] = gui->addIntSlider("LIGHT GREEN", 0, 255, 0);
+//    lightColorSlider[2] = gui->addIntSlider("LIGHT BLUE", 0, 255, 0);
     //lightDimmerSlider = gui->addIntSlider("LIGHT LEVEL", 0, 255, 0);
     //lightStrobeSlider = gui->addIntSlider("LIGHT STROBE", 0, 255, 0);
     
@@ -178,9 +180,9 @@ void ofApp::setup(){
         x += gap;
     }
      */
+    
+    
     gui->addSpacer();
-    
-    
     gui->addLabel("SOUND");
     sound.masterVolume = gui->addSlider("MASTER VOLUME", 0, 1, 1);
     sound.tempo = gui->addSlider("TEMPO", 60, 220, 90);
@@ -199,16 +201,17 @@ void ofApp::setup(){
     ofAddListener(gui->newGUIEvent, this, &ofApp::guiEvent);
     gui->loadSettings(GUI_SETTINGS_XML);
 
+    
     trackPosSlider->setValue(trackPos);
     motorReturnToggle->setValue(false);
     motorReleaseToggle->setValue(false);
     forceOnToggle->setValue(false);
 //    lightStrobeSlider->setValue(0);
 //    lightDimmerSlider->setValue(0);
-    lightColorSlider[0]->setValue(LIGHT_R);
-    lightColorSlider[1]->setValue(LIGHT_G);
-    lightColorSlider[2]->setValue(LIGHT_B);
-    
+//    lightColorSlider[0]->setValue(LIGHT_R);
+//    lightColorSlider[1]->setValue(LIGHT_G);
+//    lightColorSlider[2]->setValue(LIGHT_B);
+    lightLevelSlider->setValue(1);
     sound.setup();
 }
 
@@ -306,9 +309,10 @@ void ofApp::update(){
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 0 : 255);
     }
     
-    dmx.setLevel(DMX_CHANNEL_LIGHT_R, lightColorSlider[0]->getValue());
-    dmx.setLevel(DMX_CHANNEL_LIGHT_G, lightColorSlider[1]->getValue());
-    dmx.setLevel(DMX_CHANNEL_LIGHT_B, lightColorSlider[2]->getValue());
+    float val = lightLevelSlider->getValue();
+    dmx.setLevel(DMX_CHANNEL_LIGHT_R, ofMap(val, 0, 1, 0, LIGHT_R));
+    dmx.setLevel(DMX_CHANNEL_LIGHT_G, ofMap(val, 0, 1, 0, LIGHT_G));
+    dmx.setLevel(DMX_CHANNEL_LIGHT_B, ofMap(val, 0, 1, 0, LIGHT_B));
     //dmx.setLevel(DMX_CHANNEL_LIGHT_DIMMER, lightDimmerSlider->getValue());
     //dmx.setLevel(DMX_CHANNEL_LIGHT_STROBE, lightStrobeSlider->getValue());
     
@@ -396,7 +400,8 @@ void ofApp::draw(){
     
     // LEFT SIDE
     ofSetColor(ofColor::white);
-    preview.draw(250, 30, 500, 1000);
+    //float ratio = (ofGetHeight()-40) / (float)preview.getHeight();
+    preview.draw(250, 20, 500, 1050);
 
     stringstream info2;
     info2 << "index = " << source.getIndex() << endl;
@@ -674,17 +679,17 @@ void ofApp::endRun() {
 }
 //--------------------------------------------------------------
 void ofApp::lightOn() {
-    
-    lightColorSlider[0]->setValue(LIGHT_R);
-    lightColorSlider[1]->setValue(LIGHT_G);
-    lightColorSlider[2]->setValue(LIGHT_B);
+    lightLevelSlider->setValue(1);
+//    lightColorSlider[0]->setValue(LIGHT_R);
+//    lightColorSlider[1]->setValue(LIGHT_G);
+//    lightColorSlider[2]->setValue(LIGHT_B);
     bLightOn = true;
     
 }
 //--------------------------------------------------------------
 void ofApp::lightOff() {
     for(int i=0; i<3; i++)
-        lightColorSlider[i]->setValue(0);
+        lightLevelSlider->setValue(0);
     bLightOn = false;
 }
 

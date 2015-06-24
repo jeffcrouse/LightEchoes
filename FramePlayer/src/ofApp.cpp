@@ -15,18 +15,17 @@ void ofApp::setup(){
     font.loadFont("verdana.ttf", 24);
     
     Poco::Path path = Poco::Path::home();
-    path.pushDirectory("Desktop");
-    path.pushDirectory("LightEchoesSmall");
+    path.pushDirectory("Dropbod");
+    path.pushDirectory("LE Shared");
+    path.pushDirectory("_PhotosSmall");
     contentPath = path.toString();
     ofDirectory::createDirectory(contentPath, false, true);
     
-    
-    path = Poco::Path::home();
-    path.pushDirectory("Desktop");
-    path.setFileName("sync.lock");
-    lockfile = path.toString();
-    ofLogNotice() << "lockfile: " << lockfile;
-    
+//    path = Poco::Path::home();
+//    path.pushDirectory("Desktop");
+//    path.setFileName("sync.lock");
+//    lockfile = path.toString();
+//    ofLogNotice() << "lockfile: " << lockfile;
     
 //    buffer = ofBufferFromFile("mountCommand.txt");
 //    mountCommand = buffer.getFirstLine();
@@ -111,10 +110,10 @@ void ofApp::checkForNewFrame(){
         return;
     }
     
-    if(ofFile::doesFileExist(lockfile)){
-        ofLogNotice() << "Waiting for sync to complete.";
-        return;
-    };
+//    if(ofFile::doesFileExist(lockfile)){
+//        ofLogNotice() << "Waiting for sync to complete.";
+//        return;
+//    }
     
     dir.allowExt("jpg");
     dir.listDir(contentPath);
