@@ -2,9 +2,9 @@
 
 #include "ofMain.h"
 
-#define NUM_FRAMES 200
+#define NUM_FRAMES 30
 #define PLAYBACK_FRAMERATE 24.0
-#define PAUSE_ON_NEW_FRAME 30
+#define PAUSE_ON_NEW_FRAME 200
 
 
 #define STATE_LOOKING_FOR_DIR 1
