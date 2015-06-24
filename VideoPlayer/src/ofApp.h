@@ -19,10 +19,12 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
-    
+        void onNewPhoto(string path);
     
         ofDirectory dir;
         int numPhotos;
+        ofImage frame;
+    
     
         string dropboxPath;
         string videoPath;

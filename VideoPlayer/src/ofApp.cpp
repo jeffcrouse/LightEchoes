@@ -12,6 +12,8 @@ void ofApp::setup(){
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
     ofSetLogLevel("ofDirectory", OF_LOG_SILENT);
     ofSetDataPathRoot("../Resources/data/");
+    bDebug=false;
+    
     
     Poco::Path path = Poco::Path::home();
     path.pushDirectory("Dropbox");
@@ -23,7 +25,6 @@ void ofApp::setup(){
     stringstream vp;
     vp << dropboxPath << "Video.mp4";
     videoPath = vp.str();
-
     video.loadMovie(videoPath);
     
     stringstream pp;
@@ -31,13 +32,13 @@ void ofApp::setup(){
     photosPath = pp.str();
     
     
+    
     dir.allowExt("jpg");
     dir.listDir(photosPath);
     numPhotos = dir.size();
     
     
-    bDebug=false;
-    
+
     float ratio =  ofGetHeight() / video.getHeight();
     bounds.height = video.getHeight() * ratio;
     bounds.width = video.getWidth() * ratio;
@@ -57,13 +58,33 @@ void ofApp::update(){
         dir.listDir(photosPath);
         dir.sort();
         if (dir.size() > numPhotos) {
-            
+            onNewPhoto(dir.getPath(dir.size()-1));
         } else {
             video.play();
         }
     }
 }
 
+//--------------------------------------------------------------
+void ofApp::onNewPhoto(string path) {
+    frame.loadImage(path);
+    
+    
+    
+    stringstream cmd;
+    cmd << "cd \"" << dropboxPath << "\";";
+    cmd << "ffmpeg -f image2 ";
+    cmd << "-pattern_type glob -i '_PhotosSmall/*.jpg' ";
+    cmd << "-s 1920x1080 ";
+    cmd << "-c:v libx264 ";
+    cmd << "-an ";
+    cmd << "-q:v 2 ";
+    cmd << "-r 24 ";
+    cmd << "-pix_fmt yuv420p ";
+    cmd << "Video.mp4";
+    
+    
+}
 
 //--------------------------------------------------------------
 void ofApp::draw(){
@@ -117,7 +138,11 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+    float ratio =  ofGetHeight() / video.getHeight();
+    bounds.height = video.getHeight() * ratio;
+    bounds.width = video.getWidth() * ratio;
+    bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
+    bounds.y = 0;
 }
 
 //--------------------------------------------------------------
