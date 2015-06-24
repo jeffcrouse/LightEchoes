@@ -319,6 +319,8 @@ void ofApp::update(){
     
     // RUN LOGIC
     if(bRunning && !bPaused) {
+        ofSetWindowTitle("LightEchoes (RUNNING)");
+        
         endTime = startTime + TRACK_TIME;
         if(elapsedTime > endTime) {
             endRun();
@@ -329,6 +331,8 @@ void ofApp::update(){
     }
 
     if(startTime != -1) {
+        ofSetWindowTitle("LightEchoes (COUNTDOWN)");
+        
         float timeToStart = startTime - elapsedTime;
         
         if(timeToStart < 2.964 && bStartClap) {
@@ -342,6 +346,8 @@ void ofApp::update(){
         }
         
         if(timeToStart <= 0) startRun();
+    } else {
+        ofSetWindowTitle("LightEchoes (IDLE)");
     }
     
     
@@ -651,7 +657,6 @@ void ofApp::startRun() {
     motorRelease();
 
     lightOff();
-    
     ofLogNotice() << "===== Pressing shutter button";
     if(camera.isConnected()) camera.pressShutterButton();
     bRunning=true;
@@ -673,7 +678,6 @@ void ofApp::endRun() {
     lightOn();
     
     //toggleDirection();
-
     if(autoRunToggle->getValue()) {
         startTime = elapsedTime + TRACK_TIME + POST_RETURN_PAUSE;
         bReturnClap = true;
