@@ -3,7 +3,7 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 //#define PERSIST_JSON_FILE "persist.json"
-#define TRACK_TIME 196.5 
+#define TRACK_TIME 190
 // TEST 1 // 3:16.5
 // TEST 2 // 2:53 // 2:55
 // TEST 3 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
@@ -11,7 +11,7 @@
 
 #define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
-#define PIXELS_OFF 9
+#define PIXELS_OFF 10
 #define DMX_CHANNEL_MOTOR_RELEASE 3
 #define DMX_CHANNEL_MOTOR_RETURN 1
 #define DMX_CHANNEL_LIGHT 15
@@ -63,7 +63,7 @@ void ofApp::setup(){
     ofBackground(50);
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
-    ofSetDataPathRoot("../Resources/data/");
+    //ofSetDataPathRoot("../Resources/data/");
     
     //
     // SETUP AND INITIALIZE!!!
@@ -108,7 +108,7 @@ void ofApp::setup(){
     path = Poco::Path::home();
     path.pushDirectory("Dropbox");
     path.pushDirectory("LE Shared");
-    path.pushDirectory("_PhotosBig");
+    path.pushDirectory("_PhotosSmall");
     savePathSmall = path.toString();
     ofDirectory::createDirectory(savePathSmall, false, true);
     
@@ -305,6 +305,7 @@ void ofApp::update(){
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, 0);
     } else {
+
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 255 : 0);
     }
