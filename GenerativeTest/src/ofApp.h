@@ -26,5 +26,5 @@ class ofApp : public ofBaseApp{
         GeneratedFrame frame;
         float incrementAt;
         string outputPath;
-    ofImage saver;
+        ofImage saver;
 };

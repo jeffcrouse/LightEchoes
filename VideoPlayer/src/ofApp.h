@@ -25,10 +25,9 @@ class ofApp : public ofBaseApp{
         int numPhotos;
         ofImage frame;
     
+        
     
         string dropboxPath;
-        string videoPath;
-        string photosPath;
         ofVideoPlayer video;
         ofRectangle bounds;
         bool bDebug;

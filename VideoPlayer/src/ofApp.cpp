@@ -2,6 +2,23 @@
 
 #define PAUSE_ON_NEW_FRAME 60
 
+
+//--------------------------------------------------------------
+string ofSystemCall(string command) {
+    
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    string result = "";
+    while(!feof(pipe)) {
+        if(fgets(buffer, 128, pipe) != NULL)
+            result += buffer;
+    }
+    pclose(pipe);
+    result.erase(remove(result.begin(), result.end(), '\n'), result.end());
+    return result;
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetWindowTitle("LightEchoes Video Player");
@@ -22,19 +39,11 @@ void ofApp::setup(){
     //ofDirectory::createDirectory(photosPath, false, true);
     
     
-    stringstream vp;
-    vp << dropboxPath << "Video.mp4";
-    videoPath = vp.str();
-    video.loadMovie(videoPath);
-    
-    stringstream pp;
-    pp << dropboxPath << "_PhotosSmall";
-    photosPath = pp.str();
-    
-    
+    stringstream path2;
+    path2 << dropboxPath << "_PhotosSmall";
     
     dir.allowExt("jpg");
-    dir.listDir(photosPath);
+    dir.listDir(path2.str());
     numPhotos = dir.size();
     
     
@@ -54,9 +63,14 @@ void ofApp::setup(){
 void ofApp::update(){
     video.update();
     if(video.getIsMovieDone()) {
+        
+        stringstream path;
+        path << dropboxPath << "_PhotosSmall";
+
         dir.allowExt("jpg");
-        dir.listDir(photosPath);
+        dir.listDir(path.str());
         dir.sort();
+        
         if (dir.size() > numPhotos) {
             onNewPhoto(dir.getPath(dir.size()-1));
         } else {
@@ -68,7 +82,6 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::onNewPhoto(string path) {
     frame.loadImage(path);
-    
     
     
     stringstream cmd;
@@ -83,7 +96,7 @@ void ofApp::onNewPhoto(string path) {
     cmd << "-pix_fmt yuv420p ";
     cmd << "Video.mp4";
     
-    
+    ofSystem
 }
 
 //--------------------------------------------------------------
@@ -94,8 +107,6 @@ void ofApp::draw(){
         stringstream ss;
         ss << "framerate " << ofGetFrameRate() << endl;
         ss << "dropboxPath " << dropboxPath << endl;
-        ss << "videoPath " << videoPath << endl;
-        ss << "photosPath " << photosPath << endl;
         ss << "PAUSE_ON_NEW_FRAME " << PAUSE_ON_NEW_FRAME;
         ofDrawBitmapStringHighlight(ss.str(), 10, 20);
     }
