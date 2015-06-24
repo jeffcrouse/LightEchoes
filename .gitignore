@@ -32,3 +32,4 @@ CameraTest02/bin/data/*.jpg
 Laser01/bin/data/images/*
 Laser02/bin/data/source-state.json
 Laser02/bin/data/fonts
+GenerativeTest/bin/data/fonts
