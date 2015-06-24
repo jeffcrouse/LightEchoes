@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofMain.h"
 #include "ofxEtherdream.h"
 #include "ofxUI.h"
 #include "ofxEdsdk.h"
