@@ -305,7 +305,8 @@ void ofApp::update(){
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, 0);
     } else {
-        dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255: 0);
+
+        dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 255 : 0);
     }
     
