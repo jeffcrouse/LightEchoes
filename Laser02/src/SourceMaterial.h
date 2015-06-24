@@ -19,7 +19,7 @@ public:
     void increment();
     int getIndex();
     string getName() {
-        if(index > dir.size()-1 || index < 0) return "NONE";
+        if(index > dir.size()-1 || dir.size()==0 || index < 0) return "NONE";
         return dir.getName(index);
     }
     void onKeyReleased(int key);
