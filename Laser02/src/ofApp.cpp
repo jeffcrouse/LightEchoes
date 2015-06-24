@@ -3,7 +3,7 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 //#define PERSIST_JSON_FILE "persist.json"
-#define TRACK_TIME 196.5 
+#define TRACK_TIME 190
 // TEST 1 // 3:16.5
 // TEST 2 // 2:53 // 2:55
 // TEST 3 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
@@ -305,8 +305,8 @@ void ofApp::update(){
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, 0);
     } else {
-        dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
-        dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 0 : 255);
+        dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255: 0);
+        dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 255 : 0);
     }
     
     float val = lightLevelSlider->getValue();

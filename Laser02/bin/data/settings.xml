@@ -28,7 +28,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TRACK POSITION</Name>
-    <Value>0.137759566</Value>
+    <Value>0.999985516</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -38,7 +38,7 @@
 <Widget>
     <Kind>17</Kind>
     <Name>MOTOR RETURN</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
