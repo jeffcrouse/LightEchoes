@@ -1,8 +1,6 @@
 #include "ofApp.h"
 
-// TO DO
-// Sort files by date modified timestamp?
-// http://forum.openframeworks.cc/t/timestamp-of-a-file-date-created-or-modified/10748/3
+#define PAUSE_ON_NEW_FRAME 60
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -12,31 +10,33 @@ void ofApp::setup(){
     ofBackground(0);
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
+    ofSetLogLevel("ofDirectory", OF_LOG_SILENT);
     ofSetDataPathRoot("../Resources/data/");
     
-    bDebug = false;
+    Poco::Path path = Poco::Path::home();
+    path.pushDirectory("Dropbox");
+    path.pushDirectory("LE Shared");
+    dropboxPath = path.toString();
+    //ofDirectory::createDirectory(photosPath, false, true);
     
-    ofBuffer buffer = ofBufferFromFile("videopath.txt");
-    videoFolder = buffer.getFirstLine();
     
-    nextVideo();
-}
+    stringstream vp;
+    vp << dropboxPath << "Video.mp4";
+    videoPath = vp.str();
 
-//--------------------------------------------------------------
-void ofApp::nextVideo() {
-    dir.allowExt("mp4");
-    dir.allowExt("mov");
-    dir.sort();
-    dir.listDir(videoFolder);
+    video.loadMovie(videoPath);
     
-    if(dir.size()==0) return;
+    stringstream pp;
+    pp << dropboxPath << "_PhotosSmall";
+    photosPath = pp.str();
     
-    // get the last video
-
-    currentVideo = dir.getPath(dir.size()-1);
-    video.loadMovie(currentVideo);
-    video.setLoopState(OF_LOOP_NONE);
     
+    dir.allowExt("jpg");
+    dir.listDir(photosPath);
+    numPhotos = dir.size();
+    
+    
+    bDebug=false;
     
     float ratio =  ofGetHeight() / video.getHeight();
     bounds.height = video.getHeight() * ratio;
@@ -44,36 +44,39 @@ void ofApp::nextVideo() {
     bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
     bounds.y = 0;
     
+    video.setLoopState(OF_LOOP_NONE);
     video.play();
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    if(video.isLoaded()) {
-        video.update();
-    }
-    
+    video.update();
     if(video.getIsMovieDone()) {
-        nextVideo();
+        dir.allowExt("jpg");
+        dir.listDir(photosPath);
+        dir.sort();
+        if (dir.size() > numPhotos) {
+            
+        } else {
+            video.play();
+        }
     }
 }
 
+
 //--------------------------------------------------------------
 void ofApp::draw(){
-    
-    if(video.isLoaded()) {
-        video.draw(bounds);
-    } else {
-        ofDrawBitmapStringHighlight("NO VIDEO", 10, 30, ofColor::red, ofColor::white);
-    }
+    video.draw(bounds);
     
     if(bDebug) {
-        stringstream info;
-        info << "videoFolder = " << videoFolder << endl;
-        if(video.isLoaded()) {
-            info << "video.getPosition() " << video.getPosition() << endl;
-        }
-        ofDrawBitmapStringHighlight(info.str(), 10, ofGetHeight()-20);
+        stringstream ss;
+        ss << "framerate " << ofGetFrameRate() << endl;
+        ss << "dropboxPath " << dropboxPath << endl;
+        ss << "videoPath " << videoPath << endl;
+        ss << "photosPath " << photosPath << endl;
+        ss << "PAUSE_ON_NEW_FRAME " << PAUSE_ON_NEW_FRAME;
+        ofDrawBitmapStringHighlight(ss.str(), 10, 20);
     }
 }
 
@@ -89,9 +92,6 @@ void ofApp::keyReleased(int key){
     }
     if(key=='d') {
         bDebug = !bDebug;
-    }
-    if(key==OF_KEY_TAB) {
-        nextVideo();
     }
 }
 
@@ -117,13 +117,7 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-    if(video.isLoaded()) {
-        float ratio =  ofGetHeight() / video.getHeight();
-        bounds.height = video.getHeight() * ratio;
-        bounds.width = video.getWidth() * ratio;
-        bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
-        bounds.y = 0;
-    }
+
 }
 
 //--------------------------------------------------------------
