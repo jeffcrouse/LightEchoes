@@ -38,11 +38,11 @@ void SoundEngine::setup() {
     
     lightATheEnd.loadSound("sounds/LE.Elements_0617.light_at_the_end.aif");
     lightATheEnd.setLoop(true);
-    lightATheEnd.playTo(MID);
+    lightATheEnd.play();
     
-    //arp.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
-    //arp.setLoop(true);
-    //arp.play();
+//    arp.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
+//    arp.setLoop(true);
+//    arp.play();
 
 //    front = 1.0;
 //    middle = 1.0;
@@ -85,13 +85,13 @@ void SoundEngine::onBeat() {
     hihat.setVolume(drumVolume->getValue()*masterVolume->getValue());
     kick.setVolume(drumVolume->getValue()*masterVolume->getValue());
     snare.setVolume(drumVolume->getValue()*masterVolume->getValue());
-    
-    hihat.playTo(FAR);
+     int speakers[6] = {0,1,2,3,4,5};
+    hihat.playTo(speakers, 6);
     
     if(beat % 4 == 0) {
-        kick.playTo(FAR);
+        kick.playTo(speakers, 6);
     } else if(beat % 2 == 0) {
-        snare.playTo(FAR);
+        snare.playTo(speakers, 6);
     }
     
     
@@ -110,7 +110,7 @@ void SoundEngine::onBeat() {
             if(find(ids.begin(), ids.end(), n) == ids.end()) {
                 ids.push_back(n);
                 fx[n].setVolume(fxVolume->getValue()*masterVolume->getValue());
-                fx[n].playTo(FAR);
+                fx[n].playTo(speakers, 6);
             }
         }
     }
