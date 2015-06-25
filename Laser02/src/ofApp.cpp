@@ -3,12 +3,7 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 //#define PERSIST_JSON_FILE "persist.json"
-#define TRACK_TIME 190
-// TEST 1 // 3:16.5
-// TEST 2 // 2:53 // 2:55
-// TEST 3 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
-// TEST 4 // 2:45 // 2:35
-
+#define TRACK_TIME 199
 #define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
 #define PIXELS_OFF 9
@@ -867,6 +862,9 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
+    if(key==' ' && !camera.isShutterButtonPressed()) {
+        camera.pressShutterButton();
+    }
 }
 
 //--------------------------------------------------------------
@@ -879,7 +877,10 @@ void ofApp::keyReleased(int key){
         bStartClap = true;
     }
     if(key==OF_KEY_ESC) {
-        endRun();
+        lightOn();
+        startTime=-1;
+        bRunning = false;
+        if(camera.isConnected()) camera.releaseShutterButton();
     }
     if(key=='e') {
         etherdream.setup();
@@ -895,6 +896,12 @@ void ofApp::keyReleased(int key){
     }
     if(key=='M') {
         motorReturn();
+    }
+    if(key=='h') {
+        sound.playHarp();
+    }
+    if(key==' ' && camera.isShutterButtonPressed()) {
+        camera.releaseShutterButton();
     }
     
     source.onKeyReleased(key);
