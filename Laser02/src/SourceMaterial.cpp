@@ -174,8 +174,8 @@ ofFloatColor SourceMaterial::getColor(int x, int y) {
 }
 
 // -------------------------------------------------
-void SourceMaterial::increment() {
-    index++;
+void SourceMaterial::increment(bool forward) {
+    index+= forward ? 1 : -1;
     index %= dir.size();
     state["index"] = index;
     state.save(SOURCE_MATERIAL_STATE_JSON, true);

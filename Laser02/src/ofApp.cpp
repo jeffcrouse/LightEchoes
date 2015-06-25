@@ -725,7 +725,7 @@ void ofApp::lightToggle() {
 
 
 //--------------------------------------------------------------
-void ofApp::incrementSource() {
+void ofApp::incrementSource(bool forward) {
     /*
     bool incremented = source.increment();
     if(!incremented) {
@@ -735,7 +735,7 @@ void ofApp::incrementSource() {
         source.reset();
     }
      */
-    source.increment();
+    source.increment(forward);
 }
 
 
@@ -872,7 +872,7 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     if(key==OF_KEY_TAB) {
-        incrementSource();
+        incrementSource(!ofGetModifierPressed(OF_KEY_SHIFT));
     }
     if(key==OF_KEY_RETURN) {
         startTime = elapsedTime + 5;

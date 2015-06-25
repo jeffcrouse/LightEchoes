@@ -31,7 +31,7 @@ class ofApp : public ofBaseApp{
     
         ofFloatColor mapColor(ofFloatColor c);
         void drawSafetyPattern();
-        void incrementSource();
+        void incrementSource(bool forward=true);
         void startRun();
         void endRun();
         void motorRelease();
