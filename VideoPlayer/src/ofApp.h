@@ -26,7 +26,7 @@ class ofApp : public ofBaseApp{
         ofVideoPlayer* video;
         ofRectangle bounds;
     
-        int numPhotos;
+        Poco::Timestamp newestFrame;
         float nextFramecheck;
     
         float frameStart,frameEnd;
