@@ -165,6 +165,15 @@ void ofApp::keyReleased(int key){
     if(key=='d') {
         bDebug = !bDebug;
     }
+    if(key=='p') {
+        if(video) video->setPaused(!video->isPaused());
+    }
+    if(key==OF_KEY_RIGHT) {
+        if(video) video->nextFrame();
+    }
+    if(key==OF_KEY_LEFT) {
+        if(video) video->previousFrame();
+    }
 }
 
 //--------------------------------------------------------------
