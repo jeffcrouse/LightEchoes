@@ -1,6 +1,6 @@
 #include "ofApp.h"
 
-#define PAUSE_ON_NEW_FRAME 10
+#define PAUSE_ON_NEW_FRAME 60
 #define PHOTOS_DIR "_PhotosSmall"
 #define VIDEO_FILE "video.mp4"
 #define LOCKFILE "video.lock"
@@ -33,10 +33,9 @@ void ofApp::setup(){
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
     ofSetLogLevel("ofDirectory", OF_LOG_SILENT);
     ofSetDataPathRoot("../Resources/data/");
-    
+    video = NULL;
     bDebug=false;
     nextFramecheck = ofGetElapsedTimef()+2;
-    nextVideoReload = 0;
     frameStart = -1;
     frameAlpha = 0;
     
@@ -44,9 +43,20 @@ void ofApp::setup(){
     path.pushDirectory("Dropbox");
     path.pushDirectory("LE Shared");
     dropboxPath = path.toString();
-    videoPath = dropboxPath + VIDEO_FILE;
     photosDir = dropboxPath + PHOTOS_DIR;
-    lockfilePath = dropboxPath + LOCKFILE;
+    
+    
+    path = Poco::Path::home();
+    path.pushDirectory("Desktop");
+    path.setFileName("LightEchoes.mp4");
+    videoFile.open(path.toString());
+    
+    
+    path = Poco::Path::home();
+    path.pushDirectory("Desktop");
+    path.setFileName("video.lock");
+    lockFile.open(path.toString());
+    
     
     
     // Get the number of photos in the photo directory
@@ -62,11 +72,13 @@ void ofApp::update(){
     
     
     if(now > nextFramecheck) {
-        ofLogNotice() << "RELOADING FRAMES";
+        ofLogNotice() << "CHECKING FOR NEW FRAMES";
         dir.allowExt("jpg");
         dir.listDir(photosDir);
         
         if (dir.size() > numPhotos) {
+            ofLogNotice() << "NEW FRAME FOUND ";
+            
             dir.sort();
             string path = dir.getPath(dir.size()-1);
             frame.loadImage(path);
@@ -78,22 +90,26 @@ void ofApp::update(){
         
         nextFramecheck = now + 2;
     }
-    
-    
-    if(now > nextVideoReload && !ofFile::doesFileExist(lockfilePath)) {
+
+    if( (video==NULL|| videoFile.getPocoFile().getLastModified()>videoModified) && !lockFile.exists()) {
+
         ofLogNotice() << "RELOADING VIDEO";
         
-        video.loadMovie(videoPath);
-        video.setLoopState(OF_LOOP_NORMAL);
-        video.play();
         
-        float ratio =  ofGetHeight() / video.getHeight();
-        bounds.height = video.getHeight() * ratio;
-        bounds.width = video.getWidth() * ratio;
+        if(video) delete video;
+        video = new ofVideoPlayer();
+        video->loadMovie(videoFile.getAbsolutePath());
+        video->setLoopState(OF_LOOP_NORMAL);
+        video->play();
+        
+        float ratio =  ofGetHeight() / video->getHeight();
+        bounds.height = video->getHeight() * ratio;
+        bounds.width = video->getWidth() * ratio;
         bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
         bounds.y = 0;
         
-        nextVideoReload = now + 20;
+        
+        videoModified =  videoFile.getPocoFile().getLastModified();
     }
     
     if(frameStart != -1) {
@@ -109,14 +125,14 @@ void ofApp::update(){
         }
     }
     
-    if(video.isLoaded()) video.update();
+    if(video) video->update();
 }
 
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofSetColor(ofColor::white, 255-frameAlpha);
-    video.draw(bounds);
+    if(video) video->draw(bounds);
     
     if(frameAlpha > 0) {
         ofSetColor(ofColor::white, frameAlpha);
@@ -173,11 +189,13 @@ void ofApp::mouseReleased(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-    float ratio =  ofGetHeight() / video.getHeight();
-    bounds.height = video.getHeight() * ratio;
-    bounds.width = video.getWidth() * ratio;
-    bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
-    bounds.y = 0;
+    if(video) {
+        float ratio =  ofGetHeight() / video->getHeight();
+        bounds.height = video->getHeight() * ratio;
+        bounds.width = video->getWidth() * ratio;
+        bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
+        bounds.y = 0;
+    }
 }
 
 //--------------------------------------------------------------
