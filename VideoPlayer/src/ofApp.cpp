@@ -1,6 +1,6 @@
 #include "ofApp.h"
 
-#define PAUSE_ON_NEW_FRAME 60
+#define PAUSE_ON_NEW_FRAME 120
 #define PHOTOS_DIR "_PhotosSmall"
 #define VIDEO_FILE "video.mp4"
 #define LOCKFILE "video.lock"
@@ -62,7 +62,9 @@ void ofApp::setup(){
     // Get the number of photos in the photo directory
     dir.allowExt("jpg");
     dir.listDir(photosDir);
-    numPhotos = dir.size();
+    dir.sort();
+    ofFile f( dir.getPath(dir.size()-1) );
+    newestFrame = f.getPocoFile().getLastModified();
 }
 
 //--------------------------------------------------------------
@@ -75,23 +77,24 @@ void ofApp::update(){
         ofLogNotice() << "CHECKING FOR NEW FRAMES";
         dir.allowExt("jpg");
         dir.listDir(photosDir);
-        
-        if (dir.size() > numPhotos) {
+        dir.sort();
+        ofFile f( dir.getPath(dir.size()-1) );
+        if (f.getPocoFile().getLastModified() > newestFrame) {
             ofLogNotice() << "NEW FRAME FOUND ";
             
-            dir.sort();
+            
             string path = dir.getPath(dir.size()-1);
             frame.loadImage(path);
             
             frameStart = now;
             frameEnd = frameStart + PAUSE_ON_NEW_FRAME;
-            numPhotos = dir.size();
+            newestFrame = f.getPocoFile().getLastModified();
         }
         
         nextFramecheck = now + 2;
     }
 
-    if( (video==NULL|| videoFile.getPocoFile().getLastModified()>videoModified) && !lockFile.exists()) {
+    if( (video==NULL || videoFile.getPocoFile().getLastModified()>videoModified) && !lockFile.exists() && videoFile.exists()) {
 
         ofLogNotice() << "RELOADING VIDEO";
         
@@ -102,7 +105,7 @@ void ofApp::update(){
         video->setLoopState(OF_LOOP_NORMAL);
         video->play();
         
-        float ratio =  ofGetHeight() / video->getHeight();
+        float ratio =  ofGetWidth() / video->getWidth();
         bounds.height = video->getHeight() * ratio;
         bounds.width = video->getWidth() * ratio;
         bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
@@ -115,7 +118,7 @@ void ofApp::update(){
     if(frameStart != -1) {
         
         float theta = ofMap(now, frameStart, frameEnd, 0, PI);
-        float fade = ofMap(sin(theta), 0, 1, 0, 2048);
+        float fade = ofMap(sin(theta), 0, 1, 0, 5000);
         
         frameAlpha = ofClamp(fade, 0, 255);
         
@@ -139,6 +142,9 @@ void ofApp::draw(){
         frame.draw(bounds);
     }
     
+    ofSetColor(ofColor::black);
+    ofRect(0, ofGetHeight()-20, ofGetWidth(), 20);
+    
     if(bDebug) {
         stringstream ss;
         ss << "framerate " << ofGetFrameRate() << endl;
@@ -146,7 +152,7 @@ void ofApp::draw(){
         ss << "frameStart " << frameStart << endl;
         ss << "frameEnd " << frameEnd << endl;
         ss << "frameAlpha " << frameAlpha << endl;
-        ss << "numPhotos " << numPhotos << endl;
+        ss << "numPhotos " << dir.size() << endl;
         ss << "PAUSE_ON_NEW_FRAME " << PAUSE_ON_NEW_FRAME;
         ofDrawBitmapStringHighlight(ss.str(), 10, 20);
     }
@@ -199,7 +205,7 @@ void ofApp::mouseReleased(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
     if(video) {
-        float ratio =  ofGetHeight() / video->getHeight();
+        float ratio =  ofGetWidth() / video->getWidth();
         bounds.height = video->getHeight() * ratio;
         bounds.width = video->getWidth() * ratio;
         bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
