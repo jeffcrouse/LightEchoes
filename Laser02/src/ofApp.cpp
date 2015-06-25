@@ -14,10 +14,10 @@
 #define PIXELS_OFF 9
 #define DMX_CHANNEL_MOTOR_RELEASE 3
 #define DMX_CHANNEL_MOTOR_RETURN 1
-#define DMX_CHANNEL_LIGHT 15
-#define DMX_CHANNEL_LIGHT_R DMX_CHANNEL_LIGHT+0
-#define DMX_CHANNEL_LIGHT_G DMX_CHANNEL_LIGHT+1
-#define DMX_CHANNEL_LIGHT_B DMX_CHANNEL_LIGHT+2
+
+//#define DMX_CHANNEL_LIGHT_1 3
+//#define DMX_CHANNEL_LIGHT_2 15
+//#define DMX_CHANNEL_LIGHT_3 32
 //#define DMX_CHANNEL_LIGHT_COLOR_MIX DMX_CHANNEL_LIGHT+3
 //#define DMX_CHANNEL_LIGHT_STROBE DMX_CHANNEL_LIGHT+4
 //#define DMX_CHANNEL_LIGHT_SOUND_ACTIVE DMX_CHANNEL_LIGHT+5
@@ -26,6 +26,15 @@
 #define LIGHT_R 192
 #define LIGHT_G 191
 #define LIGHT_B 173
+
+#define NUM_LIGHTS 4
+// Light one - switches 3&4 (4+8=12)
+// Light two - switches 4&5 (8+16=24)
+// Light three - switch 6 = 32
+// Light four - switches 5&6 (16+32=48)
+int dmx_light_channels[NUM_LIGHTS] = {12, 24, 32, 48};
+
+
 
 //--------------------------------------------------------------
 string ofSystemCall(string command) {
@@ -311,9 +320,14 @@ void ofApp::update(){
     }
     
     float val = lightLevelSlider->getValue();
-    dmx.setLevel(DMX_CHANNEL_LIGHT_R, ofMap(val, 0, 1, 0, LIGHT_R));
-    dmx.setLevel(DMX_CHANNEL_LIGHT_G, ofMap(val, 0, 1, 0, LIGHT_G));
-    dmx.setLevel(DMX_CHANNEL_LIGHT_B, ofMap(val, 0, 1, 0, LIGHT_B));
+    
+    for(int i=0; i<NUM_LIGHTS; i++) {
+        int channel = dmx_light_channels[i];
+        dmx.setLevel(channel+0, ofMap(val, 0, 1, 0, LIGHT_R));
+        dmx.setLevel(channel+1, ofMap(val, 0, 1, 0, LIGHT_G));
+        dmx.setLevel(channel+2, ofMap(val, 0, 1, 0, LIGHT_B));
+    }
+
     //dmx.setLevel(DMX_CHANNEL_LIGHT_DIMMER, lightDimmerSlider->getValue());
     //dmx.setLevel(DMX_CHANNEL_LIGHT_STROBE, lightStrobeSlider->getValue());
     
