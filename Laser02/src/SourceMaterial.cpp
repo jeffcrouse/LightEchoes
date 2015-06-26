@@ -12,7 +12,7 @@
 #define SOURCE_DIR "Source"
 #define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 #define SOURCE_MATERIAL_WARP_JSON "warper.json"
-#define NUM_ROWS 30
+#define NUM_ROWS 40
 #define NUM_COLS 4
 
 
@@ -174,8 +174,8 @@ ofFloatColor SourceMaterial::getColor(int x, int y) {
 }
 
 // -------------------------------------------------
-void SourceMaterial::increment() {
-    index++;
+void SourceMaterial::increment(bool forward) {
+    index+= forward ? 1 : -1;
     index %= dir.size();
     state["index"] = index;
     state.save(SOURCE_MATERIAL_STATE_JSON, true);
@@ -225,17 +225,20 @@ void SourceMaterial::drawIntoFBO() {
     ofDisableNormalizedTexCoords();
     
     if(bWarpMode) {
-        
+        ofNoFill();
         vector<ofPoint>& verts = mesh.getVertices();
         for(int i=0; i<verts.size(); i++) {
             if(i==v) {
-                ofFill();
+                ofSetLineWidth(10);
                 ofSetColor(ofColor::green);
+                ofRect(verts[i], 100, 100);
             } else {
-                ofNoFill();
+
+                ofSetLineWidth(1);
                 ofSetColor(ofColor::gray);
+                ofRect(verts[i], 20, 20);
             }
-            ofRect(verts[i], 20, 20);
+            
         }
     }
     

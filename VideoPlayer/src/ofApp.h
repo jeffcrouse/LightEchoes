@@ -23,18 +23,19 @@ class ofApp : public ofBaseApp{
     
         ofDirectory dir;
         ofImage frame;
-        ofVideoPlayer video;
+        ofVideoPlayer* video;
         ofRectangle bounds;
     
-        int numPhotos;
+        Poco::Timestamp newestFrame;
         float nextFramecheck;
-        float nextVideoReload;
     
         float frameStart,frameEnd;
         float frameAlpha;
     
         string dropboxPath;
-        string videoPath;
         string photosDir;
-        string lockfilePath;
+        ofFile videoFile;
+        ofFile lockFile;
+        Poco::Timestamp videoModified;
+    
 };

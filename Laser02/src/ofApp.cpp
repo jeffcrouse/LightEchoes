@@ -3,15 +3,10 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 //#define PERSIST_JSON_FILE "persist.json"
-#define TRACK_TIME 190
-// TEST 1 // 3:16.5
-// TEST 2 // 2:53 // 2:55
-// TEST 3 // 2:47 // 2:37 // 2:35.6 // 2:39.6 // 2:36 //2:32
-// TEST 4 // 2:45 // 2:35
-
+#define TRACK_TIME 195
 #define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
-#define PIXELS_OFF 9
+#define PIXELS_OFF 10
 #define DMX_CHANNEL_MOTOR_RELEASE 3
 #define DMX_CHANNEL_MOTOR_RETURN 1
 
@@ -33,7 +28,7 @@
 // Light three - switch 6 = 32
 // Light four - switches 5&6 (16+32=48)
 int dmx_light_channels[NUM_LIGHTS] = {12, 24, 32, 48};
-
+int speakers[7] = {0,1,2,3,4,5,6};
 
 
 //--------------------------------------------------------------
@@ -158,11 +153,11 @@ void ofApp::setup(){
     //lightDimmerSlider = gui->addIntSlider("LIGHT LEVEL", 0, 255, 0);
     //lightStrobeSlider = gui->addIntSlider("LIGHT STROBE", 0, 255, 0);
     
-    gui->addSpacer();
-    gui->addLabel("LASER COLOR ADJUST");
-    colorAdjust[0] = gui->addSlider("RED ADJUST", 0, 1, 1);
-    colorAdjust[1] = gui->addSlider("GREEN ADJUST", 0, 1, 1);
-    colorAdjust[2] = gui->addSlider("BLUE ADJUST", 0, 1, 1);
+//    gui->addSpacer();
+//    gui->addLabel("LASER COLOR ADJUST");
+//    colorAdjust[0] = gui->addSlider("RED ADJUST", 0, 1, 1);
+//    colorAdjust[1] = gui->addSlider("GREEN ADJUST", 0, 1, 1);
+//    colorAdjust[2] = gui->addSlider("BLUE ADJUST", 0, 1, 1);
     
     gui->addSpacer();
     gui->addLabel("MAIN LINE");
@@ -225,6 +220,7 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
+/*
 ofFloatColor ofApp::mapColor(ofFloatColor c) {
     c.r *= colorAdjust[0]->getValue();
     c.g *= colorAdjust[1]->getValue();
@@ -236,7 +232,7 @@ ofFloatColor ofApp::mapColor(ofFloatColor c) {
     
     return c;
 }
-
+*/
 //--------------------------------------------------------------
 void ofApp::exit() {
     dmx.clear();
@@ -251,6 +247,7 @@ void ofApp::exit() {
     delete gui;
 }
 
+/*
 //--------------------------------------------------------------
 void ofApp::drawSafetyPattern() {
     ofxIlda::Frame safetyPattern[3];
@@ -283,6 +280,7 @@ void ofApp::drawSafetyPattern() {
         etherdream.addPoints(safetyPattern[i]);
     }
 }
+*/
 
 //--------------------------------------------------------------
 void ofApp::pause() {
@@ -314,13 +312,11 @@ void ofApp::update(){
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, 0);
     } else {
-
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 255 : 0);
     }
     
     float val = lightLevelSlider->getValue();
-    
     for(int i=0; i<NUM_LIGHTS; i++) {
         int channel = dmx_light_channels[i];
         dmx.setLevel(channel+0, ofMap(val, 0, 1, 0, LIGHT_R));
@@ -351,12 +347,12 @@ void ofApp::update(){
         float timeToStart = startTime - elapsedTime;
         
         if(timeToStart < 2.964 && bStartClap) {
-            sound.startClap.playTo(0, 1);
+            sound.startClap.playTo(speakers, 7);
             bStartClap = false;
         }
         
         if(timeToStart<POST_RETURN_PAUSE && bReturnClap) {
-            sound.endClap.playTo(0,1);
+            sound.endClap.playTo(speakers, 7);
             bReturnClap = false;
         }
         
@@ -587,12 +583,14 @@ void ofApp::drawMainLine() {
     float totalBrightness = 0;
     int sampleX;
     for (int sampleX=0; sampleX<source.getWidth(); sampleX++) {
-     
+    //for(int i=0; i<100; i++) {
+        //int sampleX = ofMap(i, 0, 00, 0, source.getWidth());
+        
         drawPos.x = sampleX / (float)source.getWidth();
         drawPos.x = ofClamp(drawPos.x, 0, 1);
         
         color = (sampleX % PIXELS_ON<PIXELS_OFF)
-            ? mapColor( source.getColor(sampleX, sampleY) )
+            ? source.getColor(sampleX, sampleY)
             : ofFloatColor::black;
 
         totalBrightness += color.getBrightness();
@@ -687,7 +685,9 @@ void ofApp::endRun() {
     
     bRunning = false;
     
-    sound.endClap.playTo(4, 5);
+    
+    sound.endClap.playTo(speakers, 7);
+    sound.lightATheEnd.playTo(4,5);
     incrementSource();
     motorReturn();
     lightOn();
@@ -725,7 +725,7 @@ void ofApp::lightToggle() {
 
 
 //--------------------------------------------------------------
-void ofApp::incrementSource() {
+void ofApp::incrementSource(bool forward) {
     /*
     bool incremented = source.increment();
     if(!incremented) {
@@ -735,7 +735,7 @@ void ofApp::incrementSource() {
         source.reset();
     }
      */
-    source.increment();
+    source.increment(forward);
 }
 
 
@@ -867,19 +867,25 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
+    if(key==' ' && !camera.isShutterButtonPressed()) {
+        camera.pressShutterButton();
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     if(key==OF_KEY_TAB) {
-        incrementSource();
+        incrementSource(!ofGetModifierPressed(OF_KEY_SHIFT));
     }
     if(key==OF_KEY_RETURN) {
         startTime = elapsedTime + 5;
         bStartClap = true;
     }
     if(key==OF_KEY_ESC) {
-        endRun();
+        lightOn();
+        startTime=-1;
+        bRunning = false;
+        if(camera.isConnected()) camera.releaseShutterButton();
     }
     if(key=='e') {
         etherdream.setup();
@@ -895,6 +901,12 @@ void ofApp::keyReleased(int key){
     }
     if(key=='M') {
         motorReturn();
+    }
+    if(key=='h') {
+        sound.playHarp();
+    }
+    if(key==' ' && camera.isShutterButtonPressed()) {
+        camera.releaseShutterButton();
     }
     
     source.onKeyReleased(key);
