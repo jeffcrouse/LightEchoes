@@ -53,6 +53,8 @@ public:
     void setup();
     void onBeat();
     void update(); //float trackPos);
+    void mute();
+    void unmute();
     void playHarp();
     void newMelody() {
         melody.clear();
@@ -69,7 +71,7 @@ public:
     int padIndex;
     //float front, middle, back;
     int beat;
-    
+    bool bMuted;
     vector<int> melody;
     vector<int>::iterator melodyIt;
     ofApp* app;

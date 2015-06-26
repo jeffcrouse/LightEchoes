@@ -74,9 +74,12 @@ void ofApp::setup(){
     //
     dmx.connect(0, 64); // or use a number
     etherdream.setup();
+    
+    
+    camera.releaseShutterButton();
+    camera.close();
     camera.setup();
-    //camera.lockUI();
-    if(camera.isConnected()) camera.releaseShutterButton();
+    
     
     font.loadFont("fonts/Neue Helvetica/HelveticaNeueLTCom-Bd.ttf", 420);
     calibPattern.drawCalibration();
@@ -92,6 +95,7 @@ void ofApp::setup(){
     bLightOn=false;
     elapsedTime = 0;
     nextLaserFrameAt = 0;
+    unmuteAt = -1;
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -137,9 +141,9 @@ void ofApp::setup(){
     drawCalibPatternToggle = gui->addLabelToggle("CALIBRATION PATTERN", false);
     //trackTimeSlider = gui->addSlider("TRACK TIME", 60, 210, 150);
     //directionToggle = gui->addLabelToggle("FORWARD", &bForward);
-    laserFrameRate = gui->addIntSlider("LASER FRAME RATE", 12, 60, 24);
+    //laserFrameRate = gui->addIntSlider("LASER FRAME RATE", 12, 60, 24);
     sampleWidth = gui->addIntSlider("SAMPLE WIDTH", 100, 800, 800 );
-    waitBeforeSend = gui->addLabelToggle("WAIT BEFORE SEND", true);
+    //waitBeforeSend = gui->addLabelToggle("WAIT BEFORE SEND", true);
     
     gui->addSpacer();
     gui->addLabel("FUNCTION");
@@ -340,14 +344,22 @@ void ofApp::update(){
         } else {
             trackPos = ofMap(elapsedTime, startTime, endTime, 0, 1, true);
             trackPosSlider->setValue(trackPos);
+            
+            if(!sound.lightATheEnd.getIsPlaying() && trackPos > 0.8) {
+                sound.lightATheEnd.playTo(4,5);
+            }
         }
     }
-
+    
+    onLaserFrame();
+    /*
     if(elapsedTime > nextLaserFrameAt) {
+        ofLogNotice() << "laserFrame";
         onLaserFrame();
         float delay = 1.0 / (float)laserFrameRate->getValue();
         nextLaserFrameAt = elapsedTime + delay;
     }
+    */
     
     if(startTime > -1) {
 
@@ -364,8 +376,11 @@ void ofApp::update(){
         }
         
         if(timeToStart <= 0) startRun();
-    } else {
-        ofSetWindowTitle("LightEchoes (IDLE)");
+    }
+    
+    if(unmuteAt!=-1 && elapsedTime > unmuteAt) {
+        sound.unmute();
+        unmuteAt = -1;
     }
     
     // Deal with photos from the camera
@@ -447,6 +462,7 @@ void ofApp::draw(){
         camera.drawPhoto(690, 510, 640, 480);
         
         stringstream info3;
+        info3 << "Connected: " << (camera.isConnected()?"YES":"NO") << endl;
         info3 << "BulbExposureTime: " << camera.bulbExposureTime;
         ofColor textColor = camera.isShutterButtonPressed()? ofColor::green: ofColor::red;
         ofDrawBitmapStringHighlight(info3.str(), 690, ofGetHeight()-60, ofColor::black, textColor);
@@ -695,9 +711,11 @@ void ofApp::endRun() {
     
     bRunning = false;
     
+    sound.mute();
+    unmuteAt = elapsedTime + 5;
     
     sound.endClap.playTo(speakers, 7);
-    sound.lightATheEnd.playTo(4,5);
+    
     incrementSource();
     motorReturn();
     lightOn();
@@ -874,7 +892,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
     else if(name=="WAIT BEFORE SEND")
     {
         //ofxUILabelToggle* toggle = (ofxUILabelToggle*)e.getToggle();
-        etherdream.setWaitBeforeSend(waitBeforeSend->getValue());
+        //etherdream.setWaitBeforeSend(waitBeforeSend->getValue());
     }
     gui->saveSettings(GUI_SETTINGS_XML);
 }
