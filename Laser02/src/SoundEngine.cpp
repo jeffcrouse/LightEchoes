@@ -49,11 +49,19 @@ void SoundEngine::setup() {
     pads[3].loadSound("sounds/pad/LE.Elements_0619.pad_G.aif");
     padIndex = 0;
     
-    harp[0].loadSound("sounds/harp/LE.Elements_0619.harp_A.aif");
-    harp[1].loadSound("sounds/harp/LE.Elements_0619.harp_B.aif");
-    harp[2].loadSound("sounds/harp/LE.Elements_0619.harp_D.aif");
-    harp[3].loadSound("sounds/harp/LE.Elements_0619.harp_E.aif");
-    harp[4].loadSound("sounds/harp/LE.Elements_0619.harp_G.aif");
+    
+    harp[0].loadSound("sounds/harp2/Harp_A.aif");
+    harp[1].loadSound("sounds/harp2/Harp_B.aif");
+    harp[2].loadSound("sounds/harp2/Harp_D.aif");
+    harp[3].loadSound("sounds/harp2/Harp_E.aif");
+    harp[4].loadSound("sounds/harp2/Harp_G.aif");
+    
+    
+    harpReverb[0].loadSound("sounds/harp2/Harp_A_rev.aif");
+    harpReverb[1].loadSound("sounds/harp2/Harp_B_rev.aif");
+    harpReverb[2].loadSound("sounds/harp2/Harp_D_rev.aif");
+    harpReverb[3].loadSound("sounds/harp2/Harp_E_rev.aif");
+    harpReverb[4].loadSound("sounds/harp2/Harp_G_rev.aif");
     
     fx[0].loadSound("sounds/LE.Elements_0617.railroad.aif");
     fx[1].loadSound("sounds/LE.Elements_0617.machine_down.aif");
@@ -143,10 +151,15 @@ void SoundEngine::playHarp() {
     if(harpCooldown>0) return;
     
     int n = *melodyIt;
+    float volume =ofRandom(harpVolume->getValueLow(), harpVolume->getValueHigh());
     
-    harp[n].volume = ofRandom(harpVolume->getValueLow(), harpVolume->getValueHigh());
+    harp[n].setVolume(volume);
     //harp[n].setLevels(front, middle, back);
     harp[n].playTo(TRACK);
+    if(ofRandomf()<0.2) {
+        harpReverb[n].setVolume(volume);
+        harpReverb[n].playTo(TRACK);
+    }
     harpCooldown = (15.0/tempo->getValue());
     
     melodyIt++;

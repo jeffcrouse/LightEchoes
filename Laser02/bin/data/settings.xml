@@ -28,7 +28,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TRACK POSITION</Name>
-    <Value>0.999998212</Value>
+    <Value>0.999887347</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -58,7 +58,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>MASTER VOLUME</Name>
-    <Value>0.719211817</Value>
+    <Value>0.576354682</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -83,8 +83,8 @@
 <Widget>
     <Kind>6</Kind>
     <Name>HARP VOLUME</Name>
-    <HighValue>0.231527090</HighValue>
-    <LowValue>0.068965524</LowValue>
+    <HighValue>0.655172348</HighValue>
+    <LowValue>0.364532024</LowValue>
 </Widget>
 <Widget>
     <Kind>4</Kind>

@@ -347,7 +347,7 @@ void ofApp::update(){
         float timeToStart = startTime - elapsedTime;
         
         if(timeToStart < 2.964 && bStartClap) {
-            sound.endClap.playTo(speakers, 7);
+            sound.startClap.playTo(speakers, 7);
             bStartClap = false;
         }
         
