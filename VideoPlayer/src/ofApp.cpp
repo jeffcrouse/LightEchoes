@@ -1,8 +1,8 @@
 #include "ofApp.h"
 
-#define PAUSE_ON_NEW_FRAME 120
-#define PHOTOS_DIR "_PhotosSmall"
-#define VIDEO_FILE "video.mp4"
+#define PAUSE_ON_LAST_FRAME 5
+//#define PHOTOS_DIR "_PhotosSmall"
+//#define VIDEO_FILE "video.mp4"
 #define LOCKFILE "video.lock"
 
 
@@ -35,18 +35,19 @@ void ofApp::setup(){
     ofSetDataPathRoot("../Resources/data/");
     video = NULL;
     bDebug=false;
-    nextFramecheck = ofGetElapsedTimef()+2;
-    frameStart = -1;
-    frameAlpha = 0;
+    playAt=-1;
     
+//    nextFramecheck = ofGetElapsedTimef()+2;
+//    frameStart = -1;
+//    frameAlpha = 0;
+//    Poco::Path path = Poco::Path::home();
+//    path.pushDirectory("Dropbox");
+//    path.pushDirectory("LE Shared");
+//    dropboxPath = path.toString();
+//    photosDir = dropboxPath + PHOTOS_DIR;
+//    
+//    
     Poco::Path path = Poco::Path::home();
-    path.pushDirectory("Dropbox");
-    path.pushDirectory("LE Shared");
-    dropboxPath = path.toString();
-    photosDir = dropboxPath + PHOTOS_DIR;
-    
-    
-    path = Poco::Path::home();
     path.pushDirectory("Desktop");
     path.setFileName("LightEchoes.mp4");
     videoFile.open(path.toString());
@@ -60,11 +61,11 @@ void ofApp::setup(){
     
     
     // Get the number of photos in the photo directory
-    dir.allowExt("jpg");
-    dir.listDir(photosDir);
-    dir.sort();
-    ofFile f( dir.getPath(dir.size()-1) );
-    newestFrame = f.getPocoFile().getLastModified();
+//    dir.allowExt("jpg");
+//    dir.listDir(photosDir);
+//    dir.sort();
+//    ofFile f( dir.getPath(dir.size()-1) );
+//    newestFrame = f.getPocoFile().getLastModified();
 }
 
 //--------------------------------------------------------------
@@ -72,7 +73,7 @@ void ofApp::update(){
     float now = ofGetElapsedTimef();
     
     
-    
+    /*
     if(now > nextFramecheck) {
         ofLogNotice() << "CHECKING FOR NEW FRAMES";
         dir.allowExt("jpg");
@@ -81,7 +82,6 @@ void ofApp::update(){
         ofFile f( dir.getPath(dir.size()-1) );
         if (f.getPocoFile().getLastModified() > newestFrame) {
             ofLogNotice() << "NEW FRAME FOUND ";
-            
             
             string path = dir.getPath(dir.size()-1);
             frame.loadImage(path);
@@ -93,7 +93,8 @@ void ofApp::update(){
         
         nextFramecheck = now + 2;
     }
-
+     */
+    
     if( (video==NULL || videoFile.getPocoFile().getLastModified()>videoModified) && !lockFile.exists() && videoFile.exists()) {
 
         ofLogNotice() << "RELOADING VIDEO";
@@ -102,7 +103,7 @@ void ofApp::update(){
         if(video) delete video;
         video = new ofVideoPlayer();
         video->loadMovie(videoFile.getAbsolutePath());
-        video->setLoopState(OF_LOOP_NORMAL);
+        video->setLoopState(OF_LOOP_NONE);
         video->play();
         
         float ratio =  ofGetWidth() / video->getWidth();
@@ -115,6 +116,19 @@ void ofApp::update(){
         videoModified =  videoFile.getPocoFile().getLastModified();
     }
     
+    if(video!=NULL && video->isLoaded()) {
+        if(video->getIsMovieDone()) {
+            if(playAt == -1) {
+                playAt = ofGetElapsedTimef()+PAUSE_ON_LAST_FRAME;
+            } else if( ofGetElapsedTimef() > playAt) {
+                video->play();
+                playAt = -1;
+            }
+        }
+        video->update();
+    }
+    
+    /*
     if(frameStart != -1) {
         
         float theta = ofMap(now, frameStart, frameEnd, 0, PI);
@@ -127,20 +141,20 @@ void ofApp::update(){
             frameStart = -1;
         }
     }
-    
-    if(video) video->update();
+    */
 }
 
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofSetColor(ofColor::white, 255-frameAlpha);
+    ofSetColor(ofColor::white);
     if(video) video->draw(bounds);
     
-    if(frameAlpha > 0) {
-        ofSetColor(ofColor::white, frameAlpha);
-        frame.draw(bounds);
-    }
+    
+//    if(frameAlpha > 0) {
+//        ofSetColor(ofColor::white, frameAlpha);
+//        frame.draw(bounds);
+//    }
     
     ofSetColor(ofColor::black);
     ofRect(0, ofGetHeight()-20, ofGetWidth(), 20);
@@ -148,12 +162,20 @@ void ofApp::draw(){
     if(bDebug) {
         stringstream ss;
         ss << "framerate " << ofGetFrameRate() << endl;
-        ss << "dropboxPath " << dropboxPath << endl;
-        ss << "frameStart " << frameStart << endl;
-        ss << "frameEnd " << frameEnd << endl;
-        ss << "frameAlpha " << frameAlpha << endl;
-        ss << "numPhotos " << dir.size() << endl;
-        ss << "PAUSE_ON_NEW_FRAME " << PAUSE_ON_NEW_FRAME;
+//        ss << "dropboxPath " << dropboxPath << endl;
+//        ss << "frameStart " << frameStart << endl;
+//        ss << "frameEnd " << frameEnd << endl;
+//        ss << "frameAlpha " << frameAlpha << endl;
+//        ss << "numPhotos " << dir.size() << endl;
+        ss << "videoModified " << Poco::DateTimeFormatter::format(videoModified, "%b %e %Y %H:%M:%S") << endl;
+        if(video!=NULL) {
+            ss << "duration " << video->getDuration() << endl;
+            ss << "frames " << video->getTotalNumFrames() << endl;
+        }
+        if(lockFile.exists()) {
+            ss << "VIDEO MAKING IN PROGRESS" << endl;
+        }
+        //ss << "PAUSE_ON_NEW_FRAME " << PAUSE_ON_NEW_FRAME;
         ofDrawBitmapStringHighlight(ss.str(), 10, 20);
     }
 }

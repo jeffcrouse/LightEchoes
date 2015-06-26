@@ -17,18 +17,8 @@
 </Widget>
 <Widget>
     <Kind>42</Kind>
-    <Name>LASER FRAME RATE</Name>
-    <Value>24</Value>
-</Widget>
-<Widget>
-    <Kind>42</Kind>
     <Name>SAMPLE WIDTH</Name>
     <Value>800</Value>
-</Widget>
-<Widget>
-    <Kind>17</Kind>
-    <Name>WAIT BEFORE SEND</Name>
-    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -43,7 +33,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>TRACK POSITION</Name>
-    <Value>0.045003261</Value>
+    <Value>0.881044686</Value>
 </Widget>
 <Widget>
     <Kind>17</Kind>
@@ -73,7 +63,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>MASTER VOLUME</Name>
-    <Value>0.576354682</Value>
+    <Value>0.674876869</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -88,31 +78,31 @@
 <Widget>
     <Kind>4</Kind>
     <Name>FX VOLUME</Name>
-    <Value>0.261083752</Value>
+    <Value>0.251231521</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>PAD VOLUME</Name>
-    <Value>1.000000000</Value>
+    <Value>0.793103456</Value>
 </Widget>
 <Widget>
     <Kind>6</Kind>
     <Name>HARP VOLUME</Name>
-    <HighValue>0.655172348</HighValue>
-    <LowValue>0.364532024</LowValue>
+    <HighValue>0.660098195</HighValue>
+    <LowValue>0.325123161</LowValue>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>DRUM VOLUME</Name>
-    <Value>0.487684727</Value>
+    <Value>0.689655185</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>CLAP VOUME</Name>
-    <Value>0.940886676</Value>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>LIGHT VOLUME</Name>
-    <Value>0.428571433</Value>
+    <Value>0.408867002</Value>
 </Widget>
