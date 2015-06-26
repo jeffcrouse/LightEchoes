@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include <Poco/DateTimeFormatter.h>
 
 class ofApp : public ofBaseApp{
 
@@ -21,19 +22,18 @@ class ofApp : public ofBaseApp{
 		
         bool bDebug;
     
-        ofDirectory dir;
-        ofImage frame;
+        //ofDirectory dir;
+        //ofImage frame;
+        //Poco::Timestamp newestFrame;
+        //float nextFramecheck;
+        //float frameStart,frameEnd;
+        //float frameAlpha;
+        //string dropboxPath;
+        //string photosDir;
+    
         ofVideoPlayer* video;
         ofRectangle bounds;
-    
-        Poco::Timestamp newestFrame;
-        float nextFramecheck;
-    
-        float frameStart,frameEnd;
-        float frameAlpha;
-    
-        string dropboxPath;
-        string photosDir;
+        float playAt;
         ofFile videoFile;
         ofFile lockFile;
         Poco::Timestamp videoModified;
