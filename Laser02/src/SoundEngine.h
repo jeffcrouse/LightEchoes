@@ -87,6 +87,7 @@ public:
     ofxSoundPlayerMultiOutput pads[NUM_PADS];
     ofxSoundPlayerMultiOutput fx[NUM_FXS];
     ofxSoundPlayerMultiOutput harp[NUM_HARPS];
+    ofxSoundPlayerMultiOutput harpReverb[NUM_HARPS];
     
     //ofxSoundPlayerMultiOutput arp;
     ofxSoundPlayerMultiOutput endClap;

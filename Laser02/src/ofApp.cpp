@@ -3,10 +3,10 @@
 
 #define GUI_SETTINGS_XML "settings.xml"
 //#define PERSIST_JSON_FILE "persist.json"
-#define TRACK_TIME 199
+#define TRACK_TIME 195
 #define POST_RETURN_PAUSE 10
 #define PIXELS_ON 10
-#define PIXELS_OFF 9
+#define PIXELS_OFF 10
 #define DMX_CHANNEL_MOTOR_RELEASE 3
 #define DMX_CHANNEL_MOTOR_RETURN 1
 
@@ -28,7 +28,7 @@
 // Light three - switch 6 = 32
 // Light four - switches 5&6 (16+32=48)
 int dmx_light_channels[NUM_LIGHTS] = {12, 24, 32, 48};
-
+int speakers[7] = {0,1,2,3,4,5,6};
 
 
 //--------------------------------------------------------------
@@ -91,6 +91,7 @@ void ofApp::setup(){
     bStartClap=false;
     bLightOn=false;
     elapsedTime = 0;
+    nextLaserFrameAt = 0;
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -136,6 +137,12 @@ void ofApp::setup(){
     drawCalibPatternToggle = gui->addLabelToggle("CALIBRATION PATTERN", false);
     //trackTimeSlider = gui->addSlider("TRACK TIME", 60, 210, 150);
     //directionToggle = gui->addLabelToggle("FORWARD", &bForward);
+    laserFrameRate = gui->addIntSlider("LASER FRAME RATE", 12, 60, 24);
+    sampleWidth = gui->addIntSlider("SAMPLE WIDTH", 100, 800, 800 );
+    waitBeforeSend = gui->addLabelToggle("WAIT BEFORE SEND", true);
+    
+    gui->addSpacer();
+    gui->addLabel("FUNCTION");
     autoRunToggle = gui->addLabelToggle("AUTO RUN", false);
     //autoRunDelaySlider = gui->addSlider("POST RUN PAUSE", 6, 30, 10);
     //cutout = gui->addRangeSlider("CUTOUT", 0, 1, 0.4, 0.6);
@@ -153,11 +160,11 @@ void ofApp::setup(){
     //lightDimmerSlider = gui->addIntSlider("LIGHT LEVEL", 0, 255, 0);
     //lightStrobeSlider = gui->addIntSlider("LIGHT STROBE", 0, 255, 0);
     
-    gui->addSpacer();
-    gui->addLabel("LASER COLOR ADJUST");
-    colorAdjust[0] = gui->addSlider("RED ADJUST", 0, 1, 1);
-    colorAdjust[1] = gui->addSlider("GREEN ADJUST", 0, 1, 1);
-    colorAdjust[2] = gui->addSlider("BLUE ADJUST", 0, 1, 1);
+//    gui->addSpacer();
+//    gui->addLabel("LASER COLOR ADJUST");
+//    colorAdjust[0] = gui->addSlider("RED ADJUST", 0, 1, 1);
+//    colorAdjust[1] = gui->addSlider("GREEN ADJUST", 0, 1, 1);
+//    colorAdjust[2] = gui->addSlider("BLUE ADJUST", 0, 1, 1);
     
     gui->addSpacer();
     gui->addLabel("MAIN LINE");
@@ -220,6 +227,7 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
+/*
 ofFloatColor ofApp::mapColor(ofFloatColor c) {
     c.r *= colorAdjust[0]->getValue();
     c.g *= colorAdjust[1]->getValue();
@@ -231,7 +239,7 @@ ofFloatColor ofApp::mapColor(ofFloatColor c) {
     
     return c;
 }
-
+*/
 //--------------------------------------------------------------
 void ofApp::exit() {
     dmx.clear();
@@ -246,6 +254,7 @@ void ofApp::exit() {
     delete gui;
 }
 
+/*
 //--------------------------------------------------------------
 void ofApp::drawSafetyPattern() {
     ofxIlda::Frame safetyPattern[3];
@@ -278,6 +287,7 @@ void ofApp::drawSafetyPattern() {
         etherdream.addPoints(safetyPattern[i]);
     }
 }
+*/
 
 //--------------------------------------------------------------
 void ofApp::pause() {
@@ -302,35 +312,28 @@ void ofApp::update(){
         elapsedTime += ofGetLastFrameTime();
     
     camera.update();
-    dmx.update();
     sound.update();
 
     if(bPaused) {
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, 0);
     } else {
-
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, motorReturnToggle->getValue() ? 255 : 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, motorReleaseToggle->getValue() ? 255 : 0);
     }
     
     float val = lightLevelSlider->getValue();
-    
     for(int i=0; i<NUM_LIGHTS; i++) {
         int channel = dmx_light_channels[i];
         dmx.setLevel(channel+0, ofMap(val, 0, 1, 0, LIGHT_R));
         dmx.setLevel(channel+1, ofMap(val, 0, 1, 0, LIGHT_G));
         dmx.setLevel(channel+2, ofMap(val, 0, 1, 0, LIGHT_B));
     }
-
-    //dmx.setLevel(DMX_CHANNEL_LIGHT_DIMMER, lightDimmerSlider->getValue());
-    //dmx.setLevel(DMX_CHANNEL_LIGHT_STROBE, lightStrobeSlider->getValue());
     
+    dmx.update();
     
     // RUN LOGIC
     if(bRunning && !bPaused) {
-        ofSetWindowTitle("LightEchoes (RUNNING)");
-        
         endTime = startTime + TRACK_TIME;
         if(elapsedTime > endTime) {
             endRun();
@@ -340,40 +343,29 @@ void ofApp::update(){
         }
     }
 
-    if(startTime != -1) {
-        ofSetWindowTitle("LightEchoes (COUNTDOWN)");
-        
+    if(elapsedTime > nextLaserFrameAt) {
+        onLaserFrame();
+        float delay = 1.0 / (float)laserFrameRate->getValue();
+        nextLaserFrameAt = elapsedTime + delay;
+    }
+    
+    if(startTime > -1) {
+
         float timeToStart = startTime - elapsedTime;
         
         if(timeToStart < 2.964 && bStartClap) {
-            sound.startClap.playTo(0, 1);
+            sound.startClap.playTo(speakers, 7);
             bStartClap = false;
         }
         
         if(timeToStart<POST_RETURN_PAUSE && bReturnClap) {
-            sound.endClap.playTo(0,1);
+            sound.endClap.playTo(speakers, 7);
             bReturnClap = false;
         }
         
         if(timeToStart <= 0) startRun();
     } else {
         ofSetWindowTitle("LightEchoes (IDLE)");
-    }
-    
-    
-    etherdream.clear();
-    if(bRunning || bPaused || forceOnToggle->getValue()) {
-        if(etherdream.checkConnection(true)) {
-            drawMainLine();
-            //drawPendulum();
-        }
-    }
-    
-    
-    // Draw calibration pattern if it's on
-    if(drawCalibPatternToggle->getValue()==true) {
-        calibPattern.update();
-        etherdream.addPoints(calibPattern);
     }
     
     // Deal with photos from the camera
@@ -391,6 +383,26 @@ void ofApp::update(){
         ofLogNotice() << ofSystemCall( cmd.str() );
     }
 }
+
+
+//--------------------------------------------------------------
+void ofApp::onLaserFrame() {
+    
+    etherdream.clear();
+    if(bRunning || forceOnToggle->getValue()) {
+        if(etherdream.checkConnection(true)) {
+            drawMainLine();
+            //drawPendulum();
+        }
+    }
+    
+    // Draw calibration pattern if it's on
+    if(drawCalibPatternToggle->getValue()==true) {
+        calibPattern.update();
+        etherdream.addPoints(calibPattern);
+    }
+}
+
 
 //--------------------------------------------------------------
 void ofApp::draw(){
@@ -580,14 +592,16 @@ void ofApp::drawMainLine() {
     drawPos.y = 0.5;
     
     float totalBrightness = 0;
-    int sampleX;
-    for (int sampleX=0; sampleX<source.getWidth(); sampleX++) {
-     
+    //int sampleX;
+    //for (int sampleX=0; sampleX<source.getWidth(); sampleX++) {
+    for(int i=0; i<sampleWidth->getValue(); i++) {
+        int sampleX = ofMap(i, 0, sampleWidth->getValue(), 0, source.getWidth());
+        
         drawPos.x = sampleX / (float)source.getWidth();
         drawPos.x = ofClamp(drawPos.x, 0, 1);
         
         color = (sampleX % PIXELS_ON<PIXELS_OFF)
-            ? mapColor( source.getColor(sampleX, sampleY) )
+            ? source.getColor(sampleX, sampleY)
             : ofFloatColor::black;
 
         totalBrightness += color.getBrightness();
@@ -606,7 +620,6 @@ void ofApp::drawMainLine() {
     if(brightnessVelocity > briChangeThresh->getValue()) {
         sound.playHarp();
     }
-    
     
     
     mainLine.points.clear();
@@ -682,7 +695,9 @@ void ofApp::endRun() {
     
     bRunning = false;
     
-    sound.endClap.playTo(4, 5);
+    
+    sound.endClap.playTo(speakers, 7);
+    sound.lightATheEnd.playTo(4,5);
     incrementSource();
     motorReturn();
     lightOn();
@@ -855,6 +870,11 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
     else if(name=="MOTOR RETURN")
     {
         motorReleaseToggle->setValue(false);
+    }
+    else if(name=="WAIT BEFORE SEND")
+    {
+        //ofxUILabelToggle* toggle = (ofxUILabelToggle*)e.getToggle();
+        etherdream.setWaitBeforeSend(waitBeforeSend->getValue());
     }
     gui->saveSettings(GUI_SETTINGS_XML);
 }

@@ -9,7 +9,7 @@
 #include "SourceMaterial.h"
 #include "ofxModifierKeys.h"
 
-#define SOURCE_DIR "SourceTesting"
+#define SOURCE_DIR "Source"
 #define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 #define SOURCE_MATERIAL_WARP_JSON "warper.json"
 #define NUM_ROWS 40
@@ -225,17 +225,20 @@ void SourceMaterial::drawIntoFBO() {
     ofDisableNormalizedTexCoords();
     
     if(bWarpMode) {
-        
+        ofNoFill();
         vector<ofPoint>& verts = mesh.getVertices();
         for(int i=0; i<verts.size(); i++) {
             if(i==v) {
-                ofFill();
+                ofSetLineWidth(10);
                 ofSetColor(ofColor::green);
+                ofRect(verts[i], 100, 100);
             } else {
-                ofNoFill();
+
+                ofSetLineWidth(1);
                 ofSetColor(ofColor::gray);
+                ofRect(verts[i], 20, 20);
             }
-            ofRect(verts[i], 20, 20);
+            
         }
     }
     

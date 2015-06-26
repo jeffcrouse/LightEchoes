@@ -10,7 +10,7 @@
 
 
 // ---------------------------------------------
-TextLine::TextLine(GeneratedFrame* parent, int _size, int _margin, string _textPath, bool _flipped) {
+TextLine::TextLine(GeneratedFrame* parent, int _size, int _margin, int _offset, string _textPath, bool _flipped) {
     
     font.loadFont("fonts/Neue Helvetica/HelveticaNeueLTCom-BdCn.ttf", _size);
 
@@ -19,7 +19,7 @@ TextLine::TextLine(GeneratedFrame* parent, int _size, int _margin, string _textP
     margin = _margin;
     speed = font.getSize() * -0.05;
     spaceWidth = font.getSize() * 0.4;
-    
+    offset = _offset;
     string text = ofToUpper(ofBufferFromFile(_textPath));
     ofStringReplace(text, "\n", " ");
     ofStringReplace(text, ",", " ");
@@ -42,7 +42,7 @@ void TextLine::draw(int index, int yPos) {
         ofTranslate(-bounds.getWidth(), y);
     }
     
-    float xPos = index * speed;
+    float xPos = (index * speed) + offset;
     int i=0;
     ofRectangle bb;
     while( xPos < bounds.width ) {
@@ -77,18 +77,18 @@ void GeneratedFrame::setup() {
     
     theTemplate.loadImage("Poetry_layout_01.jpg");
     
-    lines.push_back(new TextLine(this, 621, 10, "text/line01.txt"));
-    lines.push_back(new TextLine(this, 260, 12, "text/line01.txt"));
-    lines.push_back(new TextLine(this, 150, 11, "text/line01.txt"));
-    lines.push_back(new TextLine(this, 80, 12, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 40, 10, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 130, 10, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 60, 10, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 190, 10, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 90, 10, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 150, 10, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 255, 10, "text/line01.txt", true));
-    lines.push_back(new TextLine(this, 600, 10, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 621, 10, -200, "text/line01.txt"));
+    lines.push_back(new TextLine(this, 260, 12, -100, "text/line01.txt"));
+    lines.push_back(new TextLine(this, 150, 11, -500, "text/line01.txt"));
+    lines.push_back(new TextLine(this, 80, 12, -1400, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 40, 10, -100, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 130, 10, -8000, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 60, 10, -6000, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 190, 10, -6000, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 90, 10, -1800, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 150, 10, -1500, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 255, 10, 0, "text/line01.txt", true));
+    lines.push_back(new TextLine(this, 600, 10, 0, "text/line01.txt", true));
 }
 
 // ---------------------------------------------

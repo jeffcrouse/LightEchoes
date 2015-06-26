@@ -29,8 +29,9 @@ class ofApp : public ofBaseApp{
 		void guiEvent(ofxUIEventArgs &e);
     
     
-        ofFloatColor mapColor(ofFloatColor c);
-        void drawSafetyPattern();
+        //ofFloatColor mapColor(ofFloatColor c);
+        //void drawSafetyPattern();
+        void onLaserFrame();
         void incrementSource(bool forward=true);
         void startRun();
         void endRun();
@@ -75,14 +76,15 @@ class ofApp : public ofBaseApp{
         float startTime,endTime;
         float brightness;
         float brightnessVelocity;
-
+        float nextLaserFrameAt;
+    
         //string currentName; // The name of the video we are working on
         //bool bForward;
         //ofxUIRangeSlider* cutout;
         //ofxUISlider* trackTimeSlider;
         //ofxUISlider* autoRunDelaySlider;
         //ofxUIToggle* directionToggle;
-        ofxUISlider* colorAdjust[3];
+        //ofxUISlider* colorAdjust[3];
         ofxUILabelToggle* drawCalibPatternToggle;
         ofxUILabelToggle* autoRunToggle;
         ofxUILabelToggle* forceOnToggle;
@@ -91,6 +93,9 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* motorReleaseToggle;
         ofxUISlider* lightLevelSlider;
         ofxUISlider* briChangeThresh;
+        ofxUIIntSlider* laserFrameRate;
+        ofxUIIntSlider* sampleWidth;
+        ofxUILabelToggle* waitBeforeSend;
         //ofxUIIntSlider* lightDimmerSlider;
         //ofxUIIntSlider* lightStrobeSlider;
     
