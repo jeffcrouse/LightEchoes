@@ -16,7 +16,7 @@ void ofApp::setup(){
     Poco::Path path = Poco::Path::home();
     path.pushDirectory("Dropbox");
     path.pushDirectory("LE Shared");
-    path.pushDirectory("GeneratedFrames");
+    path.pushDirectory("Frames02");
     outputPath = path.toString();
     ofDirectory::createDirectory(outputPath, false, true);
     
@@ -41,8 +41,7 @@ void ofApp::update(){
         saver.setFromPixels(frame.pixels);
         saver.rotate90(1);
         saver.saveImage(path.str());
-        
-        
+  
         incrementAt = ofGetElapsedTimef()+(1/frameRate);
     }
 }

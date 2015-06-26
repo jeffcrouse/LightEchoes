@@ -13,13 +13,14 @@ class GeneratedFrame;
 
 class TextLine {
 public:
-    TextLine(GeneratedFrame* parent, int size, int height, string textPath, bool flipped=false);
+    TextLine(GeneratedFrame* parent, int size, int height, int offset, string textPath, bool flipped=false);
     void draw(int index, int yPos);
     int getHeight();
     
 protected:
     bool isRed(string word);
     
+    int offset;
     int margin;
     bool flipped;
     string line;
