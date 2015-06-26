@@ -31,6 +31,7 @@ class ofApp : public ofBaseApp{
     
         //ofFloatColor mapColor(ofFloatColor c);
         //void drawSafetyPattern();
+        void onLaserFrame();
         void incrementSource(bool forward=true);
         void startRun();
         void endRun();
@@ -75,7 +76,8 @@ class ofApp : public ofBaseApp{
         float startTime,endTime;
         float brightness;
         float brightnessVelocity;
-
+        float nextLaserFrameAt;
+    
         //string currentName; // The name of the video we are working on
         //bool bForward;
         //ofxUIRangeSlider* cutout;
@@ -91,6 +93,9 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* motorReleaseToggle;
         ofxUISlider* lightLevelSlider;
         ofxUISlider* briChangeThresh;
+        ofxUIIntSlider* laserFrameRate;
+        ofxUIIntSlider* sampleWidth;
+        ofxUILabelToggle* waitBeforeSend;
         //ofxUIIntSlider* lightDimmerSlider;
         //ofxUIIntSlider* lightStrobeSlider;
     
