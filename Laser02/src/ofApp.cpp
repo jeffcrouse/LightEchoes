@@ -28,7 +28,7 @@
 // Light three - switch 6 = 32
 // Light four - switches 5&6 (16+32=48)
 int dmx_light_channels[NUM_LIGHTS] = {12, 24, 32, 48};
-
+int speakers[7] = {0,1,2,3,4,5,6};
 
 
 //--------------------------------------------------------------
@@ -347,12 +347,12 @@ void ofApp::update(){
         float timeToStart = startTime - elapsedTime;
         
         if(timeToStart < 2.964 && bStartClap) {
-            sound.startClap.playTo(0, 1);
+            sound.endClap.playTo(speakers, 7);
             bStartClap = false;
         }
         
         if(timeToStart<POST_RETURN_PAUSE && bReturnClap) {
-            sound.endClap.playTo(0,1);
+            sound.endClap.playTo(speakers, 7);
             bReturnClap = false;
         }
         
@@ -685,7 +685,9 @@ void ofApp::endRun() {
     
     bRunning = false;
     
-    sound.endClap.playTo(4, 5);
+    
+    sound.endClap.playTo(speakers, 7);
+    sound.lightATheEnd.playTo(4,5);
     incrementSource();
     motorReturn();
     lightOn();

@@ -37,13 +37,8 @@ void SoundEngine::setup() {
     endClap.loadSound("sounds/LE.Elements_0617.end_clap.aif");
     
     lightATheEnd.loadSound("sounds/LE.Elements_0617.light_at_the_end.aif");
-    lightATheEnd.setLoop(true);
-    lightATheEnd.play();
     
-//    arp.loadSound("sounds/LE.Elements_0617.arp_pad.aif");
-//    arp.setLoop(true);
-//    arp.play();
-
+    
 //    front = 1.0;
 //    middle = 1.0;
 //    back = 1.0;
@@ -80,26 +75,28 @@ void SoundEngine::setup() {
 
 // ------------------------------------------------
 void SoundEngine::onBeat() {
+    int speakers[6] = {0,1,2,3,4,5};
     
-    //arp.setVolume(arpVolume->getValue());
     hihat.setVolume(drumVolume->getValue()*masterVolume->getValue());
     kick.setVolume(drumVolume->getValue()*masterVolume->getValue());
     snare.setVolume(drumVolume->getValue()*masterVolume->getValue());
-     int speakers[6] = {0,1,2,3,4,5};
-    hihat.playTo(speakers, 6);
     
-    if(beat % 4 == 0) {
-        kick.playTo(speakers, 6);
-    } else if(beat % 2 == 0) {
-        snare.playTo(speakers, 6);
+    if(app->bRunning) {
+        
+        hihat.playTo(FAR);
+        
+        if(beat % 4 == 0) {
+            kick.playTo(FAR);
+        } else if(beat % 2 == 0) {
+            snare.playTo(FAR);
+        }
     }
-    
     
     if(beat % 8 == 0) {
         pads[padIndex].volume = padVolume->getValue();
         pads[padIndex].setVolume(padVolume->getValue()*masterVolume->getValue());
-        //pads[padIndex].setLevels(front, middle, back);
-        int speakers[6] = {0,1,2,3,4,5};
+     
+        
         pads[padIndex].playTo(speakers, 6);
         ++padIndex %= NUM_PADS;
         
@@ -115,15 +112,7 @@ void SoundEngine::onBeat() {
         }
     }
     
-    /*
-    if(beat > nextFX) {
-        int n = ofRandom(NUM_FXS);
-        //fx[n].volume = fxVolume->getValue();
-        //fx[n].setLevels(front, middle, back);
-        //fx[n].play();
-        nextFX = beat + ofRandom(4, 12) * 2;
-    }
-     */
+
     beat++;
 }
 
