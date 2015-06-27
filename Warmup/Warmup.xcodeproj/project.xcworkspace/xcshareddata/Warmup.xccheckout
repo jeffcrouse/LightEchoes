@@ -20,7 +20,7 @@
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>1C584D82D8F91B619E103DBEA051F0CCC0070ED3</key>
-		<string>../../../../../addons/ofxDmx</string>
+		<string>../../../../addons/ofxDmx</string>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>../../..</string>
 	</dict>
