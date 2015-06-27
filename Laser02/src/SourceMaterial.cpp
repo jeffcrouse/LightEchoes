@@ -10,7 +10,6 @@
 #include "ofxModifierKeys.h"
 
 #define SOURCE_DIR "Frames02"
-#define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 #define SOURCE_MATERIAL_WARP_JSON "warper.json"
 #define NUM_ROWS 40
 #define NUM_COLS 4
@@ -33,7 +32,11 @@ void SourceMaterial::setup() {
     v = 0;
     bWarpMode=false;
     
-    state.open(SOURCE_MATERIAL_STATE_JSON);
+    
+    sourcePath = Poco::Path::home();
+    sourcePath.pushDirectory("Desktop");
+    sourcePath.setFileName("source-state.json");
+    state.open(sourcePath.toString());
     
     if (!state.isMember("index")) state["index"] = 0;
     index = state["index"].asInt();
@@ -178,7 +181,9 @@ void SourceMaterial::increment(bool forward) {
     index+= forward ? 1 : -1;
     index %= dir.size();
     state["index"] = index;
-    state.save(SOURCE_MATERIAL_STATE_JSON, true);
+    
+
+    state.save(sourcePath.toString(), true);
     loadImage();
 }
 
