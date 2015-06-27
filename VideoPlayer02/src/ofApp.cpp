@@ -43,12 +43,11 @@ void ofApp::setup(){
     framesPath.pushDirectory("LE Shared");
     framesPath.pushDirectory("_PhotosSmall");
     
-    
-    ofDirectory dir;
-    dir.allowExt("mp4");
-    dir.sort();
-    dir.listDir(desktop.toString());
-    
+//    ofDirectory dir;
+//    dir.allowExt("mp4");
+//    dir.sort();
+//    dir.listDir(desktop.toString());
+//    
     startThread();
 }
 
@@ -106,6 +105,7 @@ void ofApp::cleanup() {
     dir.allowExt("mp4");
     dir.listDir(desktop.toString());
     if(dir.size() < 3) return;
+    dir.sort();
     
     vector<ofFile> toRemove;
     for(int i=0; i<dir.size(); i++) {
