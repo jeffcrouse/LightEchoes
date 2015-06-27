@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 
-class ofApp : public ofBaseApp{
+class ofApp : public ofBaseApp, ofThread {
 
 	public:
 		void setup();
@@ -18,5 +18,19 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
+        void threadedFunction();
+        void makeVideo();
+        void cleanup();
+    
+        bool bMakingVideo;  // THREADED VAR!
+        bool bDebug;
+        ofVideoPlayer* video;
+        ofRectangle bounds;
+        ofTrueTypeFont font;
+        float nextVideoCheck;
+        string currentVideo;
+    
+        Poco::Path framesPath;
+        Poco::Path desktop;
+        Poco::Timestamp videoModified;
 };
