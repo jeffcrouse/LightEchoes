@@ -385,15 +385,18 @@ void ofApp::update(){
     
     // Deal with photos from the camera
     if(camera.isPhotoNew()) {
-        string basename = ofGetTimestampString("%m-%d-%H-%M-%S-%i");
+        
+        stringstream basename;
+        basename << ofGetTimestampString("%m-%d-%H-%M-");
+        basename << std::setw(5) << std::setfill('0') << source.getIndex()-1;
         
         stringstream path;
-        path << savePathBig << basename << ".jpg";
+        path << savePathBig << basename.str() << ".jpg";
         ofLogNotice() << "=== SAVING " << path.str();
         camera.savePhoto( path.str() );
         
         stringstream cmd;
-        cmd << "sips -Z 1920 \"" << path.str() << "\" --out \"" << savePathSmall << basename << ".jpg\"";
+        cmd << "sips -Z 1920 \"" << path.str() << "\" --out \"" << savePathSmall << basename.str() << ".jpg\"";
         ofLogNotice() << "=== RESIZING " << cmd.str();
         ofLogNotice() << ofSystemCall( cmd.str() );
     }
