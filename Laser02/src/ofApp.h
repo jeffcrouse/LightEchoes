@@ -77,7 +77,7 @@ class ofApp : public ofBaseApp{
         float brightness;
         float brightnessVelocity;
         float nextLaserFrameAt;
-    
+        float unmuteAt;
         //string currentName; // The name of the video we are working on
         //bool bForward;
         //ofxUIRangeSlider* cutout;
@@ -93,9 +93,9 @@ class ofApp : public ofBaseApp{
         ofxUILabelToggle* motorReleaseToggle;
         ofxUISlider* lightLevelSlider;
         ofxUISlider* briChangeThresh;
-        ofxUIIntSlider* laserFrameRate;
+        //ofxUIIntSlider* laserFrameRate;
         ofxUIIntSlider* sampleWidth;
-        ofxUILabelToggle* waitBeforeSend;
+        //ofxUILabelToggle* waitBeforeSend;
         //ofxUIIntSlider* lightDimmerSlider;
         //ofxUIIntSlider* lightStrobeSlider;
     

@@ -9,7 +9,7 @@
 #include "SourceMaterial.h"
 #include "ofxModifierKeys.h"
 
-#define SOURCE_DIR "Source"
+#define SOURCE_DIR "Frames02"
 #define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 #define SOURCE_MATERIAL_WARP_JSON "warper.json"
 #define NUM_ROWS 40

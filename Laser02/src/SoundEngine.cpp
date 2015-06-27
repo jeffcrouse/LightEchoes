@@ -50,11 +50,11 @@ void SoundEngine::setup() {
     padIndex = 0;
     
     
-    harp[0].loadSound("sounds/harp2/Harp_A.aif");
-    harp[1].loadSound("sounds/harp2/Harp_B.aif");
-    harp[2].loadSound("sounds/harp2/Harp_D.aif");
-    harp[3].loadSound("sounds/harp2/Harp_E.aif");
-    harp[4].loadSound("sounds/harp2/Harp_G.aif");
+    harp[0].loadSound("sounds/harp2/Harp_A3.aif");
+    harp[1].loadSound("sounds/harp2/Harp_B3.aif");
+    harp[2].loadSound("sounds/harp2/Harp_D3.aif");
+    harp[3].loadSound("sounds/harp2/Harp_E3.aif");
+    harp[4].loadSound("sounds/harp2/Harp_G3.aif");
     
     
     harpReverb[0].loadSound("sounds/harp2/Harp_A_rev.aif");
@@ -83,6 +83,8 @@ void SoundEngine::setup() {
 
 // ------------------------------------------------
 void SoundEngine::onBeat() {
+    if(bMuted) return;
+    
     int speakers[6] = {0,1,2,3,4,5};
     
     hihat.setVolume(drumVolume->getValue()*masterVolume->getValue());
@@ -125,10 +127,21 @@ void SoundEngine::onBeat() {
 }
 
 // ------------------------------------------------
+void SoundEngine::mute() {
+    bMuted=true;
+}
+
+
+// ------------------------------------------------
+void SoundEngine::unmute() {
+    bMuted=false;
+}
+
+// ------------------------------------------------
 void SoundEngine::update() { // float trackPos) {
     
     ofFmodSoundUpdate();
-    ofFmodSoundSetVolume(masterVolume->getValue());
+    //ofFmodSoundSetVolume(masterVolume->getValue());
     
     startClap.setVolume(clapVolume->getValue()*masterVolume->getValue());
     endClap.setVolume(clapVolume->getValue()*masterVolume->getValue());
@@ -154,7 +167,6 @@ void SoundEngine::playHarp() {
     float volume =ofRandom(harpVolume->getValueLow(), harpVolume->getValueHigh());
     
     harp[n].setVolume(volume);
-    //harp[n].setLevels(front, middle, back);
     harp[n].playTo(TRACK);
     if(ofRandomf()<0.2) {
         harpReverb[n].setVolume(volume);
