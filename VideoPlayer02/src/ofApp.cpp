@@ -178,6 +178,7 @@ void ofApp::draw(){
     
     ofSetColor(ofColor::black);
     ofRect(0, ofGetHeight()-20, ofGetWidth(), 20);
+    ofRect(0, 0, 29, ofGetHeight());
     
     if(bDebug) {
         stringstream ss;

@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>06CDCB0A-8C7B-435F-83E8-E99A2375782B</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>VideoPlayer</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>https://github.com/seethroughlab/LightEchoes.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>VideoPlayer/VideoPlayer.xcodeproj/project.xcworkspace</string>
+	<string>VideoPlayer/VideoPlayer.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
