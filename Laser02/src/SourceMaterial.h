@@ -39,6 +39,7 @@ protected:
     ofxJSONElement warper;
     ofDirectory dir;
     map<string,ofTrueTypeFont> fonts;
+    Poco::Path sourcePath;
     
     void saveWarp();
     void loadWarp();

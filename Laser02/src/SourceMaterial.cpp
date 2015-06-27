@@ -31,13 +31,14 @@ void SourceMaterial::setup() {
     v = 0;
     bWarpMode=false;
     
+
     sourceState = Poco::Path::home();
     sourceState.pushDirectory("Library");
     sourceState.pushDirectory("Application Support");
     sourceState.pushDirectory("LightEchoes");
     sourceState.setFileName("source-state.json");
-    
     state.open(sourceState.toString());
+
     
     if (!state.isMember("index")) state["index"] = 0;
     index = state["index"].asInt();
@@ -182,7 +183,9 @@ void SourceMaterial::increment(bool forward) {
     index+= forward ? 1 : -1;
     index %= dir.size();
     state["index"] = index;
+
     state.save(sourceState.toString(), true);
+
     loadImage();
 }
 
