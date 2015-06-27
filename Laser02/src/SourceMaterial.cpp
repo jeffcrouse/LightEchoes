@@ -10,7 +10,6 @@
 #include "ofxModifierKeys.h"
 
 #define SOURCE_DIR "Frames02"
-#define SOURCE_MATERIAL_STATE_JSON "source-state.json"
 #define SOURCE_MATERIAL_WARP_JSON "warper.json"
 #define NUM_ROWS 40
 #define NUM_COLS 4
@@ -24,7 +23,6 @@ void SourceMaterial::setup() {
     fonts["med"].loadFont("fonts/HelveticaNeueLTCom-Th.ttf", 200);
     fonts["large"].loadFont("fonts/HelveticaNeueLTCom-Th.ttf", 300);
     
-    
     begin();
     ofClear(ofColor::black);
     ofDrawBitmapStringHighlight("NOT LOADED", 10, 20, ofColor::red, ofColor::white);
@@ -33,7 +31,13 @@ void SourceMaterial::setup() {
     v = 0;
     bWarpMode=false;
     
-    state.open(SOURCE_MATERIAL_STATE_JSON);
+    sourceState = Poco::Path::home();
+    sourceState.pushDirectory("Library");
+    sourceState.pushDirectory("Application Support");
+    sourceState.pushDirectory("LightEchoes");
+    sourceState.setFileName("source-state.json");
+    
+    state.open(sourceState.toString());
     
     if (!state.isMember("index")) state["index"] = 0;
     index = state["index"].asInt();
@@ -178,7 +182,7 @@ void SourceMaterial::increment(bool forward) {
     index+= forward ? 1 : -1;
     index %= dir.size();
     state["index"] = index;
-    state.save(SOURCE_MATERIAL_STATE_JSON, true);
+    state.save(sourceState.toString(), true);
     loadImage();
 }
 

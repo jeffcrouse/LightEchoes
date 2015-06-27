@@ -34,6 +34,7 @@ protected:
     ofImage image;
     string dirPath;
     int index;
+    Poco::Path sourceState;
     ofxJSONElement state;
     ofxJSONElement warper;
     ofDirectory dir;

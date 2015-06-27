@@ -61,7 +61,7 @@ string toHMS(int time) {
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetWindowTitle("LightEchoes");
+    ofSetWindowTitle("Laser02");
     ofSetFrameRate(60);
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofBackground(50);
@@ -96,6 +96,7 @@ void ofApp::setup(){
     elapsedTime = 0;
     nextLaserFrameAt = 0;
     unmuteAt = -1;
+    mainLine.blankCount=22;
     
     //
     // PERSIST: load some persistent variables (that aren't sliders)
@@ -120,6 +121,12 @@ void ofApp::setup(){
     path.pushDirectory("_PhotosSmall");
     savePathSmall = path.toString();
     ofDirectory::createDirectory(savePathSmall, false, true);
+    
+    path = Poco::Path::home();
+    path.pushDirectory("Library");
+    path.pushDirectory("Application Support");
+    path.pushDirectory("LightEchoes");
+    ofDirectory::createDirectory(path.toString(), false, true);
     
     
     //
@@ -170,10 +177,10 @@ void ofApp::setup(){
 //    colorAdjust[1] = gui->addSlider("GREEN ADJUST", 0, 1, 1);
 //    colorAdjust[2] = gui->addSlider("BLUE ADJUST", 0, 1, 1);
     
-    gui->addSpacer();
-    gui->addLabel("MAIN LINE");
-    gui->addIntSlider("LINE END COUNT", 0, 50, 10);
-    gui->addIntSlider("LINE BLANK COUNT", 0, 50, 10);
+//    gui->addSpacer();
+//    gui->addLabel("MAIN LINE");
+//    gui->addIntSlider("LINE END COUNT", 0, 50, 10);
+//    gui->addIntSlider("LINE BLANK COUNT", 0, 50, 10);
     
     /*
     gui->addSpacer();
@@ -868,7 +875,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUISlider *slider = (ofxUISlider *) e.getSlider();
         pendulum.stripeWidth = slider->getValue();
     }
-      */
+
     else if(name == "LINE END COUNT")
     {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
@@ -879,6 +886,7 @@ void ofApp::guiEvent(ofxUIEventArgs &e) {
         ofxUIIntSlider *slider = (ofxUIIntSlider*)e.getSlider();
         mainLine.blankCount = slider->getValue();
     }
+           */
     else if(name == "TRACK POSITION")
     {
         ofxUISlider *slider = (ofxUISlider*)e.getSlider();
