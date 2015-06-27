@@ -1,6 +1,6 @@
 #include "ofApp.h"
 
-#define PAUSE_ON_LAST_FRAME 5
+#define PAUSE_ON_LAST_FRAME 0.5
 //#define PHOTOS_DIR "_PhotosSmall"
 //#define VIDEO_FILE "video.mp4"
 #define LOCKFILE "video.lock"
@@ -28,6 +28,7 @@ void ofApp::setup(){
     ofSetFrameRate(60);
     ofSetLogLevel(OF_LOG_NOTICE);
     ofBackground(0);
+    ofHideCursor();
     ofEnableAlphaBlending();
     ofSetEscapeQuitsApp(false);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
@@ -103,7 +104,7 @@ void ofApp::update(){
         if(video) delete video;
         video = new ofVideoPlayer();
         video->loadMovie(videoFile.getAbsolutePath());
-        video->setLoopState(OF_LOOP_NONE);
+        video->setLoopState(OF_LOOP_NORMAL);
         video->play();
         
         float ratio =  ofGetWidth() / video->getWidth();
@@ -115,22 +116,29 @@ void ofApp::update(){
         
         videoModified =  videoFile.getPocoFile().getLastModified();
     }
-    
+
+
     if(video!=NULL && video->isLoaded()) {
+       
+        video->update();
+
         if(video->getIsMovieDone()) {
+            video->play();
+            /*
             if(playAt == -1) {
-                playAt = ofGetElapsedTimef()+PAUSE_ON_LAST_FRAME;
-            } else if( ofGetElapsedTimef() > playAt) {
+                ofLogNotice() << "scheduling start";
+                playAt = now+PAUSE_ON_LAST_FRAME;
+            } else if( now > playAt) {
+                ofLogNotice() << "playing";
                 video->play();
                 playAt = -1;
             }
+             */
         }
-        video->update();
     }
-    
     /*
     if(frameStart != -1) {
-        
+     
         float theta = ofMap(now, frameStart, frameEnd, 0, PI);
         float fade = ofMap(sin(theta), 0, 1, 0, 5000);
         
@@ -158,6 +166,7 @@ void ofApp::draw(){
     
     ofSetColor(ofColor::black);
     ofRect(0, ofGetHeight()-20, ofGetWidth(), 20);
+    ofRect(0, 0, 29, ofGetHeight());
     
     if(bDebug) {
         stringstream ss;
@@ -169,8 +178,8 @@ void ofApp::draw(){
 //        ss << "numPhotos " << dir.size() << endl;
         ss << "videoModified " << Poco::DateTimeFormatter::format(videoModified, "%b %e %Y %H:%M:%S") << endl;
         if(video!=NULL) {
-            ss << "duration " << video->getDuration() << endl;
-            ss << "frames " << video->getTotalNumFrames() << endl;
+           // ss << "duration " << video->getDuration() << endl;
+            //ss << "frames " << video->getTotalNumFrames() << endl;
         }
         if(lockFile.exists()) {
             ss << "VIDEO MAKING IN PROGRESS" << endl;
