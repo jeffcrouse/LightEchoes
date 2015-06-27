@@ -28,6 +28,7 @@ void ofApp::setup(){
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
     ofSetLogLevel("ofDirectory", OF_LOG_SILENT);
     ofSetDataPathRoot("../Resources/data/");
+    ofHideCursor();
     
     video = NULL;
     bDebug = false;
