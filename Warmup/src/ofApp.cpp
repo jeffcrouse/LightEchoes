@@ -34,6 +34,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    
     if(bForward) {
         dmx.setLevel(DMX_CHANNEL_MOTOR_RETURN, 0);
         dmx.setLevel(DMX_CHANNEL_MOTOR_RELEASE, 255);
@@ -44,6 +45,7 @@ void ofApp::update(){
     
     if(ofGetElapsedTimef() > changeDirectionAt) {
         bForward = !bForward;
+        changeDirectionAt = ofGetElapsedTimef() +TRACK_TIME;
     }
     dmx.update();
 }
