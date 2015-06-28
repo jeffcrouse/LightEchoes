@@ -19,7 +19,9 @@ void ofApp::setup(){
     videoPath.pushDirectory("Desktop");
     videoPath.setFileName("LightEchoes.avi");
     video.loadMovie(videoPath.toString());
+    video.setLoopState(OF_LOOP_NORMAL);
     video.play();
+    
     
 //    float ratio =  ofGetWidth() / (float)video.getWidth();
 //    bounds.height = video.getHeight() * ratio;
@@ -82,7 +84,6 @@ void ofApp::update(){
     
     
     video.update();
-    if(video.getIsMovieDone()) video.play();
 }
 
 //--------------------------------------------------------------
