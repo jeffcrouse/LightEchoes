@@ -45,6 +45,7 @@ void ofApp::update(){
     if(ofGetElapsedTimef() > changeDirectionAt) {
         bForward = !bForward;
     }
+    dmx.update();
 }
 
 //--------------------------------------------------------------
