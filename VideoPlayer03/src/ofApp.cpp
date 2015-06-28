@@ -1,8 +1,9 @@
 #include "ofApp.h"
+#include "ofxModifierKeys.h"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetWindowTitle("LightEchoes Video Player");
+    ofSetWindowTitle("VideoPlayer03");
     ofSetFrameRate(60);
     ofSetLogLevel(OF_LOG_NOTICE);
     ofBackground(0);
@@ -22,17 +23,14 @@ void ofApp::setup(){
     video.setLoopState(OF_LOOP_NORMAL);
     video.play();
     
-    
 //    float ratio =  ofGetWidth() / (float)video.getWidth();
 //    bounds.height = video.getHeight() * ratio;
 //    bounds.width = video.getWidth() * ratio;
 //    bounds.x = (ofGetWidth()/2.0) - (bounds.width/2.0);
 //    bounds.y = 0;
     
-
-    
-    int w = ofGetWidth();
-    int h = ofGetHeight();
+    int w = video.getWidth();
+    int h = video.getHeight();
     
     mesh = ofMesh::plane(w, h);
     vector<ofPoint>& verts = mesh.getVertices();
@@ -42,7 +40,7 @@ void ofApp::setup(){
     verts[3].set(w, h);
     
     
-    playhead.set(20, h-50, w-40, 20);
+    playhead.set(20, ofGetHeight()-50, ofGetWidth()-40, 20);
     progress = playhead;
     
     
@@ -117,11 +115,14 @@ void ofApp::draw(){
         ofSetColor(ofColor::white);
         ofRect(playhead);
         
-        vector<ofPoint>& verts = mesh.getVertices();
-        ofSetColor(ofColor::green);
         ofNoFill();
         ofSetRectMode(OF_RECTMODE_CENTER);
-        ofRect(verts[v].x, verts[v].y, 20, 20);
+        vector<ofPoint>& verts = mesh.getVertices();
+        for(int i=0; i<verts.size(); i++) {
+            ofSetColor(v==i?ofColor::green:ofColor::white);
+            ofSetLineWidth(v==i?3:1);
+            ofRect(verts[i].x, verts[i].y, 20, 20);
+        }
         ofPopStyle();
     }
     //ofDrawBitmapStringHighlight(path.toString(), 10, 20);
@@ -143,22 +144,22 @@ void ofApp::keyReleased(int key){
     
     if(bDebug) {
         vector<ofPoint>& verts = mesh.getVertices();
-        
+    
         if(key==OF_KEY_TAB) {
             ++v %= verts.size();
         }
-
+        int amt = ofGetModifierPressed(OF_KEY_SHIFT)?5:1;
         if (key==OF_KEY_LEFT) {
-            verts[v].x --;
+            verts[v].x -=amt;
         }
         if (key==OF_KEY_RIGHT) {
-            verts[v].x ++;
+            verts[v].x +=amt;
         }
         if (key==OF_KEY_UP) {
-            verts[v].y --;
+            verts[v].y -=amt;
         }
         if (key==OF_KEY_DOWN) {
-            verts[v].y ++;
+            verts[v].y +=amt;
         }
         save();
     }
@@ -192,11 +193,11 @@ void ofApp::windowResized(int w, int h){
 //    bounds.x = (w/2.0) - (bounds.width/2.0);
 //    bounds.y = 0;
     
-    vector<ofPoint>& verts = mesh.getVertices();
-    verts[0].set(0, 0);
-    verts[1].set(w, 0);
-    verts[2].set(0, h);
-    verts[3].set(w, h);
+//    vector<ofPoint>& verts = mesh.getVertices();
+//    verts[0].set(0, 0);
+//    verts[1].set(w, 0);
+//    verts[2].set(0, h);
+//    verts[3].set(w, h);
 
     playhead.set(20, h-50, w-40, 20);
     progress = playhead;

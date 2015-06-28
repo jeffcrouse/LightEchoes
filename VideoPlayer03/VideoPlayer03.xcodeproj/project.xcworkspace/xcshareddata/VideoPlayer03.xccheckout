@@ -5,13 +5,15 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>FC9CD8C2-3F1D-44E5-A2E1-9FCF0CBE6429</string>
+	<string>577DC02A-215E-48BD-9D57-52AE7C866FDE</string>
 	<key>IDESourceControlProjectName</key>
 	<string>VideoPlayer03</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>5DB7C332A3A89035E93556A2A38BF414005BA671</key>
 		<string>https://github.com/jefftimesten/ofxJSON.git</string>
+		<key>822CBBF35EE99AD08308D0A6CCA015A457F9E7CD</key>
+		<string>https://github.com/satoruhiga/ofxModifierKeys.git</string>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>https://github.com/seethroughlab/LightEchoes.git</string>
 	</dict>
@@ -21,6 +23,8 @@
 	<dict>
 		<key>5DB7C332A3A89035E93556A2A38BF414005BA671</key>
 		<string>../../../../../addons/ofxJSON</string>
+		<key>822CBBF35EE99AD08308D0A6CCA015A457F9E7CD</key>
+		<string>../../../../../addons/ofxModifierKeys</string>
 		<key>A56E3376EDF7C18256EC4C0A8E4B5E1AB096FEAF</key>
 		<string>../../..</string>
 	</dict>
@@ -47,6 +51,14 @@
 			<string>5DB7C332A3A89035E93556A2A38BF414005BA671</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ofxJSON</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>822CBBF35EE99AD08308D0A6CCA015A457F9E7CD</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxModifierKeys</string>
 		</dict>
 	</array>
 </dict>
